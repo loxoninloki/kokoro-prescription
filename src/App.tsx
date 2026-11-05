@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CHECKIN_XP, evolutionFromXp } from './evolution';
+import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
 const POINTS_PER_DAY = CHECKIN_XP;
@@ -38,6 +39,7 @@ function streakFor(days: string[]): number {
 
 export default function App() {
   const [days, setDays] = useState<string[]>(loadCheckins);
+  const [diary, setDiary] = useState<DiaryEntries>(readDiary);
   const [today, setToday] = useState(localDay);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function App() {
   }, [days]);
 
   const checkedIn = days.includes(today);
-  const totalPoints = days.length * POINTS_PER_DAY;
+  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary);
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
   const formSymbol = { tablet: '💊', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
@@ -92,8 +94,9 @@ export default function App() {
       <section aria-label="チェックインの記録" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 18, textAlign: 'center' }}>
         <div><strong>{days.length}</strong><p>累計日数</p></div>
         <div><strong>{streak}</strong><p>連続日数</p></div>
-        <div><strong>{totalPoints}</strong><p>ポイント</p></div>
+        <div><strong>{totalPoints}</strong><p>経験値</p></div>
       </section>
+      <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} />
       <section style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
         {days.length === 0 ? <p>最初のチェックインをお待ちしています。</p> :
