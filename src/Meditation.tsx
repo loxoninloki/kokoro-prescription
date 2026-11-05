@@ -47,7 +47,8 @@ export default function Meditation({ today, entries, setEntries }: Props) {
         deadline.current = null;
         setRunning(false);
         setFinished(true);
-        const completedDay = new Date().toLocaleDateString('sv-SE');
+        const now = new Date();
+        const completedDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         setEntries(previous => ({ ...previous, [completedDay]: true }));
       }
     };
@@ -57,7 +58,9 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   }, [running, setEntries]);
 
   const start = () => {
-    deadline.current = Date.now() + remaining * 1000;
+    const seconds = remaining > 0 ? remaining : duration;
+    setRemaining(seconds);
+    deadline.current = Date.now() + seconds * 1000;
     setFinished(false);
     setRunning(true);
   };
