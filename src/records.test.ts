@@ -31,6 +31,9 @@ describe('日々の記録', () => {
     expect(diaryExperience({ '2026-11-06': { mood: 3, text: '今日の日記' } })).toBe(10);
     expect(diaryExperience({ '2026-11-06': { mood: null, text: '  ' } })).toBe(0);
   });
+  test('非表示にしたお薬の過去の経験値は残る', () => {
+    expect(medicationExperience({ medicines: [{ id: 'old', name: '以前のお薬', time: '08:00', archived: true }], taken: { '2026-11-06|old': true } })).toBe(10);
+  });
   test('服薬チェックの経験値は重複せず登録済み薬だけ', () => {
     const key = doseKey('2026-11-06', 'medicine-1');
     expect(medicationExperience({ medicines: [{ id: 'medicine-1', name: '朝のお薬', time: '08:00' }], taken: { [key]: true, '2026-11-06|unknown': true } })).toBe(10);
