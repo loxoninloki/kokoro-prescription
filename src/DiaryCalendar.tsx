@@ -47,7 +47,6 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
   useEffect(() => {
     setDraft(entries[selected]?.text || '');
     setMood(entries[selected]?.mood || null);
-    setSaved(false);
   }, [selected, entries]);
 
   useEffect(() => {
