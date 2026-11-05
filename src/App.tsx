@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CHECKIN_XP, evolutionFromXp, FormStage } from './evolution';
+import { CHECKIN_XP, evolutionFromXp } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
 import StepTracker, { StepEntries, readSteps, stepsExperience } from './StepTracker';
@@ -48,7 +48,6 @@ export default function App() {
   const [steps, setSteps] = useState<StepEntries>(readSteps);
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [today, setToday] = useState(localDay);
-  const [previewStage, setPreviewStage] = useState<FormStage | null>(null);
   const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'backup'>('home');
   const navigate = (next: typeof page) => { setPage(next); window.scrollTo(0, 0); };
 
@@ -139,35 +138,6 @@ export default function App() {
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
           <p style={{ fontSize: 12 }}>5段階の進化で、ろきちゃんが成長します。</p>
-        </section>
-        <section aria-label="進化フォルム確認プレビュー" style={{ marginTop: 18, padding: 16, borderRadius: 18, border: '1px solid #e6d8f4', background: '#fcfaff' }}>
-          <h2 style={{ fontSize: 17, margin: '0 0 6px' }}>🔎 進化フォルム確認プレビュー</h2>
-          <p style={{ fontSize: 12, color: '#766b82', margin: '0 0 12px' }}>表示確認専用です。経験値・レベル・記録は変更されません。</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-            {([
-              ['tablet', 'Lv.1'],
-              ['birth', 'Lv.10'],
-              ['awakening', 'Lv.20'],
-              ['chibi', 'Lv.30'],
-              ['human', 'Lv.50']
-            ] as const).map(([stage, label]) => (
-              <button key={stage} type="button" onClick={() => setPreviewStage(stage)} aria-pressed={previewStage === stage}
-                style={{ border: '1px solid #cbb7e3', borderRadius: 999, padding: '9px 12px', background: previewStage === stage ? '#7653a6' : '#fff', color: previewStage === stage ? '#fff' : '#38294d', fontSize: 13 }}>
-                {label}
-              </button>
-            ))}
-          </div>
-          {previewStage !== null && <div style={{ textAlign: 'center', marginTop: 14 }}>
-            <img key={previewStage} src={`${process.env.PUBLIC_URL}/${({
-              tablet: 'lv1_tablet.png', birth: 'lv10_birth.png', awakening: 'lv20_awake.png', chibi: 'lv30_chibi.png', human: 'lv50_human.png'
-            } as Record<FormStage, string>)[previewStage]}`} alt={`プレビュー：${({
-              tablet: '錠剤フォルム', birth: '誕生フォルム', awakening: '覚醒フォルム', chibi: 'ちびろきフォルム', human: 'ヒューマンフォルム'
-            } as Record<FormStage, string>)[previewStage]}`} style={{ display: 'block', width: 220, height: 220, maxWidth: '100%', objectFit: 'contain', margin: '0 auto' }} />
-            <p style={{ fontSize: 14, margin: '8px 0' }}>{({
-              tablet: '錠剤フォルム', birth: '誕生フォルム', awakening: '覚醒フォルム', chibi: 'ちびろきフォルム', human: 'ヒューマンフォルム'
-            } as Record<FormStage, string>)[previewStage]}</p>
-            <button type="button" onClick={() => setPreviewStage(null)} style={{ border: 0, background: '#eee5f8', borderRadius: 999, padding: '9px 16px', color: '#38294d' }}>プレビューを閉じる</button>
-          </div>}
         </section>
         <section style={{ marginTop: 24 }}>
           <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
