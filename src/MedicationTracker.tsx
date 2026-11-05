@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-export interface Medicine { id: string; name: string; time: string }
+export interface Medicine { id: string; name: string; time: string; archived?: boolean }
 export interface MedicationData { medicines: Medicine[]; taken: Record<string, boolean> }
 const KEY = 'kokoro-medication-v1';
 export const MEDICATION_XP = 10;
@@ -11,7 +11,7 @@ export function readMedication(): MedicationData {
     const data = JSON.parse(localStorage.getItem(KEY) || '{}');
     const medicines = Array.isArray(data.medicines) ? data.medicines.filter((m: any) =>
       m && typeof m.id === 'string' && typeof m.name === 'string' && typeof m.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(m.time)
-    ).map((m: Medicine) => ({ id: m.id, name: m.name.slice(0, 80), time: m.time })) : [];
+    ).map((m: Medicine) => ({ id: m.id, name: m.name.slice(0, 80), time: m.time, archived: m.archived === true })) : [];
     const taken: Record<string, boolean> = {};
     if (data.taken && typeof data.taken === 'object') {
       for (const [key, value] of Object.entries(data.taken)) {
@@ -51,7 +51,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
   };
 
   const toggleTaken = (id: string) => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) || selectedDate > today || !data.medicines.some(m => m.id === id)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) || selectedDate > today || !data.medicines.some(m => m.id === id && !m.archived)) return;
     const key = doseKey(selectedDate, id);
     setData(previous => {
       const taken = { ...previous.taken };
@@ -62,8 +62,8 @@ export default function MedicationTracker({ data, setData, today }: Props) {
   };
 
   const removeMedicine = (id: string) => {
-    if (!window.confirm('このお薬の登録を削除しますか？過去の記録も育成経験値の対象外になります。')) return;
-    setData(previous => ({ ...previous, medicines: previous.medicines.filter(m => m.id !== id) }));
+    if (!window.confirm('このお薬を一覧から非表示にしますか？過去の服薬記録と経験値は残ります。')) return;
+    setData(previous => ({ ...previous, medicines: previous.medicines.map(m => m.id === id ? { ...m, archived: true } : m) }));
   };
 
   return (
@@ -78,16 +78,16 @@ export default function MedicationTracker({ data, setData, today }: Props) {
       <label style={{ display: 'block', marginTop: 18 }}>記録する日付
         <input type="date" value={selectedDate} max={today} min="2000-01-01" onChange={e => setSelectedDate(e.target.value)} style={{ display: 'block', padding: 9, marginTop: 5 }} />
       </label>
-      {data.medicines.length === 0 ? <p>お薬はまだ登録されていません。</p> :
+      {data.medicines.every(m => m.archived) ? <p>お薬はまだ登録されていません。</p> :
         <ul style={{ paddingLeft: 0, listStyle: 'none' }}>
-          {[...data.medicines].sort((a, b) => a.time.localeCompare(b.time)).map(m => {
+          {[...data.medicines].filter(m => !m.archived).sort((a, b) => a.time.localeCompare(b.time)).map(m => {
             const checked = !!data.taken[doseKey(selectedDate, m.id)];
             return <li key={m.id} style={{ background: '#fff', padding: 12, borderRadius: 12, marginTop: 10 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <input type="checkbox" checked={checked} disabled={selectedDate > today} onChange={() => toggleTaken(m.id)} />
                 <span><strong>{m.time} {m.name}</strong><span style={{ display: 'block', fontSize: 12 }}>{checked ? '服薬済み ✓' : '未記録'}</span></span>
               </label>
-              <button type="button" onClick={() => removeMedicine(m.id)} style={{ marginTop: 8, background: 'transparent', border: 0, color: '#775d8c', textDecoration: 'underline' }}>登録を削除</button>
+              <button type="button" onClick={() => removeMedicine(m.id)} style={{ marginTop: 8, background: 'transparent', border: 0, color: '#775d8c', textDecoration: 'underline' }}>一覧から非表示</button>
             </li>;
           })}
         </ul>}
