@@ -61,10 +61,12 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
 
   const changeMonth = (delta: number) => {
     const date = new Date(year, monthNumber - 1 + delta, 1);
-    setMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+    const nextMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (nextMonth <= today.slice(0, 7)) setMonth(nextMonth);
   };
 
   const save = () => {
+    if (selected > today) return;
     setEntries(previous => ({ ...previous, [selected]: { mood, text: draft.slice(0, 2000) } }));
     setSaved(true);
   };
@@ -76,7 +78,7 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <button type="button" onClick={() => changeMonth(-1)} aria-label="前の月">‹</button>
         <strong>{year}年 {monthNumber}月</strong>
-        <button type="button" onClick={() => changeMonth(1)} aria-label="次の月">›</button>
+        <button type="button" onClick={() => changeMonth(1)} disabled={month >= today.slice(0, 7)} aria-label="次の月">›</button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4, textAlign: 'center' }}>
         {['日','月','火','水','木','金','土'].map(day => <strong key={day} style={{ fontSize: 12 }}>{day}</strong>)}
