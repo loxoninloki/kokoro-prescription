@@ -50,7 +50,7 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
 
   const save = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!/^\d{1,6}$/.test(draft)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selected) || selected > today || !/^\d{1,6}$/.test(draft)) return;
     const steps = Number(draft);
     if (steps > 100000) return;
     setEntries(previous => ({ ...previous, [selected]: steps }));
