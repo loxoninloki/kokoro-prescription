@@ -73,9 +73,9 @@ export default function App() {
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
-  const formSymbol = { tablet: '💊', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
+  const formSymbol = { tablet: '💊', birth: '🌱', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
   const [imageUnavailable, setImageUnavailable] = useState(false);
-  const formImage = { tablet: 'lv1_tablet.png', awakening: 'lv10_awake.png', chibi: 'lv20_chibi.png', human: 'lv40_human.png' }[evolution.stage];
+  const formImage = { tablet: 'lv1_tablet.png', birth: 'lv10_birth.png', awakening: 'lv20_awake.png', chibi: 'lv30_chibi.png', human: 'lv50_human.png' }[evolution.stage];
   useEffect(() => setImageUnavailable(false), [formImage]);
   const character = (size: number) => imageUnavailable
     ? <span aria-hidden="true" style={{ fontSize: size * 0.55 }}>{formSymbol} 🐹</span>
@@ -137,7 +137,7 @@ export default function App() {
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
-          <p style={{ fontSize: 12 }}>キャラクター画像は準備中です。</p>
+          <p style={{ fontSize: 12 }}>5段階の進化で、ろきちゃんが成長します。</p>
         </section>
         <section style={{ marginTop: 24 }}>
           <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
