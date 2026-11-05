@@ -29,11 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
-          - name: Build
-    run: npm run build
-    env:
-      PUBLIC_URL: /kokoro-prescription
-
+        run: npm run build
+        env:
+          PUBLIC_URL: /kokoro-prescription
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
