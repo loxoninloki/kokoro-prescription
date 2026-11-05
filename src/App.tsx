@@ -100,7 +100,7 @@ export default function App() {
         <div><strong>{streak}</strong><p>連続日数</p></div>
         <div><strong>{totalPoints}</strong><p>経験値</p></div>
       </section>
-      <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} />
+      <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />
       <MedicationTracker data={medication} setData={setMedication} today={today} />
       <StepTracker entries={steps} setEntries={setSteps} today={today} />
       <section style={{ marginTop: 24 }}>
