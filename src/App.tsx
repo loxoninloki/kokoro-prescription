@@ -79,7 +79,7 @@ export default function App() {
   useEffect(() => setImageUnavailable(false), [formImage]);
   const character = (size: number) => imageUnavailable
     ? <span aria-hidden="true" style={{ fontSize: size * 0.55 }}>{formSymbol} 🐹</span>
-    : <img src={`${process.env.PUBLIC_URL}/characters/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
+    : <img src={`${process.env.PUBLIC_URL}/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
 
   const checkIn = () => {
     const current = localDay();
