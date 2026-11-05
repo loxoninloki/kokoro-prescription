@@ -87,16 +87,14 @@ export default function App() {
         <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
       </header>
       {page === 'home' && <>
-        <button type="button" onClick={() => navigate('growth')} aria-label="ろきちゃんの成長を見る"
-          style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '16px 16px', border: '1px solid #e6d8f4', borderRadius: 16, background: '#f8f1ff', color: '#38294d', textAlign: 'left' }}>
-          <span style={{ fontSize: 43 }} aria-hidden="true">{formSymbol}</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <strong>ろきちゃん Lv.{evolution.level}</strong>
-            <span style={{ display: 'block', fontSize: 12 }}>{evolution.stageName}・もるすけ 🐹</span>
-            <progress aria-label="経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', height: 8, marginTop: 5, accentColor: '#7653a6' }} />
-          </span>
-          <span aria-hidden="true">›</span>
-        </button>
+        <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
+          <div style={{ fontSize: 56, lineHeight: 1.15 }} aria-hidden="true">{formSymbol} 🐹</div>
+          <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
+          <p style={{ fontSize: 14, margin: '0 0 10px' }}>現在のフォルム：{evolution.stageName}</p>
+          <label htmlFor="home-xp-progress" style={{ display: 'block', fontSize: 13 }}>経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
+          <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', height: 12, marginTop: 7, accentColor: '#7653a6' }} />
+          <p style={{ fontSize: 12, margin: '8px 0 0' }}>{evolution.nextLevel ? `次の進化：Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
+        </section>
         <section style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, padding: '14px 14px', background: '#f3eaff', borderRadius: 14 }}>
           <span style={{ flex: 1, fontSize: 13 }}>{checkedIn ? '本日のチェックイン完了 ✓' : '今日もゆっくり、一歩ずつ。'}</span>
           <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '12px 16px', fontSize: 14, whiteSpace: 'nowrap' }}>{checkedIn ? '完了 ✓' : 'チェックイン'}</button>
@@ -104,7 +102,7 @@ export default function App() {
         <div aria-label="記録の概要" style={{ display: 'flex', justifyContent: 'space-around', margin: '14px 0', fontSize: 13, textAlign: 'center' }}>
           <span>累計 <strong>{days.length}日</strong></span><span>連続 <strong>{streak}日</strong></span><span>EXP <strong>{totalPoints}</strong></span>
         </div>
-        <section aria-label="機能メニュー">
+        <section aria-label="機能メニュー" style={{ marginTop: 14 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 11 }}>
             {([
               ['diary', '📅', '日記・気分'],
