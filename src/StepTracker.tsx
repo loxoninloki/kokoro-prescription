@@ -42,7 +42,6 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
 
   useEffect(() => {
     setDraft(entries[selected] === undefined ? '' : String(entries[selected]));
-    setSaved(false);
   }, [selected, entries]);
 
   useEffect(() => {
