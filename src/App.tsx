@@ -48,6 +48,8 @@ export default function App() {
   const [steps, setSteps] = useState<StepEntries>(readSteps);
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [today, setToday] = useState(localDay);
+  const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'backup'>('home');
+  const navigate = (next: typeof page) => { setPage(next); window.scrollTo(0, 0); };
 
   useEffect(() => {
     const updateDate = () => setToday(localDay());
@@ -86,7 +88,7 @@ export default function App() {
         <h1>こころの処方箋</h1>
         <p>今日も来てくれて、ありがとう。</p>
       </header>
-      <section aria-label="ろきちゃんの成長" style={{ padding: 24, borderRadius: 24, background: '#f8f1ff', textAlign: 'center', marginBottom: 18 }}>
+      {(page === 'home' || page === 'growth') && <section aria-label="ろきちゃんの成長" style={{ padding: 24, borderRadius: 24, background: '#f8f1ff', textAlign: 'center', marginBottom: 18 }}>
         <div style={{ fontSize: 56 }} aria-hidden="true">{formSymbol} 🐹</div>
         <h2 style={{ marginBottom: 4 }}>ろきちゃん Lv.{evolution.level}</h2>
         <p style={{ marginTop: 0 }}>{evolution.stageName} ＆ もるすけ</p>
@@ -94,29 +96,52 @@ export default function App() {
         <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
         <p style={{ fontSize: 13 }}>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
         <p style={{ fontSize: 12, color: '#766b82' }}>キャラクター画像は準備中です。現在は仮アイコンで表示しています。</p>
-      </section>
-      <section style={{ padding: 24, borderRadius: 24, background: '#f3eaff', textAlign: 'center' }}>
+      </section>}
+      {page === 'home' && <section style={{ padding: 24, borderRadius: 24, background: '#f3eaff', textAlign: 'center' }}>
         <h2>今日のチェックイン</h2>
         <p>{checkedIn ? '今日も会えてうれしいです。ゆっくり過ごしましょう。' : '頑張る日も、休む日も。ここに来ただけで十分です。'}</p>
         <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '14px 28px', fontSize: 16 }}>
           {checkedIn ? '本日のチェックイン完了 ✓' : '今日のチェックインをする'}
         </button>
-      </section>
-      <section aria-label="チェックインの記録" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 18, textAlign: 'center' }}>
+      </section>}
+      {page === 'home' && <section aria-label="チェックインの記録" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 18, textAlign: 'center' }}>
         <div><strong>{days.length}</strong><p>累計日数</p></div>
         <div><strong>{streak}</strong><p>連続日数</p></div>
         <div><strong>{totalPoints}</strong><p>経験値</p></div>
-      </section>
-      <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />
-      <MedicationTracker data={medication} setData={setMedication} today={today} />
-      <StepTracker entries={steps} setEntries={setSteps} today={today} />
-      <Meditation entries={meditation} setEntries={setMeditation} today={today} />
-      <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} />
-      <section style={{ marginTop: 24 }}>
+      </section>}
+      {page === 'home' && <section aria-label="機能メニュー" style={{ marginTop: 20 }}>
+        <h2 style={{ fontSize: 19, marginBottom: 12 }}>メニュー</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+          {([
+            ['diary', '📅', '日記・気分'],
+            ['medication', '💊', 'お薬'],
+            ['steps', '👟', '歩数'],
+            ['meditation', '🌙', '瞑想'],
+            ['growth', '💜', 'ろきちゃん'],
+            ['backup', '🗂️', 'バックアップ']
+          ] as const).map(([target, symbol, title]) => (
+            <button key={target} type="button" onClick={() => navigate(target)}
+              style={{ minHeight: 100, padding: 12, border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f2ff', color: '#38294d', fontSize: 16, fontWeight: 600, cursor: 'pointer' }}>
+              <span aria-hidden="true" style={{ display: 'block', fontSize: 28, marginBottom: 6 }}>{symbol}</span>{title}
+            </button>
+          ))}
+        </div>
+      </section>}
+      {page !== 'home' && <nav aria-label="画面移動" style={{ marginTop: 20 }}>
+        <button type="button" onClick={() => navigate('home')}
+          style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 22px', fontSize: 16 }}>← ホームに戻る</button>
+      </nav>}
+      {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
+      {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
+      {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} />}
+      {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
+      {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} />}
+      {page === 'growth' && <section style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
         {days.length === 0 ? <p>最初のチェックインをお待ちしています。</p> :
           <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
-      </section>
+      </section>}
+      {page !== 'home' && <button type="button" onClick={() => navigate('home')} style={{ marginTop: 24, border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 22px', fontSize: 16 }}>← ホームに戻る</button>}
       <p style={{ fontSize: 12, color: '#766b82', marginTop: 32 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>
     </main>
   );
