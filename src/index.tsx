@@ -12,11 +12,5 @@ root.render(
   </React.StrictMode>
 );
 
-// PWA用 サービスワーカーの登録
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(err => {
-      console.log('SW registration failed: ', err);
-    });
-  });
-}
+// Service worker registration is deferred until a compiled worker is included in public/.
+// Registering a missing root-level worker on GitHub Pages causes repeated 404s.
