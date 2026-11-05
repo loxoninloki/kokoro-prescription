@@ -82,14 +82,14 @@ export default function App() {
   };
 
   return (
-    <main style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '12px 14px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
-      <header style={{ textAlign: 'center', marginBottom: page === 'home' ? 10 : 20 }}>
-        <h1 style={{ fontSize: page === 'home' ? 21 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
+    <main style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
+      <header style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
+        <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
       </header>
       {page === 'home' && <>
         <button type="button" onClick={() => navigate('growth')} aria-label="ろきちゃんの成長を見る"
-          style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '12px 14px', border: '1px solid #e6d8f4', borderRadius: 16, background: '#f8f1ff', color: '#38294d', textAlign: 'left' }}>
-          <span style={{ fontSize: 36 }} aria-hidden="true">{formSymbol}</span>
+          style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '16px 16px', border: '1px solid #e6d8f4', borderRadius: 16, background: '#f8f1ff', color: '#38294d', textAlign: 'left' }}>
+          <span style={{ fontSize: 43 }} aria-hidden="true">{formSymbol}</span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <strong>ろきちゃん Lv.{evolution.level}</strong>
             <span style={{ display: 'block', fontSize: 12 }}>{evolution.stageName}・もるすけ 🐹</span>
@@ -97,15 +97,15 @@ export default function App() {
           </span>
           <span aria-hidden="true">›</span>
         </button>
-        <section style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, padding: '10px 12px', background: '#f3eaff', borderRadius: 14 }}>
+        <section style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, padding: '14px 14px', background: '#f3eaff', borderRadius: 14 }}>
           <span style={{ flex: 1, fontSize: 13 }}>{checkedIn ? '本日のチェックイン完了 ✓' : '今日もゆっくり、一歩ずつ。'}</span>
-          <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '10px 14px', fontSize: 13, whiteSpace: 'nowrap' }}>{checkedIn ? '完了 ✓' : 'チェックイン'}</button>
+          <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '12px 16px', fontSize: 14, whiteSpace: 'nowrap' }}>{checkedIn ? '完了 ✓' : 'チェックイン'}</button>
         </section>
-        <div aria-label="記録の概要" style={{ display: 'flex', justifyContent: 'space-around', margin: '10px 0', fontSize: 12, textAlign: 'center' }}>
+        <div aria-label="記録の概要" style={{ display: 'flex', justifyContent: 'space-around', margin: '14px 0', fontSize: 13, textAlign: 'center' }}>
           <span>累計 <strong>{days.length}日</strong></span><span>連続 <strong>{streak}日</strong></span><span>EXP <strong>{totalPoints}</strong></span>
         </div>
         <section aria-label="機能メニュー">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 9 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 11 }}>
             {([
               ['diary', '📅', '日記・気分'],
               ['medication', '💊', 'お薬'],
@@ -115,8 +115,8 @@ export default function App() {
               ['backup', '🗂️', 'バックアップ']
             ] as const).map(([target, symbol, title]) => (
               <button key={target} type="button" onClick={() => navigate(target)}
-                style={{ minHeight: 66, padding: '8px 5px', border: '1px solid #e6d8f4', borderRadius: 14, background: '#f8f2ff', color: '#38294d', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                <span aria-hidden="true" style={{ display: 'block', fontSize: 23 }}>{symbol}</span>{title}
+                style={{ minHeight: 83, padding: '12px 7px', border: '1px solid #e6d8f4', borderRadius: 14, background: '#f8f2ff', color: '#38294d', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                <span aria-hidden="true" style={{ display: 'block', fontSize: 27, marginBottom: 3 }}>{symbol}</span>{title}
               </button>
             ))}
           </div>
