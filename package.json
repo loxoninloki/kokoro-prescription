@@ -24,12 +24,13 @@
   "browserslist": {
     "production": [
       ">0.2%",
-      "not-inferno-not-supported"
+      "not dead",
+      "not op_mini all"
     ],
     "development": [
-      "last1chromeversion",
-      "last1firefoxversion",
-      "last1safariversion"
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
   },
   "devDependencies": {
