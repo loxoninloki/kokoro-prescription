@@ -1,6 +1,7 @@
 name: Verify app build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - rebuild/kokoro-v2
