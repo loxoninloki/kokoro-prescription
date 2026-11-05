@@ -33,7 +33,7 @@ describe('バックアップ復元', () => {
     let failures = 0;
     const mock = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(function (key: string, value: string) {
       if (key === 'kokoro-medication-v1' && failures++ === 0) throw new Error('quota');
-      original.call(this, key, value);
+      original.call(localStorage, key, value);
     });
     try {
       expect(() => restoreBackup(sample())).toThrow();
