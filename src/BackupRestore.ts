@@ -36,6 +36,7 @@ export function parseBackup(text: string): BackupData {
   if (!raw.medication.medicines.every((m: unknown) => object(m) &&
       typeof m.id === 'string' && m.id.length > 0 && m.id.length <= 150 &&
       typeof m.name === 'string' && m.name.length <= 80 &&
+      (m.archived === undefined || typeof m.archived === 'boolean') &&
       typeof m.time === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(m.time))) {
     throw new Error('お薬の登録情報が不正です。');
   }
