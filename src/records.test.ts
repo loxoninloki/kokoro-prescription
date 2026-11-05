@@ -2,6 +2,7 @@ import { evolutionFromXp, XP_PER_LEVEL } from './evolution';
 import { stepsExperience, encouragement } from './StepTracker';
 import { diaryExperience } from './DiaryCalendar';
 import { medicationExperience, doseKey } from './MedicationTracker';
+import { meditationExperience } from './Meditation';
 
 describe('ろきちゃんの成長', () => {
   test('レベルとフォルムの境界', () => {
@@ -33,5 +34,14 @@ describe('日々の記録', () => {
   test('服薬チェックの経験値は重複せず登録済み薬だけ', () => {
     const key = doseKey('2026-11-06', 'medicine-1');
     expect(medicationExperience({ medicines: [{ id: 'medicine-1', name: '朝のお薬', time: '08:00' }], taken: { [key]: true, '2026-11-06|unknown': true } })).toBe(10);
+  });
+});
+
+
+describe('瞑想の経験値', () => {
+  test('1日1回のみ加算される', () => {
+    expect(meditationExperience({ '2026-11-06': true })).toBe(10);
+    expect(meditationExperience({ '2026-11-06': true, '2026-11-07': true })).toBe(20);
+    expect(meditationExperience({ '2026-11-06': false })).toBe(0);
   });
 });
