@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AmbientSound, Soundscape } from './AmbientSound';
+type MeditationTrack = 'ambient' | 'floating' | 'relaxing';
+const TRACKS: Record<MeditationTrack, string> = {
+  ambient: 'quietphase-ambient-meditation-485723.mp3',
+  floating: 'leberch-meditation-ambient-375361.mp3',
+  relaxing: 'danamusic-meditation-relaxing-music-293922.mp3',
+};
 
 export type MeditationEntries = Record<string, boolean>;
 const KEY = 'kokoro-meditation-v1';
@@ -33,12 +38,16 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
   const deadline = useRef<number | null>(null);
-  const sound = useRef<AmbientSound | null>(null);
+  const sound = useRef<HTMLAudioElement | null>(null);
   const [bgmEnabled, setBgmEnabled] = useState(false);
-  const [soundscape, setSoundscape] = useState<Soundscape>('rain');
+  const [soundscape, setSoundscape] = useState<MeditationTrack>('ambient');
   const [audioError, setAudioError] = useState('');
 
-  useEffect(() => () => { sound.current?.stop(); }, []);
+  const stopAudio = () => {
+    const audio = sound.current;
+    if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); sound.current = null; }
+  };
+  useEffect(() => () => { sound.current?.pause(); }, []);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { /* storage unavailable */ }
@@ -53,8 +62,7 @@ export default function Meditation({ today, entries, setEntries }: Props) {
       if (seconds === 0) {
         deadline.current = null;
         setRunning(false);
-        sound.current?.stop();
-        sound.current = null;
+        stopAudio();
         setFinished(true);
         const now = new Date();
         const completedDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -69,10 +77,17 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const start = () => {
     setAudioError('');
     if (bgmEnabled) {
-      sound.current?.stop();
-      const ambient = new AmbientSound();
-      sound.current = ambient;
-      void ambient.start(soundscape).catch(() => { ambient.stop(); setAudioError('音を再生できませんでした。無音でも瞑想できます。'); });
+      stopAudio();
+      const audio = new Audio(`${process.env.PUBLIC_URL}/music/${TRACKS[soundscape]}`);
+      audio.loop = true;
+      audio.volume = 0.35;
+      sound.current = audio;
+      void audio.play().catch(() => {
+        if (sound.current === audio) {
+          stopAudio();
+          setAudioError('音を再生できませんでした。無音でも瞑想できます。');
+        }
+      });
     }
     const seconds = remaining > 0 ? remaining : duration;
     setRemaining(seconds);
@@ -81,8 +96,7 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     setRunning(true);
   };
   const stop = () => {
-    sound.current?.stop();
-    sound.current = null;
+    stopAudio();
     deadline.current = null;
     setRunning(false);
     setRemaining(duration);
@@ -107,11 +121,11 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     </label>
     <label style={{ display: 'block', marginTop: 12 }}><input type="checkbox" checked={bgmEnabled} disabled={running} onChange={e => setBgmEnabled(e.target.checked)} /> リラックスBGMを流す</label>
     {bgmEnabled && <label style={{ display: 'block', marginTop: 12 }}>BGMの種類
-      <select disabled={running} value={soundscape} onChange={e => setSoundscape(e.target.value as Soundscape)}
+      <select disabled={running} value={soundscape} onChange={e => setSoundscape(e.target.value as MeditationTrack)}
         style={{ display: 'block', margin: '10px auto', padding: 10, borderRadius: 10 }}>
-        <option value="rain">🌧️ やさしい雨音</option>
-        <option value="forest">🌿 森の風と小鳥</option>
-        <option value="piano">🎹 やさしいピアノ</option>
+        <option value="ambient">✨ Ambient Meditation</option>
+        <option value="floating">🌙 Meditation Ambient</option>
+        <option value="relaxing">💜 Meditation Relaxing Music</option>
       </select>
     </label>}
     {audioError && <p role="status">{audioError}</p>}
