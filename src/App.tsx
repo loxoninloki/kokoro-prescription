@@ -74,6 +74,12 @@ export default function App() {
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
   const formSymbol = { tablet: '💊', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
+  const [imageUnavailable, setImageUnavailable] = useState(false);
+  const formImage = { tablet: 'lv1_tablet.png', awakening: 'lv10_awake.png', chibi: 'lv20_chibi.png', human: 'lv40_human.png' }[evolution.stage];
+  useEffect(() => setImageUnavailable(false), [formImage]);
+  const character = (size: number) => imageUnavailable
+    ? <span aria-hidden="true" style={{ fontSize: size * 0.55 }}>{formSymbol} 🐹</span>
+    : <img src={`${process.env.PUBLIC_URL}/characters/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
 
   const checkIn = () => {
     const current = localDay();
@@ -88,7 +94,7 @@ export default function App() {
       </header>
       {page === 'home' && <>
         <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
-          <div style={{ fontSize: 56, lineHeight: 1.15 }} aria-hidden="true">{formSymbol} 🐹</div>
+          <div style={{ minHeight: 110, display: "flex", alignItems: "center", justifyContent: "center" }}>{character(116)}</div>
           <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
           <p style={{ fontSize: 14, margin: '0 0 10px' }}>現在のフォルム：{evolution.stageName}</p>
           <label htmlFor="home-xp-progress" style={{ display: 'block', fontSize: 13 }}>経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
@@ -125,7 +131,7 @@ export default function App() {
       </nav>}
       {page === 'growth' && <>
         <section aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
-          <div style={{ fontSize: 56 }} aria-hidden="true">{formSymbol} 🐹</div>
+          <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>
           <h2>ろきちゃん Lv.{evolution.level}</h2>
           <p>{evolution.stageName} ＆ もるすけ</p>
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
