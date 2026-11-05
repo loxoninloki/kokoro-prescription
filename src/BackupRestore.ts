@@ -49,7 +49,12 @@ export function parseBackup(text: string): BackupData {
 export function restoreBackup(backup: BackupData): void {
   const keys = ['kokoro-checkins-v1', 'kokoro-diary-v1', 'kokoro-medication-v1', 'kokoro-steps-v1', 'kokoro-meditation-v1'];
   const values = [backup.checkins, backup.diary, backup.medication, backup.steps, backup.meditation];
-  const previous = keys.map(key => localStorage.getItem(key));
+  let previous: Array<string | null>;
+  try {
+    previous = keys.map(key => localStorage.getItem(key));
+  } catch {
+    throw new Error('保存領域にアクセスできません。ブラウザ設定をご確認ください。');
+  }
   try {
     keys.forEach((key, i) => localStorage.setItem(key, JSON.stringify(values[i])));
   } catch {
