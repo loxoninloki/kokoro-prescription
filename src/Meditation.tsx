@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { AmbientSound } from './AmbientSound';
 
 export type MeditationEntries = Record<string, boolean>;
 const KEY = 'kokoro-meditation-v1';
@@ -32,6 +33,11 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
   const deadline = useRef<number | null>(null);
+  const sound = useRef<AmbientSound | null>(null);
+  const [bgmEnabled, setBgmEnabled] = useState(false);
+  const [audioError, setAudioError] = useState('');
+
+  useEffect(() => () => { sound.current?.stop(); }, []);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { /* storage unavailable */ }
@@ -46,6 +52,8 @@ export default function Meditation({ today, entries, setEntries }: Props) {
       if (seconds === 0) {
         deadline.current = null;
         setRunning(false);
+        sound.current?.stop();
+        sound.current = null;
         setFinished(true);
         const now = new Date();
         const completedDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -58,6 +66,13 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   }, [running, setEntries]);
 
   const start = () => {
+    setAudioError('');
+    if (bgmEnabled) {
+      sound.current?.stop();
+      const ambient = new AmbientSound();
+      sound.current = ambient;
+      void ambient.start().catch(() => { ambient.stop(); setAudioError('音を再生できませんでした。無音でも瞑想できます。'); });
+    }
     const seconds = remaining > 0 ? remaining : duration;
     setRemaining(seconds);
     deadline.current = Date.now() + seconds * 1000;
@@ -65,6 +80,8 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     setRunning(true);
   };
   const stop = () => {
+    sound.current?.stop();
+    sound.current = null;
     deadline.current = null;
     setRunning(false);
     setRemaining(duration);
@@ -87,6 +104,8 @@ export default function Meditation({ today, entries, setEntries }: Props) {
         <option value={300}>5分</option>
       </select>
     </label>
+    <label style={{ display: 'block', marginTop: 12 }}><input type="checkbox" checked={bgmEnabled} disabled={running} onChange={e => setBgmEnabled(e.target.checked)} /> 静かなオリジナルBGMを流す</label>
+    {audioError && <p role="status">{audioError}</p>}
     <div role="timer" aria-label="残り時間" style={{ fontSize: 40, fontWeight: 700, margin: '16px 0' }}>
       {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
     </div>
@@ -94,6 +113,6 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     {!running ? <button type="button" onClick={start} style={{ padding: '12px 24px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>{remaining === duration ? '瞑想を始める' : '続きを始める'}</button> :
       <button type="button" onClick={stop} style={{ padding: '12px 24px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>終了する</button>}
     {entries[today] && <p>本日の瞑想記録 ✓</p>}
-    <p style={{ fontSize: 12, color: '#766b82' }}>1日1回、完了すると+10EXP。BGMは今後追加します。画面を閉じている間はタイマーの完了処理が遅れる場合があります。</p>
+    <p style={{ fontSize: 12, color: '#766b82' }}>1日1回、完了すると+10EXP。音量に注意してください。BGMは画面ロック時に停止する場合があります。画面を閉じている間はタイマーの完了処理が遅れる場合があります。</p>
   </section>;
 }
