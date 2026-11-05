@@ -113,7 +113,7 @@ export default function Meditation({ today, entries, setEntries }: Props) {
         <option value="forest">🌿 森の風と小鳥</option>
         <option value="piano">🎹 やさしいピアノ</option>
       </select>
-    </label>
+    </label>}
     {audioError && <p role="status">{audioError}</p>}
     <div role="timer" aria-label="残り時間" style={{ fontSize: 40, fontWeight: 700, margin: '16px 0' }}>
       {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
