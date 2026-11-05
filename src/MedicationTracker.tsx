@@ -44,14 +44,14 @@ export default function MedicationTracker({ data, setData, today }: Props) {
 
   const addMedicine = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name.trim() || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)) return;
+    if (!name.trim() || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
     const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
     setData(previous => ({ ...previous, medicines: [...previous.medicines, { id, name: name.trim().slice(0, 80), time }] }));
     setName('');
   };
 
   const toggleTaken = (id: string) => {
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(selectedDate) || selectedDate > today || !data.medicines.some(m => m.id === id)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) || selectedDate > today || !data.medicines.some(m => m.id === id)) return;
     const key = doseKey(selectedDate, id);
     setData(previous => {
       const taken = { ...previous.taken };
