@@ -20,11 +20,11 @@ export function parseBackup(text: string): BackupData {
   if (!raw.checkins.every(v => typeof v === 'string' && datePattern.test(v))) throw new Error('チェックイン記録が不正です。');
   for (const [day, entry] of Object.entries(raw.diary)) {
     if (!datePattern.test(day) || !object(entry) ||
-        !(entry.mood === null || (Number.isInteger(entry.mood) && Number(entry.mood) >= 1 && Number(entry.mood) <= 5)) ||
+        !(entry.mood === null || (typeof entry.mood === 'number' && Number.isInteger(entry.mood) && entry.mood >= 1 && entry.mood <= 5)) ||
         typeof entry.text !== 'string' || entry.text.length > 2000) throw new Error('日記データが不正です。');
   }
   for (const [day, steps] of Object.entries(raw.steps)) {
-    if (!datePattern.test(day) || !Number.isInteger(steps) || Number(steps) < 0 || Number(steps) > 100000) throw new Error('歩数データが不正です。');
+    if (!datePattern.test(day) || typeof steps !== 'number' || !Number.isInteger(steps) || steps < 0 || steps > 100000) throw new Error('歩数データが不正です。');
   }
   for (const [day, done] of Object.entries(raw.meditation)) {
     if (!datePattern.test(day) || typeof done !== 'boolean') throw new Error('瞑想データが不正です。');
