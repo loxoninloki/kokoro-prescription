@@ -32,10 +32,13 @@ interface Props {
   setEntries: React.Dispatch<React.SetStateAction<DiaryEntries>>;
   checkins: string[];
   today: string;
+  steps: Record<string, number>;
+  medicationTaken: Record<string, boolean>;
 }
 
-export default function DiaryCalendar({ entries, setEntries, checkins, today }: Props) {
+export default function DiaryCalendar({ entries, setEntries, checkins, today, steps, medicationTaken }: Props) {
   const [selected, setSelected] = useState(today);
+  const hasMedication = (day: string) => Object.keys(medicationTaken).some(key => medicationTaken[key] && key.startsWith(day + '|'));
   const [month, setMonth] = useState(today.slice(0, 7));
   const [draft, setDraft] = useState('');
   const [mood, setMood] = useState<number | null>(null);
@@ -78,16 +81,18 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today }: 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4, textAlign: 'center' }}>
         {['日','月','火','水','木','金','土'].map(day => <strong key={day} style={{ fontSize: 12 }}>{day}</strong>)}
         {dates.map((date, index) => date ?
-          <button type="button" key={date} onClick={() => setSelected(date)} aria-pressed={selected === date}
-            style={{ minHeight: 48, padding: '4px 0', borderRadius: 10, border: selected === date ? '2px solid #7950a8' : '1px solid #e5d7f1', background: selected === date ? '#e9d8fd' : '#fff', color: '#392b4d' }}>
+          <button type="button" key={date} onClick={() => setSelected(date)} aria-pressed={selected === date} disabled={date > today}
+            style={{ minHeight: 48, padding: '4px 0', borderRadius: 10, border: selected === date ? '2px solid #7950a8' : '1px solid #e5d7f1', background: selected === date ? '#e9d8fd' : '#fff', opacity: date > today ? 0.45 : 1, color: '#392b4d' }}>
             <span>{Number(date.slice(-2))}</span>
-            <span style={{ display: 'block', fontSize: 11 }}>{checkins.includes(date) ? '✓' : ''}{entries[date]?.mood ? '♥' : ''}{entries[date]?.text?.trim() ? '✎' : ''}</span>
+            <span style={{ display: 'block', fontSize: 11 }}>{checkins.includes(date) ? '✓' : ''}{entries[date]?.mood ? '♥' : ''}{entries[date]?.text?.trim() ? '✎' : ''}{steps[date] !== undefined ? '👟' : ''}{hasMedication(date) ? '💊' : ''}</span>
           </button> :
           <span key={`empty-${index}`} />
         )}
       </div>
+      <p style={{ fontSize: 12 }}>✓ チェックイン　♥ 気分　✎ 日記　👟 歩数　💊 服薬</p>
       <div style={{ marginTop: 22 }}>
         <h3>{selected} の記録</h3>
+        <p style={{ fontSize: 13 }}>歩数：{steps[selected] === undefined ? '未記録' : `${steps[selected].toLocaleString()}歩`} ／ 服薬：{hasMedication(selected) ? '記録あり' : '記録なし'}</p>
         <p>今日の気分はいかがでしたか？</p>
         <div role="group" aria-label="5段階の気分" style={{ display: 'flex', justifyContent: 'space-between', gap: 5 }}>
           {['つらい','低め','ふつう','良い','とても良い'].map((label, index) =>
