@@ -3,6 +3,8 @@ import { CHECKIN_XP, evolutionFromXp } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
 import StepTracker, { StepEntries, readSteps, stepsExperience } from './StepTracker';
+import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
+import BackupExport from './BackupExport';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
 const POINTS_PER_DAY = CHECKIN_XP;
@@ -44,6 +46,7 @@ export default function App() {
   const [diary, setDiary] = useState<DiaryEntries>(readDiary);
   const [medication, setMedication] = useState<MedicationData>(readMedication);
   const [steps, setSteps] = useState<StepEntries>(readSteps);
+  const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [today, setToday] = useState(localDay);
 
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function App() {
   }, [days]);
 
   const checkedIn = days.includes(today);
-  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps);
+  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
   const formSymbol = { tablet: '💊', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
@@ -103,6 +106,8 @@ export default function App() {
       <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />
       <MedicationTracker data={medication} setData={setMedication} today={today} />
       <StepTracker entries={steps} setEntries={setSteps} today={today} />
+      <Meditation entries={meditation} setEntries={setMeditation} today={today} />
+      <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} />
       <section style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
         {days.length === 0 ? <p>最初のチェックインをお待ちしています。</p> :
