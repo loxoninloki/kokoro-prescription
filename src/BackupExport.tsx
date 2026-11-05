@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { parseBackup, restoreBackup } from './BackupRestore';
 import type { DiaryEntries } from './DiaryCalendar';
 import type { MedicationData } from './MedicationTracker';
 import type { StepEntries } from './StepTracker';
@@ -36,6 +37,27 @@ export function makeBackup(data: Props): BackupData {
 
 export default function BackupExport(data: Props) {
   const [message, setMessage] = useState('');
+  const [restoring, setRestoring] = useState(false);
+  const importBackup = async (file?: File) => {
+    if (!file) return;
+    setMessage('');
+    if (file.size > 2000000) {
+      setMessage('ファイルが大きすぎます。');
+      return;
+    }
+    setRestoring(true);
+    try {
+      const backup = parseBackup(await file.text());
+      const confirmed = window.confirm('現在の記録が上書きされます。復元しますか？');
+      if (!confirmed) return;
+      restoreBackup(backup);
+      window.location.reload();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '復元に失敗しました。');
+    } finally {
+      setRestoring(false);
+    }
+  };
   const exportBackup = () => {
     try {
       const blob = new Blob([JSON.stringify(makeBackup(data), null, 2)], { type: 'application/json' });
@@ -56,7 +78,13 @@ export default function BackupExport(data: Props) {
     <h2>🗂 記録のバックアップ</h2>
     <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録をJSONファイルに書き出します。</p>
     <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
+    <label style={{ display: 'block', marginTop: 18 }}>
+      バックアップから復元
+      <input type="file" accept=".json,application/json" disabled={restoring}
+        onChange={event => { void importBackup(event.target.files?.[0]); event.target.value = ''; }}
+        style={{ display: 'block', marginTop: 8, maxWidth: '100%' }} />
+    </label>
     <p role="status" style={{ fontSize: 13 }}>{message}</p>
-    <p style={{ fontSize: 12, color: '#766b82' }}>このファイルには日記や服薬情報などの個人情報が含まれます。共有せず安全な場所に保管してください。復元機能は準備中です。</p>
+    <p style={{ fontSize: 12, color: '#766b82' }}>このファイルには日記や服薬情報などの個人情報が含まれます。共有せず安全な場所に保管してください。復元すると現在の記録を上書きします。復元前に現在の記録もバックアップしてください。</p>
   </section>;
 }
