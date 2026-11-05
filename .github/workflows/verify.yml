@@ -34,11 +34,11 @@ jobs:
         run: npm run build
         env:
           CI: 'true'
-          PUBLIC_URL: /kokoro-prescription
+          PUBLIC_URL: /
       - name: Upload verified build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kokoro-v2-build
+          name: kokoro-v2-cloudflare-build
           path: build/
           if-no-files-found: error
           retention-days: 7
