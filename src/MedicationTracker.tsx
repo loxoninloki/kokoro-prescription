@@ -44,13 +44,14 @@ export default function MedicationTracker({ data, setData, today }: Props) {
 
   const addMedicine = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)) return;
     const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
     setData(previous => ({ ...previous, medicines: [...previous.medicines, { id, name: name.trim().slice(0, 80), time }] }));
     setName('');
   };
 
   const toggleTaken = (id: string) => {
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(selectedDate) || selectedDate > today || !data.medicines.some(m => m.id === id)) return;
     const key = doseKey(selectedDate, id);
     setData(previous => {
       const taken = { ...previous.taken };
@@ -75,7 +76,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
         <button type="submit" style={{ padding: 12, border: 0, borderRadius: 20, color: '#fff', background: '#7653a6' }}>お薬を登録</button>
       </form>
       <label style={{ display: 'block', marginTop: 18 }}>記録する日付
-        <input type="date" value={selectedDate} max={today} onChange={e => setSelectedDate(e.target.value)} style={{ display: 'block', padding: 9, marginTop: 5 }} />
+        <input type="date" value={selectedDate} max={today} min="2000-01-01" onChange={e => setSelectedDate(e.target.value)} style={{ display: 'block', padding: 9, marginTop: 5 }} />
       </label>
       {data.medicines.length === 0 ? <p>お薬はまだ登録されていません。</p> :
         <ul style={{ paddingLeft: 0, listStyle: 'none' }}>
@@ -83,7 +84,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
             const checked = !!data.taken[doseKey(selectedDate, m.id)];
             return <li key={m.id} style={{ background: '#fff', padding: 12, borderRadius: 12, marginTop: 10 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <input type="checkbox" checked={checked} onChange={() => toggleTaken(m.id)} />
+                <input type="checkbox" checked={checked} disabled={selectedDate > today} onChange={() => toggleTaken(m.id)} />
                 <span><strong>{m.time} {m.name}</strong><span style={{ display: 'block', fontSize: 12 }}>{checked ? '服薬済み ✓' : '未記録'}</span></span>
               </label>
               <button type="button" onClick={() => removeMedicine(m.id)} style={{ marginTop: 8, background: 'transparent', border: 0, color: '#775d8c', textDecoration: 'underline' }}>登録を削除</button>
