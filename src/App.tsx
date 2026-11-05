@@ -60,7 +60,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(days));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(days));
+    } catch {
+      // Storage can be blocked or full.
+    }
   }, [days]);
 
   const checkedIn = days.includes(today);
