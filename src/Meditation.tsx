@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AmbientSound } from './AmbientSound';
+import { AmbientSound, Soundscape } from './AmbientSound';
 
 export type MeditationEntries = Record<string, boolean>;
 const KEY = 'kokoro-meditation-v1';
@@ -35,6 +35,7 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const deadline = useRef<number | null>(null);
   const sound = useRef<AmbientSound | null>(null);
   const [bgmEnabled, setBgmEnabled] = useState(false);
+  const [soundscape, setSoundscape] = useState<Soundscape>('rain');
   const [audioError, setAudioError] = useState('');
 
   useEffect(() => () => { sound.current?.stop(); }, []);
@@ -71,7 +72,7 @@ export default function Meditation({ today, entries, setEntries }: Props) {
       sound.current?.stop();
       const ambient = new AmbientSound();
       sound.current = ambient;
-      void ambient.start().catch(() => { ambient.stop(); setAudioError('音を再生できませんでした。無音でも瞑想できます。'); });
+      void ambient.start(soundscape).catch(() => { ambient.stop(); setAudioError('音を再生できませんでした。無音でも瞑想できます。'); });
     }
     const seconds = remaining > 0 ? remaining : duration;
     setRemaining(seconds);
@@ -104,7 +105,15 @@ export default function Meditation({ today, entries, setEntries }: Props) {
         <option value={300}>5分</option>
       </select>
     </label>
-    <label style={{ display: 'block', marginTop: 12 }}><input type="checkbox" checked={bgmEnabled} disabled={running} onChange={e => setBgmEnabled(e.target.checked)} /> 静かなオリジナルBGMを流す</label>
+    <label style={{ display: 'block', marginTop: 12 }}><input type="checkbox" checked={bgmEnabled} disabled={running} onChange={e => setBgmEnabled(e.target.checked)} /> リラックスBGMを流す</label>
+    {bgmEnabled && <label style={{ display: 'block', marginTop: 12 }}>BGMの種類
+      <select disabled={running} value={soundscape} onChange={e => setSoundscape(e.target.value as Soundscape)}
+        style={{ display: 'block', margin: '10px auto', padding: 10, borderRadius: 10 }}>
+        <option value="rain">🌧️ やさしい雨音</option>
+        <option value="forest">🌿 森の風と小鳥</option>
+        <option value="piano">🎹 やさしいピアノ</option>
+      </select>
+    </label>
     {audioError && <p role="status">{audioError}</p>}
     <div role="timer" aria-label="残り時間" style={{ fontSize: 40, fontWeight: 700, margin: '16px 0' }}>
       {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
