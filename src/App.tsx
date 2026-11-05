@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { CHECKIN_XP, evolutionFromXp } from './evolution';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
-const POINTS_PER_DAY = 10;
+const POINTS_PER_DAY = CHECKIN_XP;
 
 function localDay(date = new Date()): string {
   const year = date.getFullYear();
@@ -56,6 +57,8 @@ export default function App() {
   const checkedIn = days.includes(today);
   const totalPoints = days.length * POINTS_PER_DAY;
   const streak = streakFor(days);
+  const evolution = evolutionFromXp(totalPoints);
+  const formSymbol = { tablet: '💊', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
 
   const checkIn = () => {
     const current = localDay();
@@ -70,6 +73,15 @@ export default function App() {
         <h1>こころの処方箋</h1>
         <p>今日も来てくれて、ありがとう。</p>
       </header>
+      <section aria-label="ろきちゃんの成長" style={{ padding: 24, borderRadius: 24, background: '#f8f1ff', textAlign: 'center', marginBottom: 18 }}>
+        <div style={{ fontSize: 56 }} aria-hidden="true">{formSymbol} 🐹</div>
+        <h2 style={{ marginBottom: 4 }}>ろきちゃん Lv.{evolution.level}</h2>
+        <p style={{ marginTop: 0 }}>{evolution.stageName} ＆ もるすけ</p>
+        <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
+        <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
+        <p style={{ fontSize: 13 }}>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
+        <p style={{ fontSize: 12, color: '#766b82' }}>キャラクター画像は準備中です。現在は仮アイコンで表示しています。</p>
+      </section>
       <section style={{ padding: 24, borderRadius: 24, background: '#f3eaff', textAlign: 'center' }}>
         <h2>今日のチェックイン</h2>
         <p>{checkedIn ? '今日も会えてうれしいです。ゆっくり過ごしましょう。' : '頑張る日も、休む日も。ここに来ただけで十分です。'}</p>
