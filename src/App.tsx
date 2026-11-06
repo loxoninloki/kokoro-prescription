@@ -5,6 +5,7 @@ import MedicationTracker, { MedicationData, medicationExperience, readMedication
 import StepTracker, { StepEntries, readSteps, stepsExperience, parseStepImport, StepImport } from './StepTracker';
 import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
 import BackupExport from './BackupExport';
+import AppInvite from './AppInvite';
 import { APPEARANCE_KEY, Appearance, readAppearance } from './appearance';
 import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
@@ -68,7 +69,7 @@ export default function App() {
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'rewards'>('home');
+  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'invite' | 'menu' | 'rewards'>('home');
   const navigate = (next: typeof page) => {
     if (next !== 'home' && next !== 'room') {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
@@ -149,6 +150,9 @@ export default function App() {
     setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
   };
 
+  const backPage = page === 'dressup' ? 'growth' : (page === 'backup' || page === 'invite') ? 'menu' : 'home';
+  const backLabel = { growth: '育成', menu: 'メニュー', home: 'ホーム' }[backPage];
+
   const checkIn = () => {
     const current = localDay();
     setToday(current);
@@ -190,8 +194,7 @@ export default function App() {
             ['medication', 'お薬'],
             ['steps', '歩数'],
             ['meditation', '瞑想BGM'],
-            ['growth', 'ろきちゃん育成'],
-            ['backup', 'バックアップ'],
+            ['menu', 'メニュー'],
           ] as const).map(([target, title]) => (
             <button key={target} type="button" onClick={() => navigate(target)}>
               <Icon name={target} />
@@ -199,18 +202,19 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <section className="home-progress" aria-label="ろきちゃんの育成状態">
-          <div className="home-form-avatar">{character(48)}</div>
-          <div className="home-progress-content">
-            <div className="progress-heading">
-              <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
-              <span>{displayForm.name}</span>
-            </div>
-            <label htmlFor="home-xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
-            <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
-            <p>{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
-          </div>
-        </section>
+        <button className="home-progress" type="button" onClick={() => navigate('growth')}
+          aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
+          <span className="home-form-avatar">{character(48)}</span>
+          <span className="home-progress-content">
+            <span className="progress-heading">
+              <strong><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</strong>
+              <span>{displayForm.name} <span aria-hidden="true">›</span></span>
+            </span>
+            <span className="home-progress-caption">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</span>
+            <progress aria-label="経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
+            <span className="home-progress-caption">{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</span>
+          </span>
+        </button>
         <button className="home-rewards" type="button" onClick={() => navigate('rewards')}>
           <RewardBalances wallet={wallet} />
           <span>報酬・ガチャ・ショップ ›</span>
@@ -223,7 +227,7 @@ export default function App() {
       {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
         equipped={mature ? appearance.equipped : undefined} onBack={() => navigate('home')} />}
       {page !== 'home' && page !== 'room' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
-        <button type="button" onClick={() => navigate(page === 'dressup' ? 'growth' : 'home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>{page === 'dressup' ? '← 育成に戻る' : '← ホームに戻る'}</button>
+        <button type="button" onClick={() => navigate(backPage)} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← {backLabel}に戻る</button>
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
       {page === 'growth' && <>
@@ -262,6 +266,14 @@ export default function App() {
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
+      {page === 'menu' && <section className="menu-panel" aria-labelledby="menu-title">
+        <h1 id="menu-title"><Icon name="menu" /> メニュー</h1>
+        <nav className="menu-links" aria-label="メニュー項目">
+          <button type="button" onClick={() => navigate('backup')}><Icon name="backup" /> バックアップ</button>
+          <button type="button" onClick={() => navigate('invite')}><Icon name="invite" /> 紹介する</button>
+        </nav>
+      </section>}
+      {page === 'invite' && <AppInvite />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
       {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
     </main>
