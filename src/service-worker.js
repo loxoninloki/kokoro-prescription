@@ -5,6 +5,9 @@ import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
 
+// Activate a fully installed build even if an old tab is still open.
+// Open pages keep their current state until the next navigation.
+self.skipWaiting();
 clientsClaim();
 
 // CRA injects the matching HTML, JavaScript, CSS and bundled assets.
