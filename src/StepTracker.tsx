@@ -120,14 +120,24 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
         <summary>オプション · 日付も一緒に送る</summary>
         <p>いま使っている「こころの歩数」を開き、最後の「URLを開く」の手前に追加します。</p>
         <ol>
-          <li>「現在の日付」を追加します。</li>
-          <li>「日付をフォーマット」を追加し、「現在の日付」をカスタム形式 <code>yyyy-MM-dd</code> にします。</li>
+          <li>「日付」アクションを追加し、青い項目を「現在の日付」にします。</li>
+          <li>「日付をフォーマット」を追加します。入力には手順1の「日付」を選び、青い矢印で詳細を開いて、日付の形式を「カスタム」、書式を <code>yyyy-MM-dd</code> にします。</li>
           <li>「URLを開く」の歩数の変数のすぐ後ろに <code>&amp;date=</code> と入力し、その直後に「フォーマット済みの日付」の変数を追加します。</li>
         </ol>
         <p>URLの末尾の並びは <code>#steps=［値］&amp;date=［フォーマット済みの日付］</code> です。角括弧の部分には青い変数を入れます。</p>
         <p>過去の歩数を送る場合は、検索対象の日と送る日付を同じ日にしてください。</p>
+        <h3>ショートカットの完成イメージ</h3>
+        <figure style={{ margin: '12px 0' }}>
+          <figcaption>① 今日の歩数を検索し、「値」を取得</figcaption>
+          <img src={`${process.env.PUBLIC_URL}/step-guide/search.webp`} alt="歩数を今日の日付で検索し、日ごとにグループ分けして値を取得する画面" width="800" height="1279" loading="lazy" style={{ width: '100%', maxWidth: 420, height: 'auto', borderRadius: 10 }} />
+        </figure>
+        <figure style={{ margin: '12px 0' }}>
+          <figcaption>② 日付を整えて「URLを開く」に渡す</figcaption>
+          <img src={`${process.env.PUBLIC_URL}/step-guide/date.webp`} alt="値の取得、現在の日付、日付の書式設定、URLを開くの順に並んだ画面" width="800" height="889" loading="lazy" style={{ width: '100%', maxWidth: 420, height: 'auto', borderRadius: 10 }} />
+          <p>画像の青い「値」と「フォーマット済みの日付」の間に、<strong><code>&amp;date=</code></strong> を入れて完成です。</p>
+        </figure>
       </details>
- style={{ display: 'grid', gap: 12 }}>
+      <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
         <label>記録する日
           <input type="date" value={selected} max={today} onChange={event => { setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
         </label>
