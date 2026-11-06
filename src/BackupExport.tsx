@@ -1,4 +1,6 @@
 import { Capacitor } from '@capacitor/core';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { Icon } from './Icon';
 import React, { useRef, useState } from 'react';
 import { parseBackup, restoreBackup } from './BackupRestore';
@@ -39,12 +41,18 @@ export function makeBackup(data: Props): BackupData {
 
 const QR_URL = 'https://kokoro-prescription-preview.pages.dev/';
 
+function isShareCancelled(error: unknown): boolean {
+  return error instanceof Error && (error.name === 'AbortError' || error.message === 'Share canceled');
+}
+
 export default function BackupExport(data: Props) {
   const [message, setMessage] = useState('');
   const [restoring, setRestoring] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
   const shareInput = useRef<HTMLInputElement>(null);
-  const shareUrl = Capacitor.isNativePlatform() ? QR_URL : window.location.origin + window.location.pathname;
+  const isNative = Capacitor.isNativePlatform();
+  const shareUrl = isNative ? QR_URL : window.location.origin + window.location.pathname;
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -59,13 +67,15 @@ export default function BackupExport(data: Props) {
   const shareApp = async () => {
     setShareMessage('');
     try {
-      await navigator.share({
+      const invite = {
         title: 'こころの処方箋',
         text: '気分や日記を記録できる「こころの処方箋」です。リンクを開いて使ってみてください。',
         url: shareUrl,
-      });
+      };
+      if (isNative) await Share.share(invite);
+      else await navigator.share(invite);
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      if (!isShareCancelled(error)) {
         setShareMessage('共有メニューを開けませんでした。「リンクをコピー」をお使いください。');
       }
     }
@@ -91,29 +101,48 @@ export default function BackupExport(data: Props) {
       setRestoring(false);
     }
   };
-  const exportBackup = () => {
+  const exportBackup = async () => {
+    setMessage('');
+    setExporting(true);
+    const backup = makeBackup(data);
+    const filename = 'kokoro-backup-' + backup.exportedAt.slice(0, 10) + '.json';
+    const json = JSON.stringify(backup, null, 2);
+    let temporaryFile = false;
     try {
-      const blob = new Blob([JSON.stringify(makeBackup(data), null, 2)], { type: 'application/json' });
+      if (isNative) {
+        const file = await Filesystem.writeFile({
+          path: filename, directory: Directory.Cache, data: json, encoding: Encoding.UTF8,
+        });
+        temporaryFile = true;
+        await Share.share({ files: [file.uri] });
+        setMessage('「ファイルに保存」を選んだ場合は、選択したフォルダに保存されています。');
+        return;
+      }
+      const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'kokoro-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage('バックアップファイルの保存を開始しました。iPhoneの「ファイル」アプリ等で保存先をご確認ください。');
-    } catch {
-      setMessage('書き出しに失敗しました。ブラウザの空き容量や設定をご確認ください。');
+    } catch (error) {
+      if (!isShareCancelled(error)) setMessage('書き出しに失敗しました。端末の空き容量や設定をご確認ください。');
+    } finally {
+      if (temporaryFile) await Filesystem.deleteFile({ path: filename, directory: Directory.Cache }).catch(() => undefined);
+      setExporting(false);
     }
   };
   return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f7f3ff' }}>
     <h2><Icon name="backup" /> 記録のバックアップ</h2>
     <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録をJSONファイルに書き出します。</p>
-    <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
+    {isNative && <p style={{ fontSize: 13 }}>共有メニューから「ファイルに保存」を選んでください。</p>}
+    <button type="button" onClick={exportBackup} disabled={exporting || restoring} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
     <label style={{ display: 'block', marginTop: 18 }}>
       バックアップから復元
-      <input type="file" accept=".json,application/json" disabled={restoring}
+      <input type="file" accept=".json,application/json" disabled={restoring || exporting}
         onChange={event => { void importBackup(event.target.files?.[0]); event.target.value = ''; }}
         style={{ display: 'block', marginTop: 8, maxWidth: '100%' }} />
     </label>
@@ -125,7 +154,7 @@ export default function BackupExport(data: Props) {
       <input ref={shareInput} aria-label="紹介リンク" value={shareUrl} readOnly
         onFocus={event => event.currentTarget.select()} style={{ width: '100%' }} />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-        {typeof navigator.share === 'function' && <button type="button" onClick={shareApp}>アプリを紹介する</button>}
+        {(isNative || typeof navigator.share === 'function') && <button type="button" onClick={shareApp}>アプリを紹介する</button>}
         <button type="button" onClick={copyLink}>リンクをコピー</button>
       </div>
       {shareUrl === QR_URL && <details style={{ marginTop: 12 }}>
