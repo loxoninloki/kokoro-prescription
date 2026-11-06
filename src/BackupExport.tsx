@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { Icon } from './Icon';
 import React, { useRef, useState } from 'react';
 import { parseBackup, restoreBackup } from './BackupRestore';
@@ -43,7 +44,7 @@ export default function BackupExport(data: Props) {
   const [restoring, setRestoring] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
   const shareInput = useRef<HTMLInputElement>(null);
-  const shareUrl = window.location.origin + window.location.pathname;
+  const shareUrl = Capacitor.isNativePlatform() ? QR_URL : window.location.origin + window.location.pathname;
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
