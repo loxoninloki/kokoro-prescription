@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { parseBackup, restoreBackup } from './BackupRestore';
 import type { DiaryEntries } from './DiaryCalendar';
 import type { MedicationData } from './MedicationTracker';
@@ -36,9 +36,40 @@ export function makeBackup(data: Props): BackupData {
   };
 }
 
+const QR_URL = 'https://kokoro-prescription-preview.pages.dev/';
+
 export default function BackupExport(data: Props) {
   const [message, setMessage] = useState('');
   const [restoring, setRestoring] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
+  const shareInput = useRef<HTMLInputElement>(null);
+  const shareUrl = window.location.origin + window.location.pathname;
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage('紹介リンクをコピーしました。');
+    } catch {
+      shareInput.current?.focus();
+      shareInput.current?.select();
+      setShareMessage('表示されたURLを長押ししてコピーしてください。');
+    }
+  };
+
+  const shareApp = async () => {
+    setShareMessage('');
+    try {
+      await navigator.share({
+        title: 'こころの処方箋',
+        text: '気分や日記を記録できる「こころの処方箋」です。リンクを開いて使ってみてください。',
+        url: shareUrl,
+      });
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        setShareMessage('共有メニューを開けませんでした。「リンクをコピー」をお使いください。');
+      }
+    }
+  };
+
   const importBackup = async (file?: File) => {
     if (!file) return;
     setMessage('');
@@ -87,5 +118,22 @@ export default function BackupExport(data: Props) {
     </label>
     <p role="status" style={{ fontSize: 13 }}>{message}</p>
     <p style={{ fontSize: 12, color: '#766b82' }}>このファイルには日記や服薬情報などの個人情報が含まれます。共有せず安全な場所に保管してください。復元すると現在の記録を上書きします。復元前に現在の記録もバックアップしてください。</p>
+    <section className="diary-entry" aria-labelledby="app-invite-title" style={{ marginTop: 20 }}>
+      <h3 id="app-invite-title">こころの処方箋を紹介する</h3>
+      <p>相手はリンクを開くだけで、自分の記録を始められます。</p>
+      <input ref={shareInput} aria-label="紹介リンク" value={shareUrl} readOnly
+        onFocus={event => event.currentTarget.select()} style={{ width: '100%' }} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        {typeof navigator.share === 'function' && <button type="button" onClick={shareApp}>アプリを紹介する</button>}
+        <button type="button" onClick={copyLink}>リンクをコピー</button>
+      </div>
+      {shareUrl === QR_URL && <details style={{ marginTop: 12 }}>
+        <summary>QRコードで紹介する</summary>
+        <p>相手のスマホのカメラで読み取ってもらってください。</p>
+        <img src={`${process.env.PUBLIC_URL}/app-invite-qr.svg`} alt="こころの処方箋を開くQRコード"
+          width="216" height="216" loading="lazy" style={{ display: 'block', maxWidth: '100%', height: 'auto' }} />
+      </details>}
+      <p role="status" style={{ fontSize: 13 }}>{shareMessage}</p>
+    </section>
   </section>;
 }
