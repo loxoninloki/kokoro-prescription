@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 336">
-  <defs>
-    <linearGradient id="lining" x2="0" y2="1" gradientUnits="objectBoundingBox">
-      <stop stop-color="#2c203d"/>
-      <stop offset="1" stop-color="#483154"/>
-    </linearGradient>
-  </defs>
-  <path fill="url(#lining)" d="M151 272C215 241 384 207 506 231C463 265 243 291 151 272Z"/>
-</svg>
