@@ -99,7 +99,7 @@ export default function App() {
   };
 
   return (
-    <main style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
+    <main className="kokoro-app" style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
       <header style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
         <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
       </header>
