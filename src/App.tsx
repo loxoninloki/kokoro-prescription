@@ -11,7 +11,7 @@ import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
-import RewardPanel, { RewardBalances } from './RewardPanel';
+import RewardPanel, { RewardIcon } from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
 import { Icon } from './Icon';
@@ -187,6 +187,11 @@ export default function App() {
           <button className="room-switch" type="button" onClick={() => navigate('room')}>
             <Icon name="growth" /> ろきちゃんのルーム
           </button>
+          <button className="home-reward-icons" type="button" onClick={() => navigate('rewards')}
+            aria-label="マカロンと処方箋チケットの残高を見る">
+            <RewardIcon kind="macaron" />
+            <RewardIcon kind="ticket" />
+          </button>
         </div>
         <nav className="kokoro-menu" aria-label="機能メニュー">
           {([
@@ -194,6 +199,7 @@ export default function App() {
             ['medication', 'お薬'],
             ['steps', '歩数'],
             ['meditation', '瞑想BGM'],
+            ['rewards', 'ショップ'],
             ['menu', 'メニュー'],
           ] as const).map(([target, title]) => (
             <button key={target} type="button" onClick={() => navigate(target)}>
@@ -214,10 +220,6 @@ export default function App() {
             <progress aria-label="経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
             <span className="home-progress-caption">{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</span>
           </span>
-        </button>
-        <button className="home-rewards" type="button" onClick={() => navigate('rewards')}>
-          <RewardBalances wallet={wallet} />
-          <span>報酬・ガチャ・ショップ ›</span>
         </button>
         <section className="kokoro-checkin" aria-label="今日のチェックイン">
           <div aria-label="記録の概要">累計 {days.length}日 · 連続 {streak}日 · {totalPoints} EXP</div>

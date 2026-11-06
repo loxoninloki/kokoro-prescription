@@ -2,7 +2,7 @@ import React from 'react';
 import { ITEMS } from './appearance';
 import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState, TICKET_DRAW_COST } from './rewardLedger';
 
-function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
+export function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className="reward-icon"
     fill="#e7ccfa" stroke="#704397" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round">
     {kind === 'macaron' ? <>
@@ -17,7 +17,7 @@ function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
   </svg>;
 }
 
-export function RewardBalances({ wallet }: { wallet: RewardState }) {
+function RewardBalances({ wallet }: { wallet: RewardState }) {
   return <span className="reward-balances">
     <span><RewardIcon kind="macaron" /> マカロン {macaronBalance(wallet).toLocaleString('ja-JP')}個</span>
     <span><RewardIcon kind="ticket" /> 処方箋チケット {wallet.tickets.toLocaleString('ja-JP')}枚</span>
@@ -25,18 +25,18 @@ export function RewardBalances({ wallet }: { wallet: RewardState }) {
 }
 
 export default function RewardPanel({ wallet, error }: { wallet: RewardState; error: boolean }) {
-  const [section, setSection] = React.useState<'gacha' | 'shop'>('gacha');
+  const [section, setSection] = React.useState<'gacha' | 'shop'>('shop');
   const progress = wallet.loginDays % LOGIN_DAYS_PER_TICKET;
   return <section className="reward-panel" aria-labelledby="reward-title">
-    <h1 id="reward-title">マカロンと処方箋チケット</h1>
+    <h1 id="reward-title">ショップ</h1>
     {error ? <p role="status">報酬データを保存または読み込みできませんでした。</p> : <>
       <RewardBalances wallet={wallet} />
       <p><label htmlFor="ticket-progress">次の処方箋チケットまで {progress}/{LOGIN_DAYS_PER_TICKET}日</label></p>
       <progress id="ticket-progress" value={progress} max={LOGIN_DAYS_PER_TICKET} />
       <p>あと{LOGIN_DAYS_PER_TICKET - progress}日。間が空いても、これまでの日数は残ります。</p>
     </>}
-    <div className="wardrobe-options" role="group" aria-label="報酬メニュー">
-      <button type="button" aria-pressed={section === 'gacha'} onClick={() => setSection('gacha')}>着せ替えガチャ</button>
+    <div className="wardrobe-options" role="group" aria-label="ショップメニュー">
+      <button type="button" aria-pressed={section === 'gacha'} onClick={() => setSection('gacha')}>ガチャ</button>
       <button type="button" aria-pressed={section === 'shop'} onClick={() => setSection('shop')}>ショップ</button>
     </div>
     {section === 'gacha' ? <>

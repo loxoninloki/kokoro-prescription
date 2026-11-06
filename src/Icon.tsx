@@ -6,6 +6,7 @@ const paths = {
   steps: 'M3 14h4l3-6 3 3 2 1 5 1a2 2 0 0 1 2 2v3H3Zm0 1v-1m7-1 2 1m1-3 2 1',
   meditation: 'M19.6 15.6A8 8 0 0 1 8.4 4.4a8 8 0 1 0 11.2 11.2ZM16 3v6m-3-3h6',
   growth: 'M12 20 4.6 12.5a4.5 4.5 0 1 1 7.4-5 4.5 4.5 0 1 1 7.4 5Z',
+  rewards: 'M4 10h16v10H4Zm-1 0 2-6h14l2 6M8 10V8m8 2V8m-6 12v-6h4v6',
   menu: 'M4 6h16M4 12h16M4 18h16',
   invite: 'M12 15V3m-4 4 4-4 4 4M7 10H4v10h16V10h-3',
   backup: 'M4 8h16v12H4ZM3 4h18v4H3Zm6 8h6',
