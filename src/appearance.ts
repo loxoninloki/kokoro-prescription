@@ -37,7 +37,7 @@ export const ITEMS: readonly DressUpItem[] = [
     layers: [{
       image: 'dressup/night_beret.webp',
       order: 30,
-      position: { left: 48, top: 3, width: 40 },
+      position: { left: 21, top: -4, width: 60 },
     }],
   },
   {
