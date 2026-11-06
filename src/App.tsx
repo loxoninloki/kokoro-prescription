@@ -100,11 +100,10 @@ export default function App() {
 
   return (
     <main className="kokoro-app" style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
-      <header className="kokoro-header" style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
+      {page === 'home' && <header className="kokoro-header" style={{ textAlign: 'center', marginBottom: 10 }}>
         <div className="kokoro-brand-symbol" aria-hidden="true">♡ <span>✧</span> ♡</div>
         <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>こころの処方箋</h1>
-        <p className="kokoro-subtitle">— ろきと一緒に、こころを整えるアプリ —</p>
-      </header>
+      </header>}
       <style>{`
         @keyframes kokoroFloat {
           0%, 100% { transform: translateY(0) rotate(-1deg); }
@@ -123,7 +122,6 @@ export default function App() {
         }
       `}</style>
       {page === 'home' && <>
-        <p className="kokoro-greeting">☾ 今日も、あなたのペースで。<br />ゆっくり、こころを休めましょう。 ✧</p>
         <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ minHeight: 124, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="kokoro-home-character">{character(116)}</div></div>
           <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
