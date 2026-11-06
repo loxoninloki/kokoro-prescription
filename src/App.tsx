@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CHECKIN_XP, evolutionFromXp, FORM_STAGES, HUMAN_FORM, MATURE_FORM } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
@@ -10,6 +10,9 @@ import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
+import RewardPanel, { RewardBalances } from './RewardPanel';
+import { collectXpEvents } from './xpEvents';
+import useRewards from './useRewards';
 import { Icon } from './Icon';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
@@ -37,6 +40,10 @@ function loadCheckins(): string[] {
   }
 }
 
+function readSavedXp() {
+  return collectXpEvents(loadCheckins(), readDiary(), readMedication(), readSteps(), readMeditation());
+}
+
 function streakFor(days: string[]): number {
   const dates = new Set(days);
   const cursor = new Date();
@@ -61,7 +68,7 @@ export default function App() {
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup'>('home');
+  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'rewards'>('home');
   const navigate = (next: typeof page) => {
     if (next !== 'home' && next !== 'room') {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
@@ -106,6 +113,9 @@ export default function App() {
     }
   }, [days]);
 
+  const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
+    [days, diary, medication, steps, meditation]);
+  const { wallet, walletError } = useRewards(readSavedXp, xpEvents);
   const recordDays = countRecordDays(today, days, diary, medication, steps, meditation);
   const rewardDays = Math.max(recordDays, appearance.rewardDays ?? 0);
   const checkedIn = days.includes(today);
@@ -201,6 +211,10 @@ export default function App() {
             <p>{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
           </div>
         </section>
+        <button className="home-rewards" type="button" onClick={() => navigate('rewards')}>
+          <RewardBalances wallet={wallet} />
+          <span>報酬・ガチャ・ショップ ›</span>
+        </button>
         <section className="kokoro-checkin" aria-label="今日のチェックイン">
           <div aria-label="記録の概要">累計 {days.length}日 · 連続 {streak}日 · {totalPoints} EXP</div>
           <button type="button" onClick={checkIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
@@ -243,6 +257,7 @@ export default function App() {
         </section>
       </>}
       {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} rewardDays={rewardDays} />}
+      {page === 'rewards' && <RewardPanel wallet={wallet} error={walletError} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}

@@ -28,9 +28,12 @@ export function readSteps(): StepEntries {
   } catch { return {}; }
 }
 
+export function stepDayExperience(steps: number): number {
+  return (steps >= 1000 ? 5 : 0) + (steps >= 3000 ? 10 : 0) + (steps >= 5000 ? 15 : 0);
+}
+
 export function stepsExperience(entries: StepEntries): number {
-  return Object.values(entries).reduce((total, steps) =>
-    total + (steps >= 1000 ? 5 : 0) + (steps >= 3000 ? 10 : 0) + (steps >= 5000 ? 15 : 0), 0);
+  return Object.values(entries).reduce((total, steps) => total + stepDayExperience(steps), 0);
 }
 
 export function encouragement(steps: number | undefined): string {
