@@ -9,9 +9,36 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <meta name="application-name" content="こころの処方箋 テスト版" />
     <title>こころの処方箋</title>
+    <style>
+      html { background: #20163a; }
+      #root:not(:empty) + .startup-message { display: none; }
+      .startup-message {
+        max-width: 26rem;
+        margin: max(3rem, env(safe-area-inset-top)) auto 0;
+        padding: 0 1.5rem;
+        color: #f3e8ff;
+        text-align: center;
+        font: 1rem/1.6 system-ui, sans-serif;
+      }
+      .startup-message button {
+        min-height: 44px;
+        padding: .5rem 1rem;
+        border: 0;
+        border-radius: .75rem;
+        background: #e9d5ff;
+        color: #20163a;
+        font: inherit;
+      }
+    </style>
   </head>
   <body>
-    <noscript>このアプリを動かすにはJavaScriptを有効にする必要があります。</noscript>
     <div id="root"></div>
+    <main class="startup-message">
+      <h1>こころの処方箋</h1>
+      <p>アプリを読み込んでいます。</p>
+      <p>画面が切り替わらないときは、通信を確認して再読み込みしてください。</p>
+      <button type="button" onclick="window.location.reload()">再読み込み</button>
+      <noscript><p>このアプリを動かすにはJavaScriptを有効にしてください。</p></noscript>
+    </main>
   </body>
 </html>
