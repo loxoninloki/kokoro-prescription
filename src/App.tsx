@@ -92,9 +92,26 @@ export default function App() {
       <header style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
         <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
       </header>
+      <style>{`
+        @keyframes kokoroFloat {
+          0%, 100% { transform: translateY(0) rotate(-1deg); }
+          50% { transform: translateY(-7px) rotate(1deg); }
+        }
+        .kokoro-home-character {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transform-origin: center center;
+          animation: kokoroFloat 4.5s ease-in-out infinite;
+          will-change: transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .kokoro-home-character { animation: none; }
+        }
+      `}</style>
       {page === 'home' && <>
         <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
-          <div style={{ minHeight: 110, display: "flex", alignItems: "center", justifyContent: "center" }}>{character(116)}</div>
+          <div style={{ minHeight: 124, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="kokoro-home-character">{character(116)}</div></div>
           <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
           <p style={{ fontSize: 14, margin: '0 0 10px' }}>現在のフォルム：{evolution.stageName}</p>
           <label htmlFor="home-xp-progress" style={{ display: 'block', fontSize: 13 }}>経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
