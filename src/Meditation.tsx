@@ -1,5 +1,7 @@
 import { Icon } from './Icon';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+type NavigatorWithAudioSession = Navigator & { audioSession?: { type: string } };
+
 type MeditationTrack = 'ambient' | 'floating' | 'relaxing';
 const TRACKS: Record<MeditationTrack, string> = {
   ambient: 'quietphase-ambient-meditation-485723.mp3',
@@ -40,17 +42,30 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const [finished, setFinished] = useState(false);
   const deadline = useRef<number | null>(null);
   const sound = useRef<HTMLAudioElement | null>(null);
+  const restoreAudioSession = useRef<(() => void) | null>(null);
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [soundscape, setSoundscape] = useState<MeditationTrack>('ambient');
   const [audioError, setAudioError] = useState('');
   const [audioPlaying, setAudioPlaying] = useState(false);
 
-  const stopAudio = () => {
-    setAudioPlaying(false);
+  const releaseAudio = useCallback(() => {
     const audio = sound.current;
-    if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); sound.current = null; }
-  };
-  useEffect(() => () => { sound.current?.pause(); }, []);
+    sound.current = null;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    }
+    restoreAudioSession.current?.();
+    restoreAudioSession.current = null;
+  }, []);
+
+  const stopAudio = useCallback(() => {
+    releaseAudio();
+    setAudioPlaying(false);
+  }, [releaseAudio]);
+
+  useEffect(() => releaseAudio, [releaseAudio]);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { /* storage unavailable */ }
@@ -74,8 +89,17 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     };
     tick();
     const timer = window.setInterval(tick, 250);
-    return () => window.clearInterval(timer);
-  }, [running, setEntries]);
+    const checkOnReturn = () => {
+      if (!document.hidden) tick();
+    };
+    document.addEventListener('visibilitychange', checkOnReturn);
+    window.addEventListener('pageshow', checkOnReturn);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', checkOnReturn);
+      window.removeEventListener('pageshow', checkOnReturn);
+    };
+  }, [running, setEntries, stopAudio]);
 
   const playAudio = (track: MeditationTrack) => {
     setAudioError('');
@@ -88,6 +112,18 @@ export default function Meditation({ today, entries, setEntries }: Props) {
       const trackAudio = audio;
       audio.onplaying = () => { if (sound.current === trackAudio) setAudioPlaying(true); };
       audio.onpause = () => { if (sound.current === trackAudio) setAudioPlaying(false); };
+    }
+    if (!restoreAudioSession.current) {
+      const session = (navigator as NavigatorWithAudioSession).audioSession;
+      if (session) {
+        try {
+          const previous = session.type;
+          session.type = 'playback';
+          restoreAudioSession.current = () => { session.type = previous; };
+        } catch {
+          // Standard HTML audio remains available if the browser rejects the hint.
+        }
+      }
     }
     const trackAudio = audio;
     void audio.play().catch((error: unknown) => {
@@ -161,6 +197,6 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     {!running ? <button type="button" onClick={start} style={{ padding: '12px 24px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>{remaining === duration ? '瞑想を始める' : '続きを始める'}</button> :
       <button type="button" onClick={stop} style={{ padding: '12px 24px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>終了する</button>}
     {entries[today] && <p>本日の瞑想記録 ✓</p>}
-    <p style={{ fontSize: 12, color: '#766b82' }}>1日1回、完了すると+10EXP。音量に注意してください。BGMは画面ロック時に停止する場合があります。画面を閉じている間はタイマーの完了処理が遅れる場合があります。</p>
+    <p style={{ fontSize: 12, color: '#766b82' }}>1日1回、完了すると+10EXP。音量に注意してください。画面ロック中も対応端末ではBGMを続けられます。端末によっては再生が止まることや、終了処理が画面に戻るまで遅れることがあります。</p>
   </section>;
 }
