@@ -7,9 +7,10 @@ import { meditationExperience } from './Meditation';
 describe('ろきちゃんの成長', () => {
   test('レベルとフォルムの境界', () => {
     expect(evolutionFromXp(0)).toMatchObject({ level: 1, stage: 'tablet' });
-    expect(evolutionFromXp(9 * XP_PER_LEVEL)).toMatchObject({ level: 10, stage: 'awakening' });
-    expect(evolutionFromXp(19 * XP_PER_LEVEL)).toMatchObject({ level: 20, stage: 'chibi' });
-    expect(evolutionFromXp(39 * XP_PER_LEVEL)).toMatchObject({ level: 40, stage: 'human' });
+    expect(evolutionFromXp(9 * XP_PER_LEVEL)).toMatchObject({ level: 10, stage: 'birth' });
+    expect(evolutionFromXp(19 * XP_PER_LEVEL)).toMatchObject({ level: 20, stage: 'awakening' });
+    expect(evolutionFromXp(29 * XP_PER_LEVEL)).toMatchObject({ level: 30, stage: 'chibi' });
+    expect(evolutionFromXp(49 * XP_PER_LEVEL)).toMatchObject({ level: 50, stage: 'human' });
   });
   test('不正な経験値を安全に扱う', () => {
     expect(evolutionFromXp(-100).level).toBe(1);

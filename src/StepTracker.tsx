@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import React, { useEffect, useState } from 'react';
 
 export type StepEntries = Record<string, number>;
@@ -44,8 +45,15 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
     setDraft(entries[selected] === undefined ? '' : String(entries[selected]));
   }, [selected, entries]);
 
+  const [storageError, setStorageError] = useState(false);
+
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { /* storage may be unavailable */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(entries));
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
   }, [entries]);
 
   const save = (event: React.FormEvent) => {
@@ -59,11 +67,12 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
 
   return (
     <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f4efff' }}>
-      <h2>👟 今日の歩数</h2>
+      <h2><Icon name="steps" /> 今日の歩数</h2>
+      <p className="step-count">{entries[today] === undefined ? '未記録' : `${entries[today].toLocaleString()} 歩`}</p>
       <p style={{ fontSize: 13 }}>iPhoneのヘルスケアで確認した歩数を入力できます。自動取得は将来のiPhoneアプリ版で検討します。</p>
       <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
         <label>記録する日
-          <input type="date" value={selected} max={today} onChange={event => setSelected(event.target.value)} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
+          <input type="date" value={selected} max={today} onChange={event => { setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
         </label>
         <label>歩数
           <input type="number" inputMode="numeric" min={0} max={100000} step={1} required value={draft}
@@ -73,8 +82,9 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
         <button type="submit" style={{ padding: 12, border: 0, borderRadius: 20, color: '#fff', background: '#7653a6' }}>歩数を保存</button>
       </form>
       <p role="status" style={{ fontWeight: 600, marginTop: 16 }}>{encouragement(entries[selected])}</p>
-      {saved && <p>歩数を保存しました 💜</p>}
+      {saved && !storageError && <p>歩数を保存しました 💜</p>}
       <p style={{ fontSize: 12, color: '#766b82' }}>0歩でも大丈夫。経験値は1,000歩で+5、3,000歩で合計+15、5,000歩で合計+30。歩数の編集で重複加算されません。</p>
+      {storageError && <p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
     </section>
   );
 }

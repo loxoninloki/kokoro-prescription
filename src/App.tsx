@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { CHECKIN_XP, evolutionFromXp } from './evolution';
+import { CHECKIN_XP, evolutionFromXp, XP_PER_LEVEL } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
 import StepTracker, { StepEntries, readSteps, stepsExperience } from './StepTracker';
 import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
 import BackupExport from './BackupExport';
+import { Icon } from './Icon';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
 const POINTS_PER_DAY = CHECKIN_XP;
@@ -84,13 +85,12 @@ export default function App() {
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
-  const formSymbol = { tablet: '💊', birth: '🌱', awakening: '✨', chibi: '💜', human: '🧑' }[evolution.stage];
   const [imageUnavailable, setImageUnavailable] = useState(false);
-  const formImage = { tablet: 'lv1_tablet.png', birth: 'lv10_birth.png', awakening: 'lv20_awake.png', chibi: 'lv30_chibi.png', human: 'lv50_human.png' }[evolution.stage];
+  const formImage = { tablet: 'lv1_tablet.webp', birth: 'lv10_birth.webp', awakening: 'lv20_awake.webp', chibi: 'lv30_chibi.webp', human: 'lv50_human.webp' }[evolution.stage];
   useEffect(() => setImageUnavailable(false), [formImage]);
   const character = (size: number) => imageUnavailable
-    ? <span aria-hidden="true" style={{ fontSize: size * 0.55 }}>{formSymbol} 🐹</span>
-    : <img src={`${process.env.PUBLIC_URL}/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
+    ? <span className="character-fallback" role="img" aria-label={evolution.stageName}><Icon name={evolution.stage === 'tablet' ? 'medication' : 'growth'} /></span>
+    : <img src={`${process.env.PUBLIC_URL}/forms/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} decoding="async" onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
 
   const checkIn = () => {
     const current = localDay();
@@ -99,60 +99,42 @@ export default function App() {
   };
 
   return (
-    <main className="kokoro-app" style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
-      {page === 'home' && <header className="kokoro-header" style={{ textAlign: 'center', marginBottom: 10 }}>
-        <div className="kokoro-brand-symbol" aria-hidden="true">♡ <span>✧</span> ♡</div>
-        <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>こころの処方箋</h1>
-      </header>}
-      <style>{`
-        @keyframes kokoroFloat {
-          0%, 100% { transform: translateY(0) rotate(-1deg); }
-          50% { transform: translateY(-7px) rotate(1deg); }
-        }
-        .kokoro-home-character {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          transform-origin: center center;
-          animation: kokoroFloat 4.5s ease-in-out infinite;
-          will-change: transform;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .kokoro-home-character { animation: none; }
-        }
-      `}</style>
+    <main className="kokoro-app" data-page={page}>
       {page === 'home' && <>
-        <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
-          <div style={{ minHeight: 124, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="kokoro-home-character">{character(116)}</div></div>
-          <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
-          <p style={{ fontSize: 14, margin: '0 0 10px' }}>現在のフォルム：{evolution.stageName}</p>
-          <label htmlFor="home-xp-progress" style={{ display: 'block', fontSize: 13 }}>経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
-          <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', height: 12, marginTop: 7, accentColor: '#7653a6' }} />
-          <p style={{ fontSize: 12, margin: '8px 0 0' }}>{evolution.nextLevel ? `次の進化：Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
-        </section>
-        <section className="kokoro-checkin" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, padding: '14px 14px', background: '#f3eaff', borderRadius: 14 }}>
-          <span style={{ flex: 1, fontSize: 13 }}>{checkedIn ? '本日のチェックイン完了 ✓' : '今日もゆっくり、一歩ずつ。'}</span>
-          <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '12px 16px', fontSize: 14, whiteSpace: 'nowrap' }}>{checkedIn ? '完了 ✓' : 'チェックイン'}</button>
-        </section>
-        <div aria-label="記録の概要" style={{ display: 'flex', justifyContent: 'space-around', margin: '14px 0', fontSize: 13, textAlign: 'center' }}>
-          <span>累計 <strong>{days.length}日</strong></span><span>連続 <strong>{streak}日</strong></span><span>EXP <strong>{totalPoints}</strong></span>
+        <header className="kokoro-header">
+          <Icon name="brand" />
+          <h1>こころの処方箋</h1>
+        </header>
+        <div className="kokoro-hero">
+          <div className="kokoro-home-character">{character(160)}</div>
         </div>
-        <section aria-label="機能メニュー" style={{ marginTop: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 11 }}>
-            {([
-              ['diary', '📅', '日記・気分'],
-              ['medication', '💊', 'お薬'],
-              ['steps', '👟', '歩数'],
-              ['meditation', '🌙', '瞑想'],
-              ['growth', '💜', 'ろきちゃん'],
-              ['backup', '🗂️', 'バックアップ']
-            ] as const).map(([target, symbol, title]) => (
-              <button key={target} type="button" onClick={() => navigate(target)}
-                style={{ minHeight: 83, padding: '12px 7px', border: '1px solid #e6d8f4', borderRadius: 14, background: '#f8f2ff', color: '#38294d', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
-                <span aria-hidden="true" style={{ display: 'block', fontSize: 27, marginBottom: 3 }}>{symbol}</span>{title}
-              </button>
-            ))}
+        <nav className="kokoro-menu" aria-label="機能メニュー">
+          {([
+            ['diary', '気分・日記'],
+            ['medication', 'お薬'],
+            ['steps', '歩数'],
+            ['meditation', '瞑想BGM'],
+            ['growth', 'ろきちゃん育成'],
+            ['backup', 'バックアップ'],
+          ] as const).map(([target, title]) => (
+            <button key={target} type="button" onClick={() => navigate(target)}>
+              <Icon name={target} />
+              {title}
+            </button>
+          ))}
+        </nav>
+        <section className="home-progress" aria-label="ろきちゃんの育成状態">
+          <div className="progress-heading">
+            <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
+            <span>{evolution.stageName}</span>
           </div>
+          <label htmlFor="home-xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
+          <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
+          <p>{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
+        </section>
+        <section className="kokoro-checkin" aria-label="今日のチェックイン">
+          <div aria-label="記録の概要">累計 {days.length}日 · 連続 {streak}日 · {totalPoints} EXP</div>
+          <button type="button" onClick={checkIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
         </section>
       </>}
       {page !== 'home' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
@@ -160,14 +142,21 @@ export default function App() {
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
       {page === 'growth' && <>
-        <section aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
+        <section className="growth-card" aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>
-          <h2>ろきちゃん Lv.{evolution.level}</h2>
-          <p>{evolution.stageName}{evolution.stage === 'chibi' ? ' ＆ もるすけ' : ''}</p>
+          <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
+          <p>{evolution.stageName}</p>
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
-          <p style={{ fontSize: 12 }}>5段階の進化で、ろきちゃんが成長します。</p>
+          <ol className="evolution-stages" aria-label="進化の5段階">
+            {([1, 10, 20, 30, 50]).map(level => {
+              const form = evolutionFromXp((level - 1) * XP_PER_LEVEL);
+              return <li key={level} aria-current={form.stage === evolution.stage ? 'step' : undefined}>
+                <span>Lv.{level}〜</span> {form.stageName}
+              </li>;
+            })}
+          </ol>
         </section>
         <section style={{ marginTop: 24 }}>
           <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>

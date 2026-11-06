@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import React, { useState } from 'react';
 import { parseBackup, restoreBackup } from './BackupRestore';
 import type { DiaryEntries } from './DiaryCalendar';
@@ -75,7 +76,7 @@ export default function BackupExport(data: Props) {
     }
   };
   return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f7f3ff' }}>
-    <h2>🗂 記録のバックアップ</h2>
+    <h2><Icon name="backup" /> 記録のバックアップ</h2>
     <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録をJSONファイルに書き出します。</p>
     <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
     <label style={{ display: 'block', marginTop: 18 }}>

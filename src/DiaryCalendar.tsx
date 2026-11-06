@@ -1,3 +1,4 @@
+import { Icon, MoodIcon } from './Icon';
 import React, { useEffect, useState } from 'react';
 
 export interface DiaryEntry { mood: number | null; text: string }
@@ -49,8 +50,15 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
     setMood(entries[selected]?.mood || null);
   }, [selected, entries]);
 
+  const [storageError, setStorageError] = useState(false);
+
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch { /* storage may be full or unavailable */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(entries));
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
   }, [entries]);
 
   const [year, monthNumber] = month.split('-').map(Number);
@@ -72,8 +80,25 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
 
   return (
     <section style={{ marginTop: 28, padding: 18, borderRadius: 24, background: '#faf5ff' }}>
-      <h2>📅 カレンダーと日記</h2>
+      <h2><Icon name="diary" /> カレンダーと日記</h2>
       <p style={{ fontSize: 13 }}>書けない日があっても大丈夫。自分のペースで記録しましょう。</p>
+      <div className="diary-entry">
+        <h3>{selected} の記録</h3>
+        <p style={{ fontSize: 13 }}>歩数：{steps[selected] === undefined ? '未記録' : `${steps[selected].toLocaleString()}歩`} ／ 服薬：{hasMedication(selected) ? '記録あり' : '記録なし'}</p>
+        <p>この日の気分はいかがでしたか？</p>
+        <div className="mood-options" role="group" aria-label="5段階の気分">
+          {['とてもつらい','つらい','ふつう','すこしよい','とてもよい'].map((label, index) =>
+            <button key={label} type="button" aria-pressed={mood === index + 1} onClick={() => { setMood(index + 1); setSaved(false); }}><MoodIcon index={index} /><span>{label}</span>
+            </button>)}
+        </div>
+        <label htmlFor="diary-text" style={{ display: 'block', marginTop: 16, marginBottom: 6 }}>日記（任意）</label>
+        <textarea id="diary-text" value={draft} maxLength={2000} onChange={event => { setDraft(event.target.value); setSaved(false); }}
+          placeholder="今日の出来事や気持ちを、自由に書いてください。" rows={5}
+          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 12, border: '1px solid #cab8da', padding: 12, font: 'inherit' }} />
+        <button type="button" onClick={save} style={{ marginTop: 10, border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 24px' }}>記録を保存</button>
+        {saved && !storageError && <p role="status">保存しました。今日もお疲れさまです 💜</p>}
+      </div>
+      <h3 className="diary-history">記録カレンダー</h3>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <button type="button" onClick={() => changeMonth(-1)} aria-label="前の月">‹</button>
         <strong>{year}年 {monthNumber}月</strong>
@@ -82,7 +107,7 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4, textAlign: 'center' }}>
         {['日','月','火','水','木','金','土'].map(day => <strong key={day} style={{ fontSize: 12 }}>{day}</strong>)}
         {dates.map((date, index) => date ?
-          <button type="button" key={date} onClick={() => setSelected(date)} aria-pressed={selected === date} disabled={date > today}
+          <button type="button" key={date} onClick={() => { setSelected(date); setSaved(false); }} aria-pressed={selected === date} disabled={date > today}
             style={{ minHeight: 48, padding: '4px 0', borderRadius: 10, border: selected === date ? '2px solid #7950a8' : '1px solid #e5d7f1', background: selected === date ? '#e9d8fd' : '#fff', opacity: date > today ? 0.45 : 1, color: '#392b4d' }}>
             <span>{Number(date.slice(-2))}</span>
             <span style={{ display: 'block', fontSize: 11 }}>{checkins.includes(date) ? '✓' : ''}{entries[date]?.mood ? '♥' : ''}{entries[date]?.text?.trim() ? '✎' : ''}{steps[date] !== undefined ? '👟' : ''}{hasMedication(date) ? '💊' : ''}</span>
@@ -91,24 +116,7 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
         )}
       </div>
       <p style={{ fontSize: 12 }}>✓ チェックイン　♥ 気分　✎ 日記　👟 歩数　💊 服薬</p>
-      <div style={{ marginTop: 22 }}>
-        <h3>{selected} の記録</h3>
-        <p style={{ fontSize: 13 }}>歩数：{steps[selected] === undefined ? '未記録' : `${steps[selected].toLocaleString()}歩`} ／ 服薬：{hasMedication(selected) ? '記録あり' : '記録なし'}</p>
-        <p>今日の気分はいかがでしたか？</p>
-        <div role="group" aria-label="5段階の気分" style={{ display: 'flex', justifyContent: 'space-between', gap: 5 }}>
-          {['つらい','低め','ふつう','良い','とても良い'].map((label, index) =>
-            <button key={label} type="button" aria-pressed={mood === index + 1} onClick={() => { setMood(index + 1); setSaved(false); }}
-              style={{ flex: 1, padding: '10px 2px', fontSize: 12, borderRadius: 12, border: mood === index + 1 ? '2px solid #7653a6' : '1px solid #ddd', background: mood === index + 1 ? '#e7d6ff' : '#fff' }}>
-              {index + 1}<span style={{ display: 'block', fontSize: 10 }}>{label}</span>
-            </button>)}
-        </div>
-        <label htmlFor="diary-text" style={{ display: 'block', marginTop: 16, marginBottom: 6 }}>日記（任意）</label>
-        <textarea id="diary-text" value={draft} maxLength={2000} onChange={event => { setDraft(event.target.value); setSaved(false); }}
-          placeholder="今日の出来事や気持ちを、自由に書いてください。" rows={5}
-          style={{ width: '100%', boxSizing: 'border-box', borderRadius: 12, border: '1px solid #cab8da', padding: 12, font: 'inherit' }} />
-        <button type="button" onClick={save} style={{ marginTop: 10, border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 24px' }}>記録を保存</button>
-        {saved && <p role="status">保存しました。今日もお疲れさまです 💜</p>}
-      </div>
+      {storageError && <p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
     </section>
   );
 }

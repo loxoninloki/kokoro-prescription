@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import React, { useEffect, useRef, useState } from 'react';
 type MeditationTrack = 'ambient' | 'floating' | 'relaxing';
 const TRACKS: Record<MeditationTrack, string> = {
@@ -42,8 +43,10 @@ export default function Meditation({ today, entries, setEntries }: Props) {
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [soundscape, setSoundscape] = useState<MeditationTrack>('ambient');
   const [audioError, setAudioError] = useState('');
+  const [audioPlaying, setAudioPlaying] = useState(false);
 
   const stopAudio = () => {
+    setAudioPlaying(false);
     const audio = sound.current;
     if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); sound.current = null; }
   };
@@ -74,21 +77,30 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     return () => window.clearInterval(timer);
   }, [running, setEntries]);
 
-  const start = () => {
+  const playAudio = (track: MeditationTrack) => {
     setAudioError('');
-    if (bgmEnabled) {
-      stopAudio();
-      const audio = new Audio(`${process.env.PUBLIC_URL}/music/${TRACKS[soundscape]}`);
+    let audio = sound.current;
+    if (!audio) {
+      audio = new Audio(`${process.env.PUBLIC_URL}/music/${TRACKS[track]}`);
       audio.loop = true;
       audio.volume = 0.35;
       sound.current = audio;
-      void audio.play().catch(() => {
-        if (sound.current === audio) {
-          stopAudio();
-          setAudioError('音を再生できませんでした。無音でも瞑想できます。');
-        }
-      });
+      const trackAudio = audio;
+      audio.onplaying = () => { if (sound.current === trackAudio) setAudioPlaying(true); };
+      audio.onpause = () => { if (sound.current === trackAudio) setAudioPlaying(false); };
     }
+    const trackAudio = audio;
+    void audio.play().catch((error: unknown) => {
+      if (sound.current === trackAudio && !(error instanceof DOMException && error.name === 'AbortError')) {
+        stopAudio();
+        setAudioError('音を再生できませんでした。無音でも瞑想できます。');
+      }
+    });
+  };
+
+  const start = () => {
+    setAudioError('');
+    if (bgmEnabled) playAudio(soundscape);
     const seconds = remaining > 0 ? remaining : duration;
     setRemaining(seconds);
     deadline.current = Date.now() + seconds * 1000;
@@ -108,8 +120,8 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     setFinished(false);
   };
 
-  return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f2ecff', textAlign: 'center' }}>
-    <h2>🌙 ひとやすみ瞑想</h2>
+  return <section className="meditation-card" style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f2ecff', textAlign: 'center' }}>
+    <h2><Icon name="meditation" /> ひとやすみ瞑想</h2>
     <p>ゆっくり呼吸して、少しだけ自分の時間を。</p>
     <label>時間を選ぶ
       <select disabled={running} value={duration} onChange={e => changeDuration(Number(e.target.value))}
@@ -121,13 +133,26 @@ export default function Meditation({ today, entries, setEntries }: Props) {
     </label>
     <label style={{ display: 'block', marginTop: 12 }}><input type="checkbox" checked={bgmEnabled} disabled={running} onChange={e => setBgmEnabled(e.target.checked)} /> リラックスBGMを流す</label>
     {bgmEnabled && <label style={{ display: 'block', marginTop: 12 }}>BGMの種類
-      <select disabled={running} value={soundscape} onChange={e => setSoundscape(e.target.value as MeditationTrack)}
+      <select value={soundscape} onChange={e => {
+        const track = e.target.value as MeditationTrack;
+        const wasPlaying = audioPlaying;
+        setSoundscape(track);
+        setAudioError('');
+        stopAudio();
+        if (wasPlaying) playAudio(track);
+      }}
         style={{ display: 'block', margin: '10px auto', padding: 10, borderRadius: 10 }}>
         <option value="ambient">✨ Ambient Meditation</option>
         <option value="floating">🌙 Meditation Ambient</option>
         <option value="relaxing">💜 Meditation Relaxing Music</option>
       </select>
     </label>}
+    {running && bgmEnabled && <div className="bgm-controls">
+      <button type="button" onClick={() => audioPlaying ? sound.current?.pause() : playAudio(soundscape)}>
+        {audioPlaying ? 'BGMを一時停止' : 'BGMを再生'}
+      </button>
+      <span role="status">{audioPlaying ? 'BGM 再生中' : 'BGM 停止中'}</span>
+    </div>}
     {audioError && <p role="status">{audioError}</p>}
     <div role="timer" aria-label="残り時間" style={{ fontSize: 40, fontWeight: 700, margin: '16px 0' }}>
       {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}

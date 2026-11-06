@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import React, { useEffect, useState } from 'react';
 
 export interface Medicine { id: string; name: string; time: string; archived?: boolean }
@@ -38,8 +39,15 @@ export default function MedicationTracker({ data, setData, today }: Props) {
   const [time, setTime] = useState('08:00');
   const [selectedDate, setSelectedDate] = useState(today);
 
+  const [storageError, setStorageError] = useState(false);
+
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { /* storage may be unavailable */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+      setStorageError(false);
+    } catch {
+      setStorageError(true);
+    }
   }, [data]);
 
   const addMedicine = (event: React.FormEvent) => {
@@ -68,7 +76,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
 
   return (
     <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f5efff' }}>
-      <h2>💊 お薬の記録</h2>
+      <h2><Icon name="medication" /> お薬の記録</h2>
       <p style={{ fontSize: 13 }}>処方されたお薬と時刻を登録できます。服薬量や時刻は医師・薬剤師の指示に従ってください。</p>
       <form onSubmit={addMedicine} style={{ display: 'grid', gap: 10 }}>
         <label>お薬の名前<input required maxLength={80} value={name} onChange={e => setName(e.target.value)} placeholder="例：朝のお薬" style={{ display: 'block', boxSizing: 'border-box', width: '100%', padding: 12, borderRadius: 10, border: '1px solid #c9b9dc' }} /></label>
@@ -82,7 +90,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
         <ul style={{ paddingLeft: 0, listStyle: 'none' }}>
           {[...data.medicines].filter(m => !m.archived).sort((a, b) => a.time.localeCompare(b.time)).map(m => {
             const checked = !!data.taken[doseKey(selectedDate, m.id)];
-            return <li key={m.id} style={{ background: '#fff', padding: 12, borderRadius: 12, marginTop: 10 }}>
+            return <li key={m.id} className="medication-dose" data-taken={checked} style={{ background: '#fff', padding: 12, borderRadius: 12, marginTop: 10 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <input type="checkbox" checked={checked} disabled={selectedDate > today} onChange={() => toggleTaken(m.id)} />
                 <span><strong>{m.time} {m.name}</strong><span style={{ display: 'block', fontSize: 12 }}>{checked ? '服薬済み ✓' : '未記録'}</span></span>
@@ -92,6 +100,7 @@ export default function MedicationTracker({ data, setData, today }: Props) {
           })}
         </ul>}
       <p style={{ fontSize: 12, color: '#766b82' }}>チェックは服薬した事実の記録です。通知機能ではありません。経験値のために余分に服用しないでください。</p>
+      {storageError && <p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
     </section>
   );
 }
