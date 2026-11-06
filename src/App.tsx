@@ -100,8 +100,10 @@ export default function App() {
 
   return (
     <main className="kokoro-app" style={{ maxWidth: 520, margin: '0 auto', padding: page === 'home' ? '18px 16px' : '20px 16px', fontFamily: 'system-ui, sans-serif', color: '#38294d' }}>
-      <header style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
-        <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>💜 こころの処方箋</h1>
+      <header className="kokoro-header" style={{ textAlign: 'center', marginBottom: page === 'home' ? 16 : 20 }}>
+        <div className="kokoro-brand-symbol" aria-hidden="true">♡ <span>✧</span> ♡</div>
+        <h1 style={{ fontSize: page === 'home' ? 24 : 26, margin: '4px 0' }}>こころの処方箋</h1>
+        <p className="kokoro-subtitle">— ろきと一緒に、こころを整えるアプリ —</p>
       </header>
       <style>{`
         @keyframes kokoroFloat {
@@ -121,6 +123,7 @@ export default function App() {
         }
       `}</style>
       {page === 'home' && <>
+        <p className="kokoro-greeting">☾ 今日も、あなたのペースで。<br />ゆっくり、こころを休めましょう。 ✧</p>
         <section aria-label="ろきちゃんの育成状態" style={{ padding: '18px 16px', border: '1px solid #e6d8f4', borderRadius: 18, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ minHeight: 124, display: "flex", alignItems: "center", justifyContent: "center" }}><div className="kokoro-home-character">{character(116)}</div></div>
           <h2 style={{ fontSize: 20, margin: '8px 0 4px' }}>ろきちゃん Lv.{evolution.level}</h2>
@@ -129,7 +132,7 @@ export default function App() {
           <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', height: 12, marginTop: 7, accentColor: '#7653a6' }} />
           <p style={{ fontSize: 12, margin: '8px 0 0' }}>{evolution.nextLevel ? `次の進化：Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
         </section>
-        <section style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, padding: '14px 14px', background: '#f3eaff', borderRadius: 14 }}>
+        <section className="kokoro-checkin" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, padding: '14px 14px', background: '#f3eaff', borderRadius: 14 }}>
           <span style={{ flex: 1, fontSize: 13 }}>{checkedIn ? '本日のチェックイン完了 ✓' : '今日もゆっくり、一歩ずつ。'}</span>
           <button onClick={checkIn} disabled={checkedIn} style={{ background: checkedIn ? '#a59ab2' : '#7653a6', color: 'white', border: 0, borderRadius: 999, padding: '12px 16px', fontSize: 14, whiteSpace: 'nowrap' }}>{checkedIn ? '完了 ✓' : 'チェックイン'}</button>
         </section>
@@ -154,7 +157,7 @@ export default function App() {
           </div>
         </section>
       </>}
-      {page !== 'home' && <nav aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
+      {page !== 'home' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
         <button type="button" onClick={() => navigate('home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← ホームに戻る</button>
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
