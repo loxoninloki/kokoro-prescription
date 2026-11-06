@@ -202,3 +202,21 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 .medication-dose { border: 1px solid #d7c0ed; overflow-wrap: anywhere; }
 .medication-dose[data-taken="true"] { background: #f0e4ff !important; border-color: #a581c7; }
 .kokoro-app [role="alert"] { color: #811d46; font-weight: 650; }
+
+.diary-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.diary-switch button, .diary-period button {
+  border: 1px solid #bfa7d8;
+  border-radius: 10px;
+  background: #fff9ff;
+  color: #492e64;
+}
+.diary-switch button[aria-pressed="true"] { background: #7653a6; color: #fff; border-color: #7653a6; }
+.diary-period { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+.diary-period button { min-width: 44px; }
+.diary-period button:disabled { opacity: .5; }
+.diary-swipe-hint { font-size: 12px; margin: 8px 0; }
+.diary-swipe-panel { touch-action: pan-y pinch-zoom; }
+.diary-preview-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.step-history-chart { display: block; width: 100%; height: auto; }
+.step-history-values { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.step-history-values dd { margin: 0; text-align: right; }
