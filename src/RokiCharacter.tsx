@@ -25,7 +25,8 @@ export default function RokiCharacter({ form, size, equipped = [] }: Props) {
       ? <span className="character-fallback" aria-hidden="true"><Icon name="growth" /></span>
       : layers.map(({ image, position, portraitClip, clipPath }) => {
         const style: React.CSSProperties = position
-          ? { inset: 'auto', left: `${position.left}%`, top: `${position.top}%`, width: `${position.width}%`, height: 'auto', clipPath }
+          ? { inset: 'auto', left: `${position.left}%`, top: `${position.top}%`, width: `${position.width}%`, height: 'auto',
+            transform: position.rotation === undefined ? undefined : `rotate(${position.rotation}deg)`, clipPath }
           : { clipPath: image === baseImage ? activeFit?.portraitClip : clipPath };
         return <img key={image} src={asset(image)} alt="" decoding="async" style={style}
             onLoad={portraitClip ? () => setReadyFit(image) : undefined}

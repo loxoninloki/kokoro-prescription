@@ -17,7 +17,7 @@ interface OutfitLayer {
   image: string;
   order: number;
   // Small overlays use percentages of the square portrait canvas.
-  position?: { left: number; top: number; width: number };
+  position?: { left: number; top: number; width: number; rotation?: number };
   portraitClip?: string;
   clipPath?: string;
 }
@@ -39,7 +39,7 @@ export const ITEMS: readonly DressUpItem[] = [
     layers: [{
       image: 'dressup/night_beret.webp',
       order: 30,
-      position: { left: 16, top: -2, width: 66 },
+      position: { left: 10, top: -3, width: 72, rotation: -7 },
       portraitClip: 'inset(9% 0 0)',
       // Follow the front seam so the underside of the beret stays hidden.
       clipPath: 'polygon(0 0, 100% 0, 100% 69%, 83% 69%, 81% 68%, 78% 66%, 74% 65%, 69% 64%, 63% 64%, 57% 64.5%, 50% 66%, 44% 68%, 38% 71%, 32% 74%, 26% 79%, 23% 81%, 0 81%)',
