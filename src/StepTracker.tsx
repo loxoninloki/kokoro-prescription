@@ -7,7 +7,7 @@ const KEY = 'kokoro-steps-v1';
 export type StepImport = { day: string; count: number };
 
 export function parseStepImport(params: URLSearchParams, today: string): StepImport | null {
-  const day = params.get('date') ?? '';
+  const day = params.get('date') ?? today;
   const value = params.get('steps') ?? '';
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > today || !/^\d{1,6}$/.test(value)) return null;
   const date = new Date(day + 'T00:00:00Z');
@@ -92,7 +92,8 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
     <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f4efff' }}>
       <h2><Icon name="steps" /> 今日の歩数</h2>
       <p className="step-count">{entries[today] === undefined ? '未記録' : `${entries[today].toLocaleString()} 歩`}</p>
-      <p style={{ fontSize: 13 }}>iPhoneのショートカットで歩数を取り込むか、手入力で記録できます。</p>
+      <p style={{ fontSize: 13 }}>初回設定のあとは、ショートカットを開いて今日の歩数を保存できます。</p>
+      <p><a href={`shortcuts://run-shortcut?name=${encodeURIComponent('こころの歩数')}`}>iPhoneから歩数を取り込む</a></p>
       {incoming === 'invalid' && <p role="alert">歩数を取り込めませんでした。ショートカットの日付と歩数をご確認ください。</p>}
       {incoming && incoming !== 'invalid' && (
         <div className="diary-entry">
@@ -104,15 +105,16 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
         </div>
       )}
       <details style={{ marginBottom: 14, fontSize: 13 }}>
-        <summary>iPhoneショートカットの設定</summary>
+        <summary>初回だけ · ショートカットを作る</summary>
+        <p>「ショートカット」アプリで、<strong>こころの歩数</strong>という名前で作ります。</p>
         <ol>
-          <li>「ヘルスケアサンプルを検索」で種類を「歩数」、開始日を「今日」、グループ化を「日」に設定します。iPhoneだけの歩数を取り込む場合はソースをiPhoneに絞ります。</li>
-          <li>「ヘルスケアサンプルの詳細を取得」で「値」を取り出します。</li>
-          <li>「現在の日付」を「日付をフォーマット」でカスタム形式 <code>yyyy-MM-dd</code> にします。</li>
-          <li>「URLを開く」で次のURLを開きます。「歩数」と「日付」は、取得した値と整形した日付の変数に置き換えます。</li>
+          <li>「ヘルスケアサンプルを検索」で「歩数」「開始日が今日」「日ごとにグループ化」を選びます。iPhoneだけの歩数を取り込む場合は、ソースをiPhoneに絞ります。</li>
+          <li>「ヘルスケアサンプルの詳細を取得」で「値」を選びます。</li>
+          <li>「URLを開く」に下の文字列を貼り、末尾に手順2の「値」を変数として追加します。</li>
         </ol>
-        <code style={{ overflowWrap: 'anywhere' }}>{window.location.origin + window.location.pathname}#steps=歩数&amp;date=日付</code>
-        <p>初回はショートカットにヘルスケアの歩数の読み取りを許可してください。</p>
+        <input aria-label="ショートカットに貼るURL" readOnly value={window.location.origin + window.location.pathname + '#steps='} onFocus={event => event.currentTarget.select()} style={{ width: '100%' }} />
+        <p>初回の実行時に、ショートカットに歩数の読み取りを許可してください。</p>
+        <a href="shortcuts://create-shortcut">ショートカット作成画面を開く</a>
       </details>
       <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
         <label>記録する日
