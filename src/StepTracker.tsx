@@ -4,6 +4,18 @@ import React, { useEffect, useState } from 'react';
 export type StepEntries = Record<string, number>;
 const KEY = 'kokoro-steps-v1';
 
+export type StepImport = { day: string; count: number };
+
+export function parseStepImport(params: URLSearchParams, today: string): StepImport | null {
+  const day = params.get('date') ?? '';
+  const value = params.get('steps') ?? '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > today || !/^\d{1,6}$/.test(value)) return null;
+  const date = new Date(day + 'T00:00:00Z');
+  const count = Number(value);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== day || count > 100000) return null;
+  return { day, count };
+}
+
 export function readSteps(): StepEntries {
   try {
     const raw: unknown = JSON.parse(localStorage.getItem(KEY) || '{}');
@@ -34,9 +46,11 @@ interface Props {
   entries: StepEntries;
   setEntries: React.Dispatch<React.SetStateAction<StepEntries>>;
   today: string;
+  incoming: StepImport | 'invalid' | null;
+  clearIncoming: () => void;
 }
 
-export default function StepTracker({ entries, setEntries, today }: Props) {
+export default function StepTracker({ entries, setEntries, today, incoming, clearIncoming }: Props) {
   const [selected, setSelected] = useState(today);
   const [draft, setDraft] = useState('');
   const [saved, setSaved] = useState(false);
@@ -47,29 +61,59 @@ export default function StepTracker({ entries, setEntries, today }: Props) {
 
   const [storageError, setStorageError] = useState(false);
 
-  useEffect(() => {
+  const persist = (day: string, count: number) => {
+    const updated = { ...entries, ...readSteps(), [day]: count };
     try {
-      localStorage.setItem(KEY, JSON.stringify(entries));
-      setStorageError(false);
+      localStorage.setItem(KEY, JSON.stringify(updated));
     } catch {
       setStorageError(true);
+      setSaved(false);
+      return false;
     }
-  }, [entries]);
+    setEntries(updated);
+    setStorageError(false);
+    setSaved(true);
+    return true;
+  };
 
   const save = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(selected) || selected > today || !/^\d{1,6}$/.test(draft)) return;
-    const steps = Number(draft);
-    if (steps > 100000) return;
-    setEntries(previous => ({ ...previous, [selected]: steps }));
-    setSaved(true);
+    const record = parseStepImport(new URLSearchParams({ date: selected, steps: draft }), today);
+    if (record) persist(record.day, record.count);
+  };
+
+  const confirmImport = (record: StepImport) => {
+    if (!persist(record.day, record.count)) return;
+    setSelected(record.day);
+    clearIncoming();
   };
 
   return (
     <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f4efff' }}>
       <h2><Icon name="steps" /> 今日の歩数</h2>
       <p className="step-count">{entries[today] === undefined ? '未記録' : `${entries[today].toLocaleString()} 歩`}</p>
-      <p style={{ fontSize: 13 }}>iPhoneのヘルスケアで確認した歩数を入力できます。自動取得は将来のiPhoneアプリ版で検討します。</p>
+      <p style={{ fontSize: 13 }}>iPhoneのショートカットで歩数を取り込むか、手入力で記録できます。</p>
+      {incoming === 'invalid' && <p role="alert">歩数を取り込めませんでした。ショートカットの日付と歩数をご確認ください。</p>}
+      {incoming && incoming !== 'invalid' && (
+        <div className="diary-entry">
+          <p>{incoming.day} の歩数を受け取りました。<strong>{incoming.count.toLocaleString()} 歩</strong></p>
+          {entries[incoming.day] !== undefined && <p>この日の記録（{entries[incoming.day].toLocaleString()} 歩）を置き換えます。</p>}
+          <button type="button" onClick={() => confirmImport(incoming)}>この歩数を保存</button>
+          {' '}
+          <button type="button" onClick={clearIncoming}>キャンセル</button>
+        </div>
+      )}
+      <details style={{ marginBottom: 14, fontSize: 13 }}>
+        <summary>iPhoneショートカットの設定</summary>
+        <ol>
+          <li>「ヘルスケアサンプルを検索」で種類を「歩数」、開始日を「今日」、グループ化を「日」に設定します。iPhoneだけの歩数を取り込む場合はソースをiPhoneに絞ります。</li>
+          <li>「ヘルスケアサンプルの詳細を取得」で「値」を取り出します。</li>
+          <li>「現在の日付」を「日付をフォーマット」でカスタム形式 <code>yyyy-MM-dd</code> にします。</li>
+          <li>「URLを開く」で次のURLを開きます。「歩数」と「日付」は、取得した値と整形した日付の変数に置き換えます。</li>
+        </ol>
+        <code style={{ overflowWrap: 'anywhere' }}>{window.location.origin + window.location.pathname}#steps=歩数&amp;date=日付</code>
+        <p>初回はショートカットにヘルスケアの歩数の読み取りを許可してください。</p>
+      </details>
       <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
         <label>記録する日
           <input type="date" value={selected} max={today} onChange={event => { setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />

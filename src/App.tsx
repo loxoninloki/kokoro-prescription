@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CHECKIN_XP, evolutionFromXp, XP_PER_LEVEL } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
-import StepTracker, { StepEntries, readSteps, stepsExperience } from './StepTracker';
+import StepTracker, { StepEntries, readSteps, stepsExperience, parseStepImport, StepImport } from './StepTracker';
 import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
 import BackupExport from './BackupExport';
 import { Icon } from './Icon';
@@ -49,6 +49,7 @@ export default function App() {
   const [diary, setDiary] = useState<DiaryEntries>(readDiary);
   const [medication, setMedication] = useState<MedicationData>(readMedication);
   const [steps, setSteps] = useState<StepEntries>(readSteps);
+  const [stepImport, setStepImport] = useState<StepImport | 'invalid' | null>(null);
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
@@ -59,9 +60,26 @@ export default function App() {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
       setHeaderStickerFailed(false);
     }
+    if (next !== 'steps') setStepImport(null);
     setPage(next);
     window.scrollTo(0, 0);
   };
+
+  useEffect(() => {
+    const receiveSteps = () => {
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      if (!params.has('steps')) return;
+      const day = localDay();
+      setStepImport(parseStepImport(params, day) ?? 'invalid');
+      setToday(day);
+      setPage('steps');
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+      window.scrollTo(0, 0);
+    };
+    receiveSteps();
+    window.addEventListener('hashchange', receiveSteps);
+    return () => window.removeEventListener('hashchange', receiveSteps);
+  }, []);
 
   useEffect(() => {
     const updateDate = () => setToday(localDay());
@@ -185,7 +203,7 @@ export default function App() {
       </>}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
-      {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} />}
+      {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} />}
       {page !== 'home' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
