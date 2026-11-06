@@ -15,3 +15,89 @@ body {
 * {
   box-sizing: border-box;
 }
+
+
+/* Kokoro v2 — calm lavender night, accessible and lightweight */
+:root { color-scheme: light; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(205,175,255,.42), transparent 38%),
+    radial-gradient(ellipse at 88% 32%, rgba(179,166,245,.32), transparent 42%),
+    radial-gradient(ellipse at 40% 90%, rgba(245,210,255,.42), transparent 45%),
+    linear-gradient(160deg, #f5edff 0%, #f9f6ff 52%, #eee6fa 100%);
+  background-attachment: fixed;
+  color: #38294d;
+}
+.kokoro-app { position: relative; min-height: 100vh; }
+.kokoro-app > header h1 {
+  color: #543877;
+  letter-spacing: .035em;
+  text-shadow: 0 2px 15px rgba(150,99,203,.14);
+}
+.kokoro-app > section,
+.kokoro-app > div[aria-label="記録の概要"],
+.kokoro-app > nav {
+  position: relative;
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"],
+.kokoro-app > section[aria-label="ろきちゃんの成長"] {
+  background: linear-gradient(145deg, rgba(255,255,255,.86), rgba(237,221,255,.78)) !important;
+  border: 1px solid rgba(171,132,218,.42) !important;
+  box-shadow: 0 10px 30px rgba(99,63,147,.09), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"]::before,
+.kokoro-app > section[aria-label="ろきちゃんの成長"]::before {
+  content: "✧  ·  ☾  ·  ✧";
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  color: #b396d7;
+  font-size: 12px;
+  letter-spacing: 5px;
+  opacity: .72;
+  pointer-events: none;
+}
+.kokoro-app > section[aria-label="機能メニュー"] button {
+  background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(237,223,252,.85)) !important;
+  border: 1px solid rgba(179,145,217,.48) !important;
+  box-shadow: 0 4px 15px rgba(106,72,155,.08), inset 0 1px 0 #fff;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.kokoro-app > section[aria-label="機能メニュー"] button:active {
+  transform: scale(.975);
+}
+.kokoro-app > section[aria-label="機能メニュー"] button:focus-visible,
+.kokoro-app button:focus-visible,
+.kokoro-app select:focus-visible,
+.kokoro-app input:focus-visible,
+.kokoro-app textarea:focus-visible {
+  outline: 3px solid #9865d1;
+  outline-offset: 3px;
+}
+.kokoro-app > section[aria-label="機能メニュー"] button span {
+  filter: drop-shadow(0 2px 5px rgba(138,89,190,.18));
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"] progress,
+.kokoro-app > section[aria-label="ろきちゃんの成長"] progress {
+  accent-color: #8b61b8;
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"] progress::-webkit-progress-bar,
+.kokoro-app > section[aria-label="ろきちゃんの成長"] progress::-webkit-progress-bar {
+  background: #e9dcf6;
+  border-radius: 999px;
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"] progress::-webkit-progress-value,
+.kokoro-app > section[aria-label="ろきちゃんの成長"] progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #8c67bc, #c29ae9);
+  border-radius: 999px;
+}
+.kokoro-app > section[aria-label="機能メニュー"] button,
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"],
+.kokoro-app > section[aria-label="ろきちゃんの成長"] {
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .kokoro-app * { transition-duration: 0.01ms !important; }
+}
