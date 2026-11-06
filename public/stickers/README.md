@@ -1,0 +1,1 @@
+Decorative sticker PNGs for secondary-page headers. Upload 01_erai.png, 02_otsukare.png, 03_yoshiyoshi.png, 04_hitoyasumi.png and 05_yattane.png here. These are decorative assets and do not reveal evolution stages.
