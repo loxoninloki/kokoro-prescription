@@ -3,6 +3,12 @@ import React, { useEffect, useState } from 'react';
 
 export interface DiaryEntry { mood: number | null; text: string }
 export type DiaryEntries = Record<string, DiaryEntry>;
+const MOOD_REPLIES = {
+  difficult: { image: '03_yoshiyoshi.png', title: 'よしよし♡', message: '今日はゆっくりで大丈夫' },
+  neutral: { image: '02_otsukare.png', title: 'おつかれ！', message: '今日も記録できましたね' },
+  good: { image: '05_yattane.png', title: 'やったね！', message: 'いい気分を残せましたね' },
+};
+
 const KEY = 'kokoro-diary-v1';
 export const DIARY_XP = 5;
 export const MOOD_XP = 5;
@@ -44,22 +50,13 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
   const [draft, setDraft] = useState('');
   const [mood, setMood] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
+  const [storageError, setStorageError] = useState(false);
+  const reply = mood === null ? null : MOOD_REPLIES[mood <= 2 ? 'difficult' : mood === 3 ? 'neutral' : 'good'];
 
   useEffect(() => {
     setDraft(entries[selected]?.text || '');
     setMood(entries[selected]?.mood || null);
   }, [selected, entries]);
-
-  const [storageError, setStorageError] = useState(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(entries));
-      setStorageError(false);
-    } catch {
-      setStorageError(true);
-    }
-  }, [entries]);
 
   const [year, monthNumber] = month.split('-').map(Number);
   const firstDay = new Date(year, monthNumber - 1, 1).getDay();
@@ -74,7 +71,16 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
 
   const save = () => {
     if (selected > today) return;
-    setEntries(previous => ({ ...previous, [selected]: { mood, text: draft.slice(0, 2000) } }));
+    const nextEntries = { ...entries, [selected]: { mood, text: draft.slice(0, 2000) } };
+    try {
+      localStorage.setItem(KEY, JSON.stringify(nextEntries));
+    } catch {
+      setStorageError(true);
+      setSaved(false);
+      return;
+    }
+    setEntries(nextEntries);
+    setStorageError(false);
     setSaved(true);
   };
 
@@ -96,7 +102,18 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
           placeholder="今日の出来事や気持ちを、自由に書いてください。" rows={5}
           style={{ width: '100%', boxSizing: 'border-box', borderRadius: 12, border: '1px solid #cab8da', padding: 12, font: 'inherit' }} />
         <button type="button" onClick={save} style={{ marginTop: 10, border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 24px' }}>記録を保存</button>
-        {saved && !storageError && <p role="status">保存しました。今日もお疲れさまです 💜</p>}
+        <div role="status">
+          {saved && (reply ? (
+            <div className="diary-mood-reply">
+              <img src={`${process.env.PUBLIC_URL}/stickers/${reply.image}`} alt="" width="80" height="80" />
+              <div>
+                <span>保存しました</span>
+                <strong>{reply.title}</strong>
+                <p>{reply.message}</p>
+              </div>
+            </div>
+          ) : <p>保存しました。今日もお疲れさまです 💜</p>)}
+        </div>
       </div>
       <h3 className="diary-history">記録カレンダー</h3>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>

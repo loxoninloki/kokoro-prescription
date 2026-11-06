@@ -163,6 +163,22 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
   box-shadow: 0 0 9px #9563c987, inset 0 0 0 1px #6d4498;
 }
 .mood-icon { width: 25px; height: 25px; }
+.diary-mood-reply {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px solid #ceb1e9;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8efff, #eee0ff);
+  color: #492e64;
+}
+.diary-mood-reply img { width: 80px; height: 80px; object-fit: contain; }
+.diary-mood-reply span { font-size: 12px; }
+.diary-mood-reply strong { display: block; margin-top: 3px; }
+.diary-mood-reply p { margin: 2px 0 0; font-size: 14px; }
+
 .evolution-stages { display: grid; gap: 4px; list-style: none; padding: 0; text-align: left; }
 .evolution-stages li { padding: 7px 10px; border-radius: 9px; background: #fff7ff90; }
 .evolution-stages li span { display: inline-block; min-width: 4.2em; }
