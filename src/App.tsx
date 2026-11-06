@@ -8,6 +8,8 @@ import BackupExport from './BackupExport';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
 const POINTS_PER_DAY = CHECKIN_XP;
+const HEADER_STICKERS = ['01_erai.png', '02_otsukare.png', '03_yoshiyoshi.png', '04_hitoyasumi.png', '05_yattane.png'] as const;
+
 
 function localDay(date = new Date()): string {
   const year = date.getFullYear();
@@ -48,8 +50,17 @@ export default function App() {
   const [steps, setSteps] = useState<StepEntries>(readSteps);
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [today, setToday] = useState(localDay);
+  const [headerSticker, setHeaderSticker] = useState<string | null>(null);
+  const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
   const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'backup'>('home');
-  const navigate = (next: typeof page) => { setPage(next); window.scrollTo(0, 0); };
+  const navigate = (next: typeof page) => {
+    if (next !== 'home') {
+      setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
+      setHeaderStickerFailed(false);
+    }
+    setPage(next);
+    window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     const updateDate = () => setToday(localDay());
@@ -143,8 +154,9 @@ export default function App() {
           </div>
         </section>
       </>}
-      {page !== 'home' && <nav aria-label="画面移動" style={{ marginBottom: 12 }}>
-        <button type="button" onClick={() => navigate('home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14 }}>← ホームに戻る</button>
+      {page !== 'home' && <nav aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
+        <button type="button" onClick={() => navigate('home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← ホームに戻る</button>
+        {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
       {page === 'growth' && <>
         <section aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
