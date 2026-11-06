@@ -101,3 +101,115 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .kokoro-app * { transition-duration: 0.01ms !important; }
 }
+
+
+/* v2 moonlit visual system: image-inspired, no external image dependencies */
+:root { --night:#261c4b; --night2:#4a3675; --lavender:#d9b7ff; --lilac:#f2e8ff; --ink:#38284e; --glow:rgba(211,164,255,.38); }
+body {
+ background:
+ radial-gradient(circle at 15% 13%,rgba(238,199,255,.24) 0 2px,transparent 3px),
+ radial-gradient(circle at 85% 24%,rgba(255,255,255,.48) 0 1px,transparent 2px),
+ radial-gradient(circle at 74% 61%,rgba(235,204,255,.3) 0 2px,transparent 3px),
+ radial-gradient(ellipse at 10% 12%,rgba(160,111,222,.6),transparent 40%),
+ radial-gradient(ellipse at 90% 80%,rgba(119,86,191,.58),transparent 44%),
+ linear-gradient(160deg,#221a45 0%,#4b377c 42%,#7860a9 100%) !important;
+ background-attachment:fixed !important;
+}
+.kokoro-app {
+ color:#fff0ff !important;
+ padding-bottom:32px !important;
+ isolation:isolate;
+}
+.kokoro-app::before {
+ content:"✧                       ✦                  ✧                ✦";
+ position:fixed; inset:0;
+ color:#f6dcff; opacity:.26; letter-spacing:18px; line-height:100px;
+ font-size:16px; pointer-events:none; z-index:-1;
+ white-space:pre-wrap; overflow:hidden;
+}
+.kokoro-app .kokoro-header { margin-bottom:18px !important; }
+.kokoro-app .kokoro-header h1 {
+ color:#fff7ff !important;
+ font-size:clamp(24px,6.5vw,32px) !important;
+ text-shadow:0 0 12px rgba(230,179,255,.9),0 0 32px rgba(204,124,255,.45);
+ letter-spacing:.06em;
+}
+.kokoro-brand-symbol { font-size:24px; color:#f2caff; text-shadow:0 0 15px #e4aaff; line-height:1.2; }
+.kokoro-brand-symbol span { font-size:16px; }
+.kokoro-subtitle { margin:6px 0 0; font-size:11px; letter-spacing:.06em; color:#eadbfa; }
+.kokoro-greeting {
+ padding:12px 16px; margin:0 0 14px;
+ border:1px solid rgba(238,201,255,.32); border-radius:19px;
+ background:linear-gradient(125deg,rgba(255,255,255,.16),rgba(191,143,240,.08));
+ box-shadow:0 0 18px rgba(206,149,255,.1);
+ color:#fff1ff; font-size:13px; line-height:1.8;
+ text-align:center;
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"],
+.kokoro-app > section[aria-label="ろきちゃんの成長"] {
+ background:linear-gradient(150deg,rgba(248,231,255,.94),rgba(223,200,253,.87)) !important;
+ border:1px solid rgba(255,236,255,.84) !important;
+ box-shadow:0 0 0 3px rgba(211,163,255,.12),0 10px 35px rgba(27,14,70,.25),0 0 24px rgba(205,148,255,.22) !important;
+ color:var(--ink) !important;
+ border-radius:24px !important;
+}
+.kokoro-app > section[aria-label="ろきちゃんの育成状態"] h2,
+.kokoro-app > section[aria-label="ろきちゃんの成長"] h2 { color:#563678; }
+.kokoro-app .kokoro-checkin {
+ background:linear-gradient(120deg,rgba(226,197,255,.9),rgba(245,228,255,.92)) !important;
+ border:1px solid rgba(255,255,255,.8);
+ box-shadow:0 7px 22px rgba(34,20,70,.16);
+ color:var(--ink); border-radius:18px !important;
+}
+.kokoro-app > div[aria-label="記録の概要"] {
+ color:#fff3ff;
+ text-shadow:0 1px 8px rgba(56,27,92,.55);
+}
+.kokoro-app > section[aria-label="機能メニュー"] button {
+ background:linear-gradient(145deg,rgba(243,223,255,.3),rgba(188,141,235,.24)) !important;
+ border:1px solid rgba(248,221,255,.62) !important;
+ border-radius:20px !important;
+ color:#fff8ff !important;
+ text-shadow:0 1px 6px rgba(58,22,96,.55);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 14px rgba(209,155,255,.25),0 8px 16px rgba(25,13,57,.13) !important;
+ min-height:96px !important;
+}
+.kokoro-app > section[aria-label="機能メニュー"] button:active { background:rgba(221,177,255,.5) !important; }
+.kokoro-app .kokoro-back-nav button {
+ background:linear-gradient(135deg,#7250ac,#a076cf) !important;
+ border:1px solid rgba(255,229,255,.68) !important;
+ box-shadow:0 0 13px rgba(211,148,255,.35);
+}
+.kokoro-app > section:not([aria-label="ろきちゃんの育成状態"]):not([aria-label="ろきちゃんの成長"]):not([aria-label="機能メニュー"]):not(.kokoro-checkin) {
+ background:linear-gradient(150deg,rgba(249,236,255,.96),rgba(231,210,252,.94)) !important;
+ border:1px solid rgba(255,238,255,.9);
+ box-shadow:0 0 0 2px rgba(225,179,255,.13),0 12px 30px rgba(25,15,64,.23),0 0 25px rgba(197,148,255,.15);
+ border-radius:24px !important;
+ color:var(--ink);
+}
+.kokoro-app > section:not([aria-label="ろきちゃんの育成状態"]):not([aria-label="ろきちゃんの成長"]):not([aria-label="機能メニュー"]):not(.kokoro-checkin) h2 {
+ color:#65418b;
+ text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.kokoro-app > section:not([aria-label="機能メニュー"]) button:not(:disabled) {
+ transition:filter .2s ease,transform .2s ease;
+}
+.kokoro-app > section:not([aria-label="機能メニュー"]) button:not(:disabled):active { transform:scale(.98); }
+.kokoro-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.kokoro-app textarea,
+.kokoro-app select {
+ background:rgba(255,255,255,.87);
+ border:1px solid #c8a7e5;
+ border-radius:12px;
+ color:#352547;
+ max-width:100%;
+}
+.kokoro-app input[type="checkbox"] { accent-color:#7951b1; }
+.kokoro-app > p:last-child { color:#e9daf6 !important; }
+@media (max-width:360px) {
+ .kokoro-app > section[aria-label="機能メニュー"] button { min-height:82px !important; }
+ .kokoro-app .kokoro-back-nav img { width:65px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+ .kokoro-app *, .kokoro-app *::before, .kokoro-app *::after { animation:none !important; transition:none !important; }
+}
