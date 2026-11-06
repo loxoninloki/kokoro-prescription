@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CHECKIN_XP, evolutionFromXp, FORM_STAGES, HUMAN_FORM, MATURE_FORM } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
@@ -7,6 +7,7 @@ import Meditation, { MeditationEntries, readMeditation, meditationExperience } f
 import BackupExport from './BackupExport';
 import { APPEARANCE_KEY, Appearance, readAppearance } from './appearance';
 import DressUp from './DressUp';
+import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import { Icon } from './Icon';
 
@@ -104,6 +105,8 @@ export default function App() {
     }
   }, [days]);
 
+  const recordDays = countRecordDays(today, days, diary, medication, steps, meditation);
+  const rewardDays = Math.max(recordDays, appearance.rewardDays ?? 0);
   const checkedIn = days.includes(today);
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
   const streak = streakFor(days);
@@ -115,15 +118,21 @@ export default function App() {
     <RokiCharacter key={displayForm.image} form={displayForm} size={size}
       equipped={mature && !human ? appearance.equipped : undefined} />
   );
-  const saveAppearance = (next: Appearance) => {
+  const saveAppearance = useCallback((next: Appearance) => {
     try {
-      localStorage.setItem(APPEARANCE_KEY, JSON.stringify(next));
-      setAppearance(next);
+      const progress = Math.max(recordDays, next.rewardDays ?? 0, readAppearance().rewardDays ?? 0);
+      const updated = { ...next, rewardDays: progress };
+      localStorage.setItem(APPEARANCE_KEY, JSON.stringify(updated));
+      setAppearance(updated);
       return true;
     } catch {
       return false;
     }
-  };
+  }, [recordDays]);
+  useEffect(() => {
+    if (recordDays > (appearance.rewardDays ?? 0)) saveAppearance(appearance);
+  }, [appearance, recordDays, saveAppearance]);
+
   const switchForm = (mode: Appearance['mode']) => {
     const saved = saveAppearance({ ...appearance, mode });
     setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
@@ -227,7 +236,7 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </section>
       </>}
-      {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} />}
+      {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} rewardDays={rewardDays} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}

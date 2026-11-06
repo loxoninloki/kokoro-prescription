@@ -29,6 +29,13 @@ describe('バックアップ復元', () => {
     expect(readAppearance()).toEqual(appearance);
   });
 
+  test('古いコーデの復元でも報酬の到達日数を保持する', () => {
+    const appearance = { version: 1, mode: 'chibi', equipped: ['moon-sparkles'] };
+    restoreBackup(parseBackup(JSON.stringify({ ...sample(), appearance: { ...appearance, rewardDays: 30 } })));
+    restoreBackup(parseBackup(JSON.stringify({ ...sample(), appearance: { ...appearance, rewardDays: 5 } })));
+    expect(readAppearance()).toEqual({ ...appearance, rewardDays: 30 });
+  });
+
   test('不正なコーデを拒否し、壊れた保存値で起動できる', () => {
     const appearance = { version: 1, mode: 'human', equipped: ['../invalid'] };
     expect(() => parseBackup(JSON.stringify({ ...sample(), appearance }))).toThrow();

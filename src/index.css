@@ -285,3 +285,8 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 
 .wardrobe-options button:disabled { opacity: .6; }
 .wardrobe-options button img { object-fit: contain; }
+
+.wardrobe-lock {
+  display: block;
+  margin-top: 2px;
+}

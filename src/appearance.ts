@@ -24,6 +24,7 @@ export interface DressUpItem {
   id: string;
   category: Category;
   name: string;
+  requiredRecordDays?: number;
   // Layers share a canvas. A hairstyle can contribute both back and front layers.
   layers: readonly OutfitLayer[];
 }
@@ -50,6 +51,13 @@ export const ITEMS: readonly DressUpItem[] = [
     }],
   },
   {
+    id: 'lavender-bloom',
+    category: 'effects',
+    name: 'ラベンダーの花あかり',
+    requiredRecordDays: 30,
+    layers: [{ image: 'dressup/lavender_bloom.svg', order: 11 }],
+  },
+  {
     id: 'moon-sparkles',
     category: 'effects',
     name: '月夜のきらめき',
@@ -61,18 +69,20 @@ export interface Appearance {
   version: 1;
   mode: 'chibi' | 'human';
   equipped: string[];
+  rewardDays?: number;
 }
 
 export const DEFAULT_APPEARANCE: Appearance = { version: 1, mode: 'chibi', equipped: [] };
 
 export function parseAppearance(value: unknown): Appearance {
   if (typeof value !== 'object' || value === null) throw new Error('コーデのデータが不正です。');
-  const { version, mode, equipped } = value as Partial<Appearance>;
+  const { version, mode, equipped, rewardDays } = value as Partial<Appearance>;
   if (version !== 1 || (mode !== 'chibi' && mode !== 'human') || !Array.isArray(equipped) ||
+      (rewardDays !== undefined && (!Number.isSafeInteger(rewardDays) || rewardDays < 0)) ||
       equipped.length > 128 || !equipped.every(id => typeof id === 'string' && /^[a-z0-9_-]{1,64}$/.test(id))) {
     throw new Error('コーデのデータが不正です。');
   }
-  return { version, mode, equipped: Array.from(new Set(equipped)) };
+  return { version, mode, equipped: Array.from(new Set(equipped)), ...(rewardDays === undefined ? {} : { rewardDays }) };
 }
 
 export function readAppearance(): Appearance {

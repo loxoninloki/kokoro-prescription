@@ -1,4 +1,4 @@
-import { APPEARANCE_KEY, parseAppearance } from './appearance';
+import { APPEARANCE_KEY, parseAppearance, readAppearance } from './appearance';
 import type { BackupData } from './BackupExport';
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -54,7 +54,8 @@ export function restoreBackup(backup: BackupData): void {
   const values: unknown[] = [backup.checkins, backup.diary, backup.medication, backup.steps, backup.meditation];
   if (backup.appearance !== undefined) {
     keys.push(APPEARANCE_KEY);
-    values.push(backup.appearance);
+    const rewardDays = Math.max(backup.appearance.rewardDays ?? 0, readAppearance().rewardDays ?? 0);
+    values.push(rewardDays ? { ...backup.appearance, rewardDays } : backup.appearance);
   }
   let previous: Array<string | null>;
   try {

@@ -3,8 +3,9 @@ import { Appearance, CATEGORIES, Category, ITEMS, toggleItem } from './appearanc
 import { MATURE_FORM } from './evolution';
 import RokiCharacter from './RokiCharacter';
 
-export default function DressUp({ saved, onSave }: {
+export default function DressUp({ saved, onSave, rewardDays }: {
   saved: Appearance;
+  rewardDays: number;
   onSave: (appearance: Appearance) => boolean;
 }) {
   const [draft, setDraft] = useState(saved);
@@ -24,12 +25,16 @@ export default function DressUp({ saved, onSave }: {
     </div>
     <div className="wardrobe-options" role="group" aria-label={`${CATEGORIES[category].name}のアイテム`}>
       {items.length === 0 && <p>初期装備を表示しています。このカテゴリの着せ替え素材は準備中です。</p>}
-      {items.map(item =>
-        <button type="button" key={item.id} aria-pressed={draft.equipped.includes(item.id)}
+      {items.map(item => {
+        const requiredDays = item.requiredRecordDays ?? 0;
+        const locked = rewardDays < requiredDays;
+        return <button type="button" key={item.id} aria-pressed={draft.equipped.includes(item.id)}
+          disabled={locked}
           onClick={() => { setDraft(previous => toggleItem(previous, item)); setMessage(''); }}>
           <img src={`${process.env.PUBLIC_URL}/${item.layers[0].image}`} alt="" width={36} height={36} />
-          {item.name}
-        </button>)}
+          <span>{item.name}{locked && <small className="wardrobe-lock">累計 {rewardDays} / {requiredDays}日</small>}</span>
+        </button>;
+      })}
     </div>
     <div className="wardrobe-options">
       <button type="button" disabled={draft.equipped.length === 0} onClick={() => {

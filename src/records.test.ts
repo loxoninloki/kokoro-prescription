@@ -1,3 +1,4 @@
+import { countRecordDays } from './recordDays';
 import { evolutionFromXp, XP_PER_LEVEL } from './evolution';
 import { stepsExperience, encouragement } from './StepTracker';
 import { diaryExperience } from './DiaryCalendar';
@@ -48,4 +49,17 @@ describe('瞑想の経験値', () => {
     expect(meditationExperience({ '2026-11-06': true, '2026-11-07': true })).toBe(20);
     expect(meditationExperience({ '2026-11-06': false })).toBe(0);
   });
+});
+
+test('累計記録日は機能をまたいで同じ日を1回と数え、未来と空欄を除く', () => {
+  expect(countRecordDays('2026-11-06', ['2026-11-01', '2026-11-09', '2026-10-32'], {
+    '2026-11-01': { mood: 1, text: '同じ日' },
+    '2026-11-02': { mood: null, text: ' ' },
+    '2026-11-04': { mood: 2, text: '' },
+  }, {
+    medicines: [{ id: 'med', name: 'お薬', time: '08:00', archived: true }],
+    taken: { '2026-11-03|med': true, '2026-11-02|unknown': true },
+  }, { '2026-11-01': 1200, '2026-11-05': 0 }, {
+    '2026-11-01': true, '2026-11-02': false, '2026-11-06': true,
+  })).toBe(5);
 });
