@@ -40,7 +40,7 @@ export const ITEMS: readonly DressUpItem[] = [
       image: 'dressup/night_beret.webp',
       order: 30,
       position: { left: 10, top: -3, width: 72, rotation: -7 },
-      portraitClip: 'inset(9% 0 0)',
+      portraitClip: 'polygon(0 9%, 18% 9%, 21% 20%, 27% 21%, 32% 18%, 39% 9%, 100% 9%, 100% 100%, 0 100%)',
       // Follow the front seam so the underside of the beret stays hidden.
       clipPath: 'polygon(0 0, 100% 0, 100% 69%, 83% 69%, 81% 68%, 78% 66%, 74% 65%, 69% 64%, 63% 64%, 57% 64.5%, 50% 66%, 44% 68%, 38% 71%, 32% 74%, 26% 79%, 23% 81%, 0 81%)',
     }],

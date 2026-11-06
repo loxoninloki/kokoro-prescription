@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Appearance, CATEGORIES, Category, ITEMS, toggleItem } from './appearance';
 import { MATURE_FORM } from './evolution';
 import RokiCharacter from './RokiCharacter';
+import WardrobeIcon from './WardrobeIcon';
 
 export default function DressUp({ saved, onSave, rewardDays }: {
   saved: Appearance;
@@ -12,15 +13,27 @@ export default function DressUp({ saved, onSave, rewardDays }: {
   const [category, setCategory] = useState<Category>('hats');
   const [message, setMessage] = useState('');
   const items = ITEMS.filter(item => item.category === category);
+  const categories = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const rail = categories.current;
+    if (!rail) return;
+    const selected = rail.querySelector('button[aria-pressed="true"]');
+    if (selected && selected.getBoundingClientRect().right > rail.getBoundingClientRect().right) {
+      rail.scrollLeft += selected.getBoundingClientRect().right - rail.getBoundingClientRect().right + 8;
+    }
+  }, []);
 
   return <section className="growth-card roki-wardrobe" aria-labelledby="wardrobe-title">
     <h2 id="wardrobe-title">ちびろきの着せ替え</h2>
     <RokiCharacter form={MATURE_FORM} size={244} equipped={draft.equipped} />
     {saved.mode === 'human' && <p>ホームではヒューマンフォルムを表示中です。</p>}
-    <div className="wardrobe-options" role="group" aria-label="着せ替えカテゴリ">
+    <p className="wardrobe-category-hint">← 横にスワイプしてカテゴリを選ぶ →</p>
+    <div className="wardrobe-categories" ref={categories} role="group" aria-label="着せ替えカテゴリ">
       {(Object.keys(CATEGORIES) as Category[]).map(key =>
         <button type="button" key={key} aria-pressed={category === key} onClick={() => setCategory(key)}>
-          {CATEGORIES[key].name}
+          <WardrobeIcon category={key} />
+          <span>{CATEGORIES[key].name}</span>
         </button>)}
     </div>
     <div className="wardrobe-options" role="group" aria-label={`${CATEGORIES[category].name}のアイテム`}>
