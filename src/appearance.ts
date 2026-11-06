@@ -18,6 +18,8 @@ interface OutfitLayer {
   order: number;
   // Small overlays use percentages of the square portrait canvas.
   position?: { left: number; top: number; width: number };
+  portraitClip?: string;
+  underlay?: string;
 }
 
 export interface DressUpItem {
@@ -37,7 +39,9 @@ export const ITEMS: readonly DressUpItem[] = [
     layers: [{
       image: 'dressup/night_beret.webp',
       order: 30,
-      position: { left: 21, top: -4, width: 60 },
+      position: { left: 16, top: -5, width: 66 },
+      portraitClip: 'inset(9% 0 0)',
+      underlay: 'dressup/night_beret_lining.svg',
     }],
   },
   {
@@ -61,7 +65,10 @@ export const ITEMS: readonly DressUpItem[] = [
     id: 'moon-sparkles',
     category: 'effects',
     name: '月夜のきらめき',
-    layers: [{ image: 'dressup/moon_sparkles.svg', order: 10 }],
+    layers: [
+      { image: 'dressup/moon_sparkles_floor.svg', order: 10 },
+      { image: 'dressup/moon_ring_front.svg', order: 21 },
+    ],
   },
 ];
 
