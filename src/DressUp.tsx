@@ -8,7 +8,7 @@ export default function DressUp({ saved, onSave }: {
   onSave: (appearance: Appearance) => boolean;
 }) {
   const [draft, setDraft] = useState(saved);
-  const [category, setCategory] = useState<Category>('effects');
+  const [category, setCategory] = useState<Category>('hats');
   const [message, setMessage] = useState('');
   const items = ITEMS.filter(item => item.category === category);
 
@@ -31,9 +31,15 @@ export default function DressUp({ saved, onSave }: {
           {item.name}
         </button>)}
     </div>
-    <button className="wardrobe-save" type="button" onClick={() => {
-      setMessage(onSave(draft) ? 'コーデを保存しました。' : 'コーデを保存できませんでした。端末の保存設定をご確認ください。');
-    }}>コーデを保存</button>
+    <div className="wardrobe-options">
+      <button type="button" disabled={draft.equipped.length === 0} onClick={() => {
+        setDraft(previous => ({ ...previous, equipped: [] }));
+        setMessage('初期装備をプレビューしています。変更を確定するには保存してください。');
+      }}>初期装備に戻す</button>
+      <button className="wardrobe-save" type="button" onClick={() => {
+        setMessage(onSave(draft) ? 'コーデを保存しました。' : 'コーデを保存できませんでした。端末の保存設定をご確認ください。');
+      }}>コーデを保存</button>
+    </div>
     <p role="status">{message}</p>
   </section>;
 }

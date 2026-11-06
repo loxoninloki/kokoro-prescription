@@ -272,6 +272,7 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
   background: #e9d7ff;
 }
 
+.wardrobe-options .wardrobe-save,
 .wardrobe-save {
   border-color: #67428f;
   background: #67428f;
@@ -281,3 +282,6 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 .roki-wardrobe [role="status"]:empty {
   margin: 0;
 }
+
+.wardrobe-options button:disabled { opacity: .6; }
+.wardrobe-options button img { object-fit: contain; }

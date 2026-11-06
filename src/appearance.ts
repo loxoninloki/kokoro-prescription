@@ -13,15 +13,42 @@ export const CATEGORIES = {
 
 export type Category = keyof typeof CATEGORIES;
 
+interface OutfitLayer {
+  image: string;
+  order: number;
+  // Small overlays use percentages of the square portrait canvas.
+  position?: { left: number; top: number; width: number };
+}
+
 export interface DressUpItem {
   id: string;
   category: Category;
   name: string;
   // Layers share a canvas. A hairstyle can contribute both back and front layers.
-  layers: ReadonlyArray<{ image: string; order: number }>;
+  layers: readonly OutfitLayer[];
 }
 
 export const ITEMS: readonly DressUpItem[] = [
+  {
+    id: 'night-beret',
+    category: 'hats',
+    name: '星夜のベレー帽',
+    layers: [{
+      image: 'dressup/night_beret.webp',
+      order: 30,
+      position: { left: 48, top: 3, width: 40 },
+    }],
+  },
+  {
+    id: 'lavender-star-clip',
+    category: 'accessories',
+    name: 'ラベンダーの星ピン',
+    layers: [{
+      image: 'dressup/lavender_star_clip.svg',
+      order: 25,
+      position: { left: 18, top: 28, width: 12 },
+    }],
+  },
   {
     id: 'moon-sparkles',
     category: 'effects',
