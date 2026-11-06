@@ -133,7 +133,7 @@ export default function App() {
         <section aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>
           <h2>ろきちゃん Lv.{evolution.level}</h2>
-          <p>{evolution.stageName} ＆ もるすけ</p>
+          <p>{evolution.stageName}{evolution.stage === 'chibi' ? ' ＆ もるすけ' : ''}</p>
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
