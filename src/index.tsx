@@ -13,5 +13,10 @@ root.render(
   </React.StrictMode>
 );
 
-// Service worker registration is deferred until a compiled worker is included in public/.
-// Registering a missing root-level worker on GitHub Pages causes repeated 404s.
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${process.env.PUBLIC_URL}/service-worker.js`).catch(error => {
+      console.warn('Offline mode is unavailable:', error);
+    });
+  }, { once: true });
+}
