@@ -1,3 +1,4 @@
+import { APPEARANCE_KEY, readAppearance } from './appearance';
 import { parseBackup, restoreBackup } from './BackupRestore';
 import { makeBackup } from './BackupExport';
 
@@ -18,6 +19,22 @@ describe('バックアップ復元', () => {
     expect(JSON.parse(localStorage.getItem('kokoro-diary-v1') || '{}')['2026-11-06'].text).toBe('穏やかな日');
     expect(JSON.parse(localStorage.getItem('kokoro-steps-v1') || '{}')['2026-11-06']).toBe(1200);
     expect(JSON.parse(localStorage.getItem('kokoro-medication-v1') || '{}').taken['2026-11-06|med-1']).toBe(true);
+  });
+
+  test('コーデを復元し、旧バックアップでは現在のコーデを保持する', () => {
+    const appearance = { version: 1, mode: 'human', equipped: ['moon-sparkles'] };
+    restoreBackup(parseBackup(JSON.stringify({ ...sample(), appearance })));
+    expect(readAppearance()).toEqual(appearance);
+    restoreBackup(parseBackup(JSON.stringify(sample())));
+    expect(readAppearance()).toEqual(appearance);
+  });
+
+  test('不正なコーデを拒否し、壊れた保存値で起動できる', () => {
+    const appearance = { version: 1, mode: 'human', equipped: ['../invalid'] };
+    expect(() => parseBackup(JSON.stringify({ ...sample(), appearance }))).toThrow();
+    localStorage.setItem(APPEARANCE_KEY, '{broken');
+    expect(readAppearance()).toEqual({ version: 1, mode: 'chibi', equipped: [] });
+    expect(localStorage.getItem(APPEARANCE_KEY)).toBe('{broken');
   });
 
   test('破損ファイルや未知のバージョンを拒否する', () => {

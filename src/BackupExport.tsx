@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import React, { useRef, useState } from 'react';
+import type { Appearance } from './appearance';
 import { parseBackup, restoreBackup } from './BackupRestore';
 import type { DiaryEntries } from './DiaryCalendar';
 import type { MedicationData } from './MedicationTracker';
@@ -14,6 +15,7 @@ export interface BackupData {
   medication: MedicationData;
   steps: StepEntries;
   meditation: MeditationEntries;
+  appearance?: Appearance;
 }
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
   medication: MedicationData;
   steps: StepEntries;
   meditation: MeditationEntries;
+  appearance?: Appearance;
 }
 
 export function makeBackup(data: Props): BackupData {
@@ -33,6 +36,7 @@ export function makeBackup(data: Props): BackupData {
     medication: data.medication,
     steps: data.steps,
     meditation: data.meditation,
+    appearance: data.appearance,
   };
 }
 
@@ -108,7 +112,7 @@ export default function BackupExport(data: Props) {
   };
   return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f7f3ff' }}>
     <h2><Icon name="backup" /> 記録のバックアップ</h2>
-    <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録をJSONファイルに書き出します。</p>
+    <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録とコーデをJSONファイルに書き出します。</p>
     <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
     <label style={{ display: 'block', marginTop: 18 }}>
       バックアップから復元

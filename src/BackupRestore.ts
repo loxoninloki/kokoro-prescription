@@ -1,3 +1,4 @@
+import { APPEARANCE_KEY, parseAppearance } from './appearance';
 import type { BackupData } from './BackupExport';
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -44,12 +45,17 @@ export function parseBackup(text: string): BackupData {
       /^\d{4}-\d{2}-\d{2}\|[^|]+$/.test(key) && value === true)) {
     throw new Error('服薬チェックの情報が不正です。');
   }
-  return raw as unknown as BackupData;
+  const backup = raw as unknown as BackupData;
+  return raw.appearance === undefined ? backup : { ...backup, appearance: parseAppearance(raw.appearance) };
 }
 
 export function restoreBackup(backup: BackupData): void {
   const keys = ['kokoro-checkins-v1', 'kokoro-diary-v1', 'kokoro-medication-v1', 'kokoro-steps-v1', 'kokoro-meditation-v1'];
-  const values = [backup.checkins, backup.diary, backup.medication, backup.steps, backup.meditation];
+  const values: unknown[] = [backup.checkins, backup.diary, backup.medication, backup.steps, backup.meditation];
+  if (backup.appearance !== undefined) {
+    keys.push(APPEARANCE_KEY);
+    values.push(backup.appearance);
+  }
   let previous: Array<string | null>;
   try {
     previous = keys.map(key => localStorage.getItem(key));

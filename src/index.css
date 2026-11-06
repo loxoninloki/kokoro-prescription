@@ -220,3 +220,64 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 .step-history-chart { display: block; width: 100%; height: auto; }
 .step-history-values { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
 .step-history-values dd { margin: 0; text-align: right; }
+
+.roki-character {
+  position: relative;
+  display: inline-grid;
+  max-width: 100%;
+  aspect-ratio: 1;
+  place-items: center;
+  vertical-align: middle;
+}
+
+.roki-character img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.roki-wardrobe {
+  padding: 18px;
+  border-radius: 20px;
+  background: #f8f1ff;
+  text-align: center;
+}
+
+.wardrobe-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-block: 14px;
+}
+
+.wardrobe-options button,
+.wardrobe-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #b9a2d4;
+  border-radius: 12px;
+  color: #302044;
+  background: #fff8ff;
+}
+
+.wardrobe-options button[aria-pressed="true"] {
+  border-color: #7045a1;
+  background: #e9d7ff;
+}
+
+.wardrobe-save {
+  border-color: #67428f;
+  background: #67428f;
+  color: #fff;
+}
+
+.roki-wardrobe [role="status"]:empty {
+  margin: 0;
+}

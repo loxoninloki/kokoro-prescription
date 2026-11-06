@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { CHECKIN_XP, evolutionFromXp, XP_PER_LEVEL } from './evolution';
+import { CHECKIN_XP, evolutionFromXp, FORM_STAGES, HUMAN_FORM, MATURE_FORM } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
 import StepTracker, { StepEntries, readSteps, stepsExperience, parseStepImport, StepImport } from './StepTracker';
 import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
 import BackupExport from './BackupExport';
+import { APPEARANCE_KEY, Appearance, readAppearance } from './appearance';
+import DressUp from './DressUp';
+import RokiCharacter from './RokiCharacter';
 import { Icon } from './Icon';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
@@ -51,10 +54,12 @@ export default function App() {
   const [steps, setSteps] = useState<StepEntries>(readSteps);
   const [stepImport, setStepImport] = useState<StepImport | 'invalid' | null>(null);
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
+  const [appearance, setAppearance] = useState(readAppearance);
+  const [appearanceMessage, setAppearanceMessage] = useState('');
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'backup'>('home');
+  const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup'>('home');
   const navigate = (next: typeof page) => {
     if (next !== 'home') {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
@@ -103,12 +108,26 @@ export default function App() {
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
   const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
-  const [imageUnavailable, setImageUnavailable] = useState(false);
-  const formImage = { tablet: 'lv1_tablet.webp', birth: 'lv10_birth.webp', awakening: 'lv20_awake.webp', chibi: 'lv30_chibi.webp', human: 'lv50_human.webp' }[evolution.stage];
-  useEffect(() => setImageUnavailable(false), [formImage]);
-  const character = (size: number) => imageUnavailable
-    ? <span className="character-fallback" role="img" aria-label={evolution.stageName}><Icon name={evolution.stage === 'tablet' ? 'medication' : 'growth'} /></span>
-    : <img src={`${process.env.PUBLIC_URL}/forms/${formImage}`} alt={`ろきちゃん：${evolution.stageName}`} decoding="async" onError={() => setImageUnavailable(true)} style={{ width: size, height: size, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />;
+  const mature = evolution.form.id === MATURE_FORM.id;
+  const human = mature && appearance.mode === 'human';
+  const displayForm = human ? HUMAN_FORM : evolution.form;
+  const character = (size: number) => (
+    <RokiCharacter key={displayForm.image} form={displayForm} size={size}
+      equipped={mature && !human ? appearance.equipped : undefined} />
+  );
+  const saveAppearance = (next: Appearance) => {
+    try {
+      localStorage.setItem(APPEARANCE_KEY, JSON.stringify(next));
+      setAppearance(next);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const switchForm = (mode: Appearance['mode']) => {
+    const saved = saveAppearance({ ...appearance, mode });
+    setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
+  };
 
   const checkIn = () => {
     const current = localDay();
@@ -162,7 +181,7 @@ export default function App() {
           <div className="home-progress-content">
             <div className="progress-heading">
               <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
-              <span>{evolution.stageName}</span>
+              <span>{displayForm.name}</span>
             </div>
             <label htmlFor="home-xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
             <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
@@ -175,24 +194,31 @@ export default function App() {
         </section>
       </>}
       {page !== 'home' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
-        <button type="button" onClick={() => navigate('home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← ホームに戻る</button>
+        <button type="button" onClick={() => navigate(page === 'dressup' ? 'growth' : 'home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>{page === 'dressup' ? '← 育成に戻る' : '← ホームに戻る'}</button>
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
       {page === 'growth' && <>
         <section className="growth-card" aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>
           <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
-          <p>{evolution.stageName}</p>
+          <p>{displayForm.name}</p>
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
-          <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : 'ヒューマンフォルムに到達しました！'}</p>
+          <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : '成熟フォルムに到達しました！'}</p>
+          {mature ? <>
+            <div className="wardrobe-options" role="group" aria-label="表示する姿">
+              <button type="button" aria-pressed={!human} onClick={() => switchForm('chibi')}>成熟フォルム</button>
+              <button type="button" aria-pressed={human} onClick={() => switchForm('human')}>ヒューマンフォルム</button>
+            </div>
+            <button className="wardrobe-save" type="button" onClick={() => navigate('dressup')}>着せ替えを開く</button>
+            {appearanceMessage && <p role="status">{appearanceMessage}</p>}
+          </> : <p>Lv.{MATURE_FORM.level}でちびろきの着せ替えが開きます。</p>}
           <ol className="evolution-stages" aria-label="進化の5段階">
-            {([1, 10, 20, 30, 50]).map(level => {
-              const form = evolutionFromXp((level - 1) * XP_PER_LEVEL);
-              return <li key={level} aria-current={form.stage === evolution.stage ? 'step' : undefined}>
-                <span>Lv.{level}〜</span> {form.stageName}
-              </li>;
-            })}
+            {FORM_STAGES.map(form => (
+              <li key={form.id} aria-current={form.id === evolution.form.id ? 'step' : undefined}>
+                <span>Lv.{form.level}〜</span> {form.name}
+              </li>
+            ))}
           </ol>
         </section>
         <section style={{ marginTop: 24 }}>
@@ -201,11 +227,12 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </section>
       </>}
+      {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
-      {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} />}
+      {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
       {page !== 'home' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
     </main>
   );
