@@ -351,7 +351,7 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 .kokoro-hero .room-switch {
   position: absolute;
   top: 8px;
-  right: 0;
+  left: 0;
 }
 
 .roki-room-header {
