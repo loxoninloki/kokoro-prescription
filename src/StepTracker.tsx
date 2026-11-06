@@ -116,7 +116,18 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
         <p>初回の実行時に、ショートカットに歩数の読み取りを許可してください。</p>
         <a href="shortcuts://create-shortcut">ショートカット作成画面を開く</a>
       </details>
-      <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
+      <details style={{ marginBottom: 14, fontSize: 13 }}>
+        <summary>オプション · 日付も一緒に送る</summary>
+        <p>いま使っている「こころの歩数」を開き、最後の「URLを開く」の手前に追加します。</p>
+        <ol>
+          <li>「現在の日付」を追加します。</li>
+          <li>「日付をフォーマット」を追加し、「現在の日付」をカスタム形式 <code>yyyy-MM-dd</code> にします。</li>
+          <li>「URLを開く」の歩数の変数のすぐ後ろに <code>&amp;date=</code> と入力し、その直後に「フォーマット済みの日付」の変数を追加します。</li>
+        </ol>
+        <p>URLの末尾の並びは <code>#steps=［値］&amp;date=［フォーマット済みの日付］</code> です。角括弧の部分には青い変数を入れます。</p>
+        <p>過去の歩数を送る場合は、検索対象の日と送る日付を同じ日にしてください。</p>
+      </details>
+ style={{ display: 'grid', gap: 12 }}>
         <label>記録する日
           <input type="date" value={selected} max={today} onChange={event => { setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
         </label>
