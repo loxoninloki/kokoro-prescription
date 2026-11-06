@@ -9,6 +9,7 @@ import { APPEARANCE_KEY, Appearance, readAppearance } from './appearance';
 import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
+import RokiRoom from './RokiRoom';
 import { Icon } from './Icon';
 
 const STORAGE_KEY = 'kokoro-checkins-v1';
@@ -60,9 +61,9 @@ export default function App() {
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup'>('home');
+  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup'>('home');
   const navigate = (next: typeof page) => {
-    if (next !== 'home') {
+    if (next !== 'home' && next !== 'room') {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
       setHeaderStickerFailed(false);
     }
@@ -169,6 +170,9 @@ export default function App() {
             <use href="#home-art-source" filter="url(#home-art-blend)" />
             <use href="#home-art-source" clipPath="url(#home-art-highlights)" />
           </svg>
+          <button className="room-switch" type="button" onClick={() => navigate('room')}>
+            <Icon name="growth" /> ろきちゃんのルーム
+          </button>
         </div>
         <nav className="kokoro-menu" aria-label="機能メニュー">
           {([
@@ -202,7 +206,9 @@ export default function App() {
           <button type="button" onClick={checkIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
         </section>
       </>}
-      {page !== 'home' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
+      {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
+        equipped={mature ? appearance.equipped : undefined} onBack={() => navigate('home')} />}
+      {page !== 'home' && page !== 'room' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
         <button type="button" onClick={() => navigate(page === 'dressup' ? 'growth' : 'home')} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>{page === 'dressup' ? '← 育成に戻る' : '← ホームに戻る'}</button>
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
@@ -242,7 +248,7 @@ export default function App() {
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
-      {page !== 'home' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
+      {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
     </main>
   );
 }
