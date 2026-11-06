@@ -39,7 +39,7 @@ button:disabled { cursor: default; }
   pointer-events: none;
   background: linear-gradient(180deg, #21133788, #23173b35 32%, #24153cce 76%, #211331ed), var(--scene) center / cover;
 }
-.kokoro-header { text-align: center; color: var(--cream); }
+.kokoro-header { position: relative; z-index: 1; text-align: center; color: var(--cream); }
 .kokoro-header h1 {
   margin: 0;
   font-size: clamp(24px, 6.8vw, 34px);
@@ -48,17 +48,32 @@ button:disabled { cursor: default; }
 }
 .kokoro-icon { display: inline-block; vertical-align: -.17em; width: 1.2em; height: 1.2em; }
 .kokoro-header .kokoro-icon { width: 30px; height: 30px; color: var(--lilac); }
-.kokoro-hero { display: grid; place-items: center; height: clamp(100px, 23svh, 184px); }
-.kokoro-home-character {
+.kokoro-hero { position: relative; height: clamp(175px, 38svh, 290px); }
+.kokoro-hero-art {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  width: min(calc(100% + 20px), 444px);
+  height: auto;
+  transform: translateX(-50%);
+  -webkit-mask-image: linear-gradient(transparent, #000 15%, #000 91%, transparent);
+  mask-image: linear-gradient(transparent, #000 15%, #000 91%, transparent);
+  pointer-events: none;
+}
+.home-form-avatar {
   display: grid;
   place-items: center;
-  animation: float 6s ease-in-out infinite;
-  filter: drop-shadow(0 5px 16px #ab78ed70);
+  align-self: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #ebc8ff95;
+  border-radius: 50%;
+  background: radial-gradient(circle, #b584d56b, #26163c74);
+  box-shadow: 0 0 12px #ca95ff55;
 }
-.kokoro-home-character img { display: block; max-height: clamp(96px, 22svh, 160px); }
+.home-form-avatar .character-fallback { font-size: 23px; }
 .character-fallback { font-size: 55px; }
-@keyframes float { 50% { transform: translateY(-5px); } }
-.kokoro-menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.kokoro-menu { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .kokoro-menu button, .home-progress, .kokoro-checkin {
   color: var(--cream);
   border: 1px solid #f2cbff8a;
@@ -72,6 +87,9 @@ button:disabled { cursor: default; }
   align-content: center;
   gap: 5px;
   min-height: 68px;
+  border-color: #e8c9ffb3;
+  background: linear-gradient(145deg, #73539bd9, #3e285de8);
+  box-shadow: inset 0 0 10px #d2a2ff45, 0 0 8px #d2a2ff48;
   padding: 7px 4px;
   font-size: clamp(11px, 3.2vw, 15px);
   font-weight: 650;
@@ -82,6 +100,7 @@ button:disabled { cursor: default; }
 .kokoro-app button { min-height: 44px; transition: transform .18s ease, box-shadow .18s ease; }
 .kokoro-app button:not(:disabled):active { transform: scale(.97); }
 .home-progress, .kokoro-checkin { padding: 10px 12px; margin-top: 10px; }
+.home-progress { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; }
 .progress-heading, .kokoro-checkin { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .progress-heading h2 { font-size: 16px; margin: 0; }
 .progress-heading span, .home-progress label, .home-progress p, .kokoro-checkin { font-size: 12px; }
@@ -167,16 +186,3 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
 .medication-dose { border: 1px solid #d7c0ed; overflow-wrap: anywhere; }
 .medication-dose[data-taken="true"] { background: #f0e4ff !important; border-color: #a581c7; }
 .kokoro-app [role="alert"] { color: #811d46; font-weight: 650; }
-.kokoro-hero::after {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  margin: -80px 0 0 -190px;
-  border-radius: 50%;
-  background: #fff0ff;
-  box-shadow: 190px 22px 0 #e7ccff, 139px -13px 0 #fff0ff;
-  animation: starlight 8s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes starlight { 0%, 100% { opacity: .25; } 50% { opacity: .75; } }

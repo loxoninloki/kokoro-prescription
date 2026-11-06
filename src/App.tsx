@@ -106,7 +106,15 @@ export default function App() {
           <h1>こころの処方箋</h1>
         </header>
         <div className="kokoro-hero">
-          <div className="kokoro-home-character">{character(160)}</div>
+          <svg className="kokoro-hero-art" viewBox="0 0 1214 1295" role="img" aria-label="月夜の部屋でぬいぐるみとくつろぐろきちゃん">
+            <defs>
+              <filter id="home-art-blend" colorInterpolationFilters="sRGB">
+                {/* Blend the white paper into the room while retaining the original illustration. */}
+                <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -4 -5 -3 1 11" />
+              </filter>
+            </defs>
+            <image href={`${process.env.PUBLIC_URL}/home-hero.webp`} width="1214" height="1295" filter="url(#home-art-blend)" />
+          </svg>
         </div>
         <nav className="kokoro-menu" aria-label="機能メニュー">
           {([
@@ -124,13 +132,16 @@ export default function App() {
           ))}
         </nav>
         <section className="home-progress" aria-label="ろきちゃんの育成状態">
-          <div className="progress-heading">
-            <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
-            <span>{evolution.stageName}</span>
+          <div className="home-form-avatar">{character(48)}</div>
+          <div className="home-progress-content">
+            <div className="progress-heading">
+              <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
+              <span>{evolution.stageName}</span>
+            </div>
+            <label htmlFor="home-xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
+            <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
+            <p>{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
           </div>
-          <label htmlFor="home-xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</label>
-          <progress id="home-xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
-          <p>{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</p>
         </section>
         <section className="kokoro-checkin" aria-label="今日のチェックイン">
           <div aria-label="記録の概要">累計 {days.length}日 · 連続 {streak}日 · {totalPoints} EXP</div>
