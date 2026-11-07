@@ -67,7 +67,8 @@ export default function App() {
   });
   const devGachaHost = isDevGachaHost();
   const [devGachaWallet, setDevGachaWallet] = useState<RewardState | null>(() =>
-    devGachaHost ? freshDevGachaWallet() : null);
+    devGachaHost && window.localStorage.getItem('kokoro-dev-gacha-mode-off-v1') !== '1'
+      ? freshDevGachaWallet() : null);
   const displayedWallet = devGachaWallet ?? wallet;
   // Gacha furniture is recorded in the reward ledger and mirrored into room ownership.
   // Reconciliation also repairs an interrupted previous write without duplicating a draw.
@@ -188,10 +189,10 @@ export default function App() {
       {devGachaHost && <aside className="dev-gacha-banner" aria-label="開発版のガチャテスト設定">
         <span>🧪 {devGachaWallet ? "テスト残高：マカロン " + (devGachaWallet.earned - devGachaWallet.spent) + "／チケット " + devGachaWallet.tickets : "ガチャテスト：OFF"}</span>
         <div>
-          <button type="button" disabled={!!devGachaWallet?.pendingGachaResult} onClick={() => setDevGachaWallet(freshDevGachaWallet())}>
+          <button type="button" disabled={!!devGachaWallet?.pendingGachaResult} onClick={() => { window.localStorage.removeItem('kokoro-dev-gacha-mode-off-v1'); setDevGachaWallet(freshDevGachaWallet()); }}>
             {devGachaWallet ? "リセット" : "テスト開始"}
           </button>
-          {devGachaWallet && <button type="button" disabled={!!devGachaWallet.pendingGachaResult} onClick={() => setDevGachaWallet(null)}>終了</button>}
+          {devGachaWallet && <button type="button" disabled={!!devGachaWallet.pendingGachaResult} onClick={() => { window.localStorage.setItem('kokoro-dev-gacha-mode-off-v1', '1'); setDevGachaWallet(null); }}>終了</button>}
         </div>
       </aside>}
 
