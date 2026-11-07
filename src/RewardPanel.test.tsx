@@ -4,7 +4,7 @@ import RewardPanel from './RewardPanel';
 import { EMPTY_REWARDS } from './rewardLedger';
 import { GACHA_TYPES } from './gachaCatalog';
 
-test('通常ガチャを含む全ガチャで、一覧から直接横スクロールのラインナップを見られる', async () => {
+test('コーデ・インテリアの2種類のガチャで、一覧から直接横スクロールのラインナップを見られる', async () => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   const target = document.createElement('div');
   document.body.appendChild(target);
@@ -20,8 +20,8 @@ test('通常ガチャを含む全ガチャで、一覧から直接横スクロ�
       roomOwnedItemIds={[]} onWalletChange={onWalletChange}
       previewForm={{id:'tablet',name:'錠剤フォルム',image:'lv1_tablet.webp'}} previewEquipment={[]} roomLayout={{}} />));
     expect(target.querySelector('.gacha-catalog-scroll')).not.toBeNull();
-    expect(target.querySelectorAll('.gacha-banner')).toHaveLength(3);
-    expect(target.querySelectorAll('.gacha-banner-more')).toHaveLength(3);
+    expect(target.querySelectorAll('.gacha-banner')).toHaveLength(2);
+    expect(target.querySelectorAll('.gacha-banner-more')).toHaveLength(2);
     expect(target.querySelector('.gacha-actions')).toBeNull();
     for (const gacha of GACHA_TYPES) {
       const lineup = Array.from(target.querySelectorAll<HTMLButtonElement>('.gacha-banner-more'))
@@ -38,7 +38,7 @@ test('通常ガチャを含む全ガチャで、一覧から直接横スクロ�
       await click(target.querySelector<HTMLButtonElement>('.gacha-preview-close'));
       expect(target.querySelector('.gacha-item-preview')).toBeNull();
       await click(target.querySelector<HTMLButtonElement>('.gacha-back'));
-      expect(target.querySelectorAll('.gacha-banner')).toHaveLength(3);
+      expect(target.querySelectorAll('.gacha-banner')).toHaveLength(2);
     }
   } finally {
     await act(async () => root.unmount());
@@ -78,7 +78,7 @@ test('カード選択後はガチャ説明と2種類の支払いだけ、抽選�
     expect(onWalletChange).not.toHaveBeenCalled();
     await click(target.querySelector<HTMLButtonElement>('.gacha-back'));
     expect(target.querySelector('.gacha-catalog-scroll')).not.toBeNull();
-    await click(target.querySelectorAll<HTMLButtonElement>('.gacha-banner-more')[2]);
+    await click(target.querySelectorAll<HTMLButtonElement>('.gacha-banner-more')[1]);
     await click(target.querySelector<HTMLButtonElement>('.gacha-lineup-to-draw'));
     expect(target.querySelector('.gacha-draw-choices')).not.toBeNull();
     expect(target.querySelector('.gacha-prize-grid')).toBeNull();
