@@ -1571,3 +1571,23 @@ button.home-progress {
 .selfcare-page.care-compact+p {display:none}
 @media(max-width:365px) {.care-diary-date .care-saved-mood{display:none}.selfcare-page .care-chart-toolbar>select{width:76px;font-size:12px!important}.care-chart-toolbar>strong{font-size:11px}.selfcare-page.care-compact .care-moods button{font-size:10px}}
 @media(max-height:650px) {.selfcare-page.care-compact textarea{height:88px;min-height:88px}.selfcare-page.care-compact .care-moods button{min-height:58px}.selfcare-page.care-compact .care-week-bar-track{height:46px}}
+
+/* Definite prize canvas: an auto grid track + absolutely positioned artwork had
+   a zero intrinsic width, shrinking loaded SVGs to 0px in the reward dialog. */
+.gacha-reward-modal .gacha-reveal-prize{position:relative;display:flex;align-items:center;justify-content:center;width:min(100%,280px);height:230px;isolation:isolate}
+.gacha-reward-modal .gacha-reveal-prize .gacha-item-art{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none}
+.gacha-reward-modal .gacha-reveal-prize.gacha-prize-large{width:min(100%,360px);height:min(340px,48dvh)}
+.gacha-confirm.gacha-reward-modal,.gacha-confirm.gacha-sequence{width:min(100%,480px);box-sizing:border-box;padding:16px}
+.gacha-confirm-backdrop{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.gacha-reward-modal .gacha-prize-zoom{min-height:44px;font-size:13px}
+.gacha-sequence-scene{max-width:390px;width:100%}
+.gacha-sequence .gacha-reveal-animation{width:100%;max-height:55dvh;aspect-ratio:309/307}
+.reward-panel--gacha{padding:14px 10px}
+.reward-panel--gacha .gacha-banner-main{min-height:164px}
+.reward-panel--gacha .gacha-banner strong{font-size:clamp(19px,5.6vw,26px)}
+.reward-panel--gacha .gacha-featured{min-height:250px}
+.reward-panel--gacha .gacha-featured-art{height:130px}
+.gacha-item-art .gacha-art-fallback{font-size:13px;color:#694080;padding:12px;background:#f5e9ff}
+.gacha-item-preview .gacha-prize-art{height:240px}
+.gacha-wear{font-weight:750}
+@media(max-height:650px){.gacha-reward-modal .gacha-reveal-prize{height:180px;margin:6px auto}.gacha-reward-modal .gacha-reveal-prize.gacha-prize-large{height:min(280px,48dvh)}.gacha-reward-modal h2{margin:5px 0}.gacha-reward-actions{margin:8px 0}.gacha-reward-kind{margin:6px 0}}

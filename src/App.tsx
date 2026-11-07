@@ -18,6 +18,7 @@ import { readRoom, EMPTY_ROOM, ROOM_KEY, updateRoom, INTERIOR_ITEMS } from './in
 import HomePage from './HomePage';
 import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
+import { equipGachaPrize } from './gachaEquip';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
 import { tokyoDay, RewardState, updateRewards } from './rewardLedger';
@@ -272,7 +273,10 @@ export default function App() {
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page + (devGachaWallet ? '-test' : '-real')} wallet={displayedWallet} error={walletError && !devGachaWallet} testMode={!!devGachaWallet} section={page === 'gacha' ? 'gacha' : 'shop'}
         roomOwnedItemIds={devGachaWallet ? [] : room.ownedItemIds} onWalletChange={devGachaWallet ? setDevGachaWallet : setWallet} previewForm={displayForm}
-        previewEquipment={visibleEquipment} roomLayout={room.layout} />}
+        previewEquipment={visibleEquipment} roomLayout={room.layout} onEquip={async(itemId,formId)=>{
+          const next=await equipGachaPrize(itemId,formId,evolution.level,!!devGachaWallet);
+          setAppearance(next);setDraft(outfitView(next,formId));
+        }} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} medicines={medication.medicines} />}
       {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}

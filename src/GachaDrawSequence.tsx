@@ -27,7 +27,7 @@ export default function GachaDrawSequence({drawId,rarity,audio,soundOn,onSoundCh
  },[loaded,reduced,rarity,audio,finish]);
  return <div className="gacha-confirm-backdrop"><section ref={root} tabIndex={-1} className="gacha-confirm gacha-sequence" role="dialog" aria-modal="true" aria-labelledby="gacha-sequence-title" data-rarity={rarity} data-phase={phase} data-reduced={reduced}>
   <h2 id="gacha-sequence-title">癒しのカプセルを開封中…</h2>
-  <button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={onSoundChange}>効果音 {soundOn?'ON':'OFF'}</button>
+  <button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={onSoundChange}>BGM・効果音 {soundOn?'ON':'OFF'}</button>
   {reduced?<div className="gacha-quiet-cross" aria-hidden="true">✚</div>:<div className="gacha-sequence-scene">
    <img className="gacha-reveal-animation" src={`${process.env.PUBLIC_URL}/${GACHA_ANIMATION.path}?draw=${encodeURIComponent(drawId)}`} width={309} height={307}
     alt="紫のガチャマシンからカプセルが出て左右に開き、医療十字が光ります" onLoad={()=>setLoaded(true)} onError={finish}/>
