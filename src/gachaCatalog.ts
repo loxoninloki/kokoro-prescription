@@ -3,7 +3,7 @@ import { INTERIOR_ITEMS } from './interior';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 export interface GachaType {
-  id: 'standard' | 'outfit' | 'interior';
+  id: 'outfit' | 'interior';
   name: string;
   description: string;
   icon: string;
@@ -16,13 +16,12 @@ const furniture = INTERIOR_ITEMS.map(item => item.id);
 
 // Adding a gacha category only requires adding another entry here.
 export const GACHA_TYPES: readonly GachaType[] = [
-  { id: 'standard', name: '通常ガチャ', description: '衣装・インテリアの両方が登場します。', icon: '✦', itemIds: [...clothing, ...furniture], macaronCost: 50 },
-  { id: 'outfit', name: 'ファッションセレクトガチャ', description: '衣装・髪型・メイク・アクセサリーが登場します。', icon: '♧', itemIds: clothing, macaronCost: 50 },
+  { id: 'outfit', name: 'コーデセレクトガチャ', description: '衣装・髪型・メイク・アクセサリーが登場します。', icon: '♧', itemIds: clothing, macaronCost: 50 },
   { id: 'interior', name: 'インテリアセレクトガチャ', description: 'ルーム用の家具・内装だけが登場します。', icon: '⌂', itemIds: furniture, macaronCost: 50 },
 ];
 
 export function drawCandidates(type: GachaType, owned: readonly string[]): string[] {
-  return type.itemIds.filter(id => !owned.includes(id));
+  return [...type.itemIds]; // Owned items stay in the pool.
 }
 
 export function equalWeightPool(itemIds: readonly string[]): {id:string;weight:number}[] {
