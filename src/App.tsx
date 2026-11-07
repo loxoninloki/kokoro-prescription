@@ -12,6 +12,7 @@ import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
 import HomePage from './HomePage';
+import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
@@ -58,16 +59,49 @@ export default function App() {
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'invite' | 'menu' | 'rewards' | 'gacha'>('home');
-  const navigate = (next: typeof page) => {
-    if (next !== 'home' && next !== 'room') {
-      setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
-      setHeaderStickerFailed(false);
-    }
+  type Page = 'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'invite' | 'menu' | 'rewards' | 'gacha';
+  const route = (): Page => {
+    const value = new URL(window.location.href).searchParams.get('page');
+    return ['home','room','diary','medication','steps','meditation','growth','dressup','backup','invite','menu','rewards','gacha'].includes(value || '') ? value as Page : 'home';
+  };
+  const [page, setPage] = useState<Page>(route);
+  const [draft, setDraft] = useState(readAppearance);
+  const [pendingPage, setPendingPage] = useState<Page | null>(null);
+  const dirty = page === 'dressup' && JSON.stringify(draft.equipped) !== JSON.stringify(appearance.equipped);
+  const commitNavigation = (next: Page, push = true) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', next);
+    if (push) window.history.pushState(null, '', url);
+    setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
+    setHeaderStickerFailed(false);
     if (next !== 'steps') setStepImport(null);
+    if (next === 'dressup') setDraft(appearance);
     setPage(next);
     window.scrollTo(0, 0);
   };
+  const navigate = (next: Page) => {
+    if (next === page) return;
+    if (dirty) { setPendingPage(next); return; }
+    commitNavigation(next);
+  };
+  useEffect(() => {
+    const back = () => {
+      const next = route();
+      if (dirty) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.history.replaceState(null, '', url);
+        setPendingPage(next);
+      } else commitNavigation(next, false);
+    };
+    const unloading = (event: BeforeUnloadEvent) => { if (dirty) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('popstate', back);
+    window.addEventListener('beforeunload', unloading);
+    return () => {
+      window.removeEventListener('popstate', back);
+      window.removeEventListener('beforeunload', unloading);
+    };
+  });
 
   useEffect(() => {
     const receiveSteps = () => {
@@ -138,7 +172,7 @@ export default function App() {
     setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
   };
 
-  const backPage = page === 'dressup' ? 'growth' : (page === 'backup' || page === 'invite') ? 'menu' : 'home';
+  const backPage = (page === 'backup' || page === 'invite') ? 'menu' : 'home';
   const backLabel = { growth: '育成', menu: 'メニュー', home: 'ホーム' }[backPage];
 
   const checkIn = () => {
@@ -155,7 +189,7 @@ export default function App() {
         checkinDays={days.length} onCheckIn={checkIn} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
         equipped={mature ? appearance.equipped : undefined} onBack={() => navigate('home')} />}
-      {page !== 'home' && page !== 'room' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
+      {page !== 'home' && page !== 'room' && page !== 'dressup' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
         <button type="button" onClick={() => navigate(backPage)} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← {backLabel}に戻る</button>
         {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
       </nav>}
@@ -172,7 +206,7 @@ export default function App() {
               <button type="button" aria-pressed={!human} onClick={() => switchForm('chibi')}>成熟フォルム</button>
               <button type="button" aria-pressed={human} onClick={() => switchForm('human')}>ヒューマンフォルム</button>
             </div>
-            <button className="wardrobe-save" type="button" onClick={() => navigate('dressup')}>着せ替えを開く</button>
+
             {appearanceMessage && <p role="status">{appearanceMessage}</p>}
           </> : <p>Lv.{MATURE_FORM.level}でちびろきの着せ替えが開きます。</p>}
           <ol className="evolution-stages" aria-label="進化の5段階">
@@ -189,8 +223,9 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </section>
       </>}
-      {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} rewardDays={rewardDays} />}
+      {page === 'dressup' && mature && <DressUp saved={appearance} draft={draft} setDraft={setDraft} onSave={saveAppearance} rewardDays={rewardDays} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
+      {page === 'dressup' && !mature && <section className="menu-panel"><h1>コーデ</h1><p>Lv.50の成熟フォルムで着せ替えが開きます。</p></section>}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
@@ -205,6 +240,16 @@ export default function App() {
       {page === 'invite' && <AppInvite />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
       {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
+      <BottomNavigation page={page} onNavigate={navigate} />
+      {pendingPage && <div className="navigation-dialog-backdrop">
+        <section role="dialog" aria-modal="true" aria-labelledby="unsaved-title" className="navigation-dialog">
+          <h2 id="unsaved-title">未保存のコーデがあります</h2>
+          <button type="button" autoFocus onClick={() => { if (saveAppearance(draft)) { commitNavigation(pendingPage); setPendingPage(null); } else setAppearanceMessage('保存できませんでした。'); }}>保存して移動</button>
+          <button type="button" onClick={() => { setDraft(appearance); commitNavigation(pendingPage); setPendingPage(null); }}>保存せず移動</button>
+          <button type="button" onClick={() => setPendingPage(null)}>編集を続ける</button>
+          {appearanceMessage && <p role="status">{appearanceMessage}</p>}
+        </section>
+      </div>}
     </main>
   );
 }

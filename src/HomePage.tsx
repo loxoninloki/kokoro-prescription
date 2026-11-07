@@ -25,11 +25,6 @@ const careActions = [
   ['diary', '気分・日記'], ['medication', 'お薬'], ['steps', '歩数'], ['meditation', '瞑想BGM'],
 ] as const;
 
-const navigation = [
-  ['diary', 'きろく', 'diary'], ['rewards', 'ショップ', 'rewards'], ['home', 'ホーム', 'home'],
-  ['gacha', 'ガチャ', 'gacha'], ['dressup', 'コーデ', 'dressup'], ['menu', 'メニュー', 'menu'],
-] as const;
-
 export default function HomePage({ evolution, displayForm, equipped, wallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
   const [scene, setScene] = useState<'avatar' | 'illustration'>('avatar');
@@ -94,14 +89,7 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
       <CheckInCompactCard {...{ checkinDays, totalPoints, checkedIn, onCheckIn }} />
     </section>
 
-    <nav className="avatar-bottom" aria-label="ホームナビゲーション">
-      {navigation.map(([target, label, icon]) =>
-        <button key={target} type="button" aria-current={target === 'home' ? 'page' : undefined}
-          disabled={target === 'dressup' && !mature} onClick={() => onNavigate(target)}
-          aria-label={target === 'dressup' && !mature ? 'コーデ Lv.50で解放' : label}>
-          <Icon name={icon} /><span>{label}</span>
-        </button>)}
-    </nav>
+
   </div>;
 }
 

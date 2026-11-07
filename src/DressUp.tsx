@@ -4,12 +4,13 @@ import { MATURE_FORM } from './evolution';
 import RokiCharacter from './RokiCharacter';
 import WardrobeIcon from './WardrobeIcon';
 
-export default function DressUp({ saved, onSave, rewardDays }: {
+export default function DressUp({ saved, onSave, rewardDays, draft, setDraft }: {
   saved: Appearance;
+  draft: Appearance;
+  setDraft: React.Dispatch<React.SetStateAction<Appearance>>;
   rewardDays: number;
   onSave: (appearance: Appearance) => boolean;
 }) {
-  const [draft, setDraft] = useState(saved);
   const [category, setCategory] = useState<Category>('hats');
   const [message, setMessage] = useState('');
   const items = ITEMS.filter(item => item.category === category);

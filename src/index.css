@@ -643,3 +643,10 @@ button.home-progress {
 .avatar-summary-grid .avatar-login { position: relative; padding-left: 34px; }
 .avatar-summary-grid .avatar-login > .kokoro-icon { position: absolute; left: 9px; top: 20px; width: 20px; height: 20px; }
 .avatar-summary-grid .avatar-login-heading strong { display: block; font-size: 15px; }
+.kokoro-app { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+.app-bottom-navigation { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(7px, env(safe-area-inset-bottom)); width: min(calc(100% - 28px), 512px); margin: 0; color: white; z-index: 100; }
+.app-bottom-navigation button { color: white; border: 0; box-shadow: none; }
+.navigation-dialog-backdrop { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px; background: #160e2ccc; z-index: 200; }
+.navigation-dialog { padding: 20px; max-width: 360px; width: 100%; border-radius: 20px; background: #f5eaff; color: #302044; }
+.navigation-dialog h2 { font-size: 18px; }
+.navigation-dialog button { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #a786c4; border-radius: 12px; background: #e6d1f5; color: #302044; }
