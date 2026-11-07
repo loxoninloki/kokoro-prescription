@@ -17,7 +17,7 @@ type Destination = 'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditat
 interface Props {
   onLoginRewards: () => void;
   evolution: Evolution;
-  level: number;
+  level?: number;
   displayForm: { name: string; image: string };
   room: RoomState;
   equipped?: string[];
@@ -77,7 +77,7 @@ export default function HomePage({ onLoginRewards, evolution, level, displayForm
           aria-label={`${sceneLabels[nextScene]}表示へ切り替え`} title={`次：${sceneLabels[nextScene]}`}>
           <Icon name="scene" /><span>表示切替</span>
         </button>
-        <PresentBox wallet={realWallet ?? wallet} room={room} level={level} onWalletChange={onWalletChange}/>
+        <PresentBox wallet={realWallet ?? wallet} room={room} level={level ?? evolution.level} onWalletChange={onWalletChange}/>
       </nav>
     </section>
 
