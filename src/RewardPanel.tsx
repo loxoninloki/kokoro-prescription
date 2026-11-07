@@ -1,10 +1,15 @@
 import React from 'react';
-import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState, TICKET_DRAW_COST, updateRewards, drawItem } from './rewardLedger';
+import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState, TICKET_DRAW_COST, PendingGachaResult } from './rewardLedger';
 import { GACHA_TYPES, drawCandidates, equalWeightPool, gachaItemName, isInteriorPrize } from './gachaCatalog';
-import { ITEMS, FormId } from './appearance';
-import { INTERIOR_ITEMS, RoomState } from './interior';
+import { FormId } from './appearance';
+import { RoomState } from './interior';
 import GachaTryOn, { canTryOn } from './GachaTryOn';
-import InteriorIcon from './InteriorIcon';
+import PrizeArt from './GachaPrizeArt';
+import GachaDrawSequence from './GachaDrawSequence';
+import GachaRewardModal from './GachaRewardModal';
+import { GachaAudio,readGachaAudio,saveGachaAudio } from './gachaAudio';
+import { gachaRarity } from './gachaRarity';
+import { confirmGachaDraw,acknowledgeGachaResult } from './gachaDraw';
 
 export function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className="reward-icon"
@@ -31,17 +36,6 @@ function RewardBalances({ wallet }: { wallet: RewardState }) {
 
 type Payment = 'ticket' | 'macaron';
 type GachaChoice = typeof GACHA_TYPES[number];
-
-function PrizeArt({ id }: { id: string }) {
-  const garment = ITEMS.find(item => item.id === id);
-  if (garment) return <img src={String(process.env.PUBLIC_URL) + '/' + garment.layers[0].image}
-    loading="lazy" alt="" onError={event => { event.currentTarget.hidden = true; }} />;
-  const furnishing = INTERIOR_ITEMS.find(item => item.id === id);
-  if (furnishing) return <span className="gacha-furniture-icon" style={{ backgroundColor: furnishing.color }}>
-    <InteriorIcon name={furnishing.slot} />
-  </span>;
-  return <span aria-hidden="true">✦</span>;
-}
 
 function GachaBanner({ gacha, onOpen, onLineup }: {
   gacha: GachaChoice;
@@ -87,27 +81,36 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
   const closePreview = () => { setPreviewId(null); setTryingOn(false); setTrialApplied(true); };
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState('');
-  const [prize, setPrize] = React.useState<string | null>(null);
-  // The draw and payment are committed before the visual reveal begins.
-  // The GIF only presents the saved outcome; it never initiates another draw.
-  const [gachaReveal, setGachaReveal] = React.useState<'playing' | 'revealed' | null>(null);
-  const [gachaAnimationLoaded, setGachaAnimationLoaded] = React.useState(false);
-  React.useEffect(() => {
-    if (gachaReveal !== 'playing' || !gachaAnimationLoaded) return;
-    const timer = window.setTimeout(() => setGachaReveal('revealed'), 3840);
-    return () => window.clearTimeout(timer);
-  }, [gachaReveal, gachaAnimationLoaded]);
-  React.useEffect(() => {
-    if (!gachaReveal) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        setGachaReveal(value => value === 'playing' ? 'revealed' : null);
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [gachaReveal]);
+  const restored=section==='gacha'?wallet.pendingGachaResult:undefined;
+  const [drawResult,setDrawResult]=React.useState<PendingGachaResult|null>(restored??null);
+  const [gachaReveal,setGachaReveal]=React.useState<'playing'|'revealed'|null>(restored?'revealed':null);
+  const drawLock=React.useRef(!!restored),mounted=React.useRef(true);
+  const audioRef=React.useRef<GachaAudio|null>(null);
+  const getAudio=()=>audioRef.current??(audioRef.current=new GachaAudio());
+  const [soundOn,setSoundOn]=React.useState(readGachaAudio),[soundMessage,setSoundMessage]=React.useState('');
+  const [resultError,setResultError]=React.useState('');
+  const toggleSound=()=>{
+    const on=!soundOn;if(on)getAudio().unlock();else getAudio().stop();
+    setSoundOn(on);setSoundMessage(saveGachaAudio(on)?'': '音声設定を保存できません。この画面では切り替わります。');
+  };
+  React.useEffect(()=>{
+    mounted.current=true;
+    return()=>{mounted.current=false;audioRef.current?.dispose();audioRef.current=null;};
+  },[]);
+  React.useEffect(()=>{
+    if(section==='gacha'&&wallet.pendingGachaResult&&!drawLock.current){
+      drawLock.current=true;setDrawResult(wallet.pendingGachaResult);setGachaReveal('revealed');
+    }
+  },[wallet.pendingGachaResult,section]);
+  const closeResult=async()=>{
+    if(!drawResult||busy)return;
+    setBusy(true);setResultError('');
+    try {
+      const next=await acknowledgeGachaResult(drawResult.id);onWalletChange(next);
+      if(mounted.current){setDrawResult(null);setGachaReveal(null);drawLock.current=false;}
+    }catch{if(mounted.current)setResultError('確認状態を保存できませんでした。獲得アイテムは保存済みです。もう一度OKを押してください。');}
+    finally{if(mounted.current)setBusy(false);}
+  };
   const selected = GACHA_TYPES.find(gacha => gacha.id === selectedId);
   const owned = Array.from(new Set([...wallet.ownedItemIds, ...roomOwnedItemIds]));
   const candidates = selected ? drawCandidates(selected, owned) : [];
@@ -125,8 +128,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     setPendingPayment(null);
     closePreview();
     setMessage('');
-    setPrize(null);
-    setGachaReveal(null);
+
   };
   const backToList = () => {
     setSelectedId(null);
@@ -134,45 +136,32 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     setPendingPayment(null);
     setPreviewId(null);
     setMessage('');
-    setPrize(null);
-    setGachaReveal(null);
+
   };
   const draw = async () => {
-    if (busy || error || !selected || !pendingPayment || !candidates.length || !enough) return;
-    setBusy(true); setMessage(''); setPrize(null);
+    if(drawLock.current||busy||error||!selected||!pendingPayment||!candidates.length||!enough)return;
+    drawLock.current=true;setBusy(true);setMessage('');
+    // Unlock during this user gesture, before any asynchronous storage work.
+    if(soundOn)getAudio().unlock();
     try {
-      let winner = '';
-      const next = await updateRewards(current => {
-        const available = drawCandidates(selected, Array.from(new Set([...current.ownedItemIds, ...roomOwnedItemIds])));
-        if (!available.length) throw new Error('このガチャのアイテムはすべて所持しています。');
-        const result = drawItem(current, {
-          macaronCost: selected.macaronCost,
-          pool: equalWeightPool(available),
-          resolveDuplicate: () => { throw new Error('抽選対象が更新されました。もう一度お試しください。'); },
-        }, pendingPayment);
-        winner = result.itemId;
-        return result.state;
-      });
-      onWalletChange(next);
-      setPendingPayment(null);
-      setPrize(winner);
-      setGachaAnimationLoaded(false);
-      setGachaReveal(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'revealed' : 'playing');
-      setMessage('「' + gachaItemName(winner) + '」を獲得しました！');
-    } catch (reason) {
-      setMessage(reason instanceof Error ? reason.message : '抽選できませんでした。');
-      setPendingPayment(null);
-    } finally { setBusy(false); }
+      const committed=await confirmGachaDraw(selected,pendingPayment,roomOwnedItemIds);
+      if(mounted.current){setDrawResult(committed.result);setGachaReveal('playing');setPendingPayment(null);}
+      onWalletChange(committed.wallet);
+    }catch(reason){
+      drawLock.current=false;getAudio().stop();
+      if(mounted.current){setMessage(reason instanceof Error?reason.message:'抽選できませんでした。');setPendingPayment(null);}
+    }finally{if(mounted.current)setBusy(false);}
   };
 
   return <section className={'reward-panel reward-panel--' + section} aria-labelledby="reward-title">
     <header className="gacha-header">
       {selected && section === 'gacha' &&
-        <button className="gacha-back" type="button" onClick={backToList} disabled={busy}>‹ 一覧へ</button>}
+        <button className="gacha-back" type="button" onClick={backToList} disabled={busy||!!gachaReveal}>‹ 一覧へ</button>}
       <h1 id="reward-title">{section === 'gacha' ? (selected ? selected.name : 'ガチャ') : 'ショップ'}</h1>
     </header>
     {error ? <p role="alert">報酬データを読み込めないため、抽選は利用できません。</p> : <>
       <RewardBalances wallet={wallet} />
+      {section==='gacha'&&<div className="gacha-sound-setting"><button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={toggleSound}>効果音 {soundOn?'ON':'OFF'}</button><small>小さな音で再生します。初期設定はOFF。</small>{soundMessage&&<span role="status">{soundMessage}</span>}</div>}
       {section === 'gacha' ? !selected || view === 'catalog' ? <>
         <p className="gacha-help">今日はどれにしよう？ 気になるガチャを選んでください。ラインナップは引く前に確認できます。</p>
         <div className="gacha-catalog-scroll" role="region" aria-label="ガチャ一覧（縦スクロール）" tabIndex={0}>
@@ -192,46 +181,19 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
           <h2>どちらで引きますか？</h2>
           <p>支払い方法を選ぶと、抽選前の確認画面が表示されます。</p>
           <div className="gacha-actions">
-            <button type="button" disabled={busy || !candidates.length || macaronBalance(wallet) < selected.macaronCost}
-              onClick={() => { setPendingPayment('macaron'); setMessage(''); setPrize(null); }}>
+            <button type="button" disabled={busy || !!gachaReveal || !candidates.length || macaronBalance(wallet) < selected.macaronCost}
+              onClick={() => { setPendingPayment('macaron'); setMessage(''); }}>
               <RewardIcon kind="macaron" /> マカロン {selected.macaronCost}個で引く
             </button>
-            <button type="button" disabled={busy || !candidates.length || wallet.tickets < TICKET_DRAW_COST}
-              onClick={() => { setPendingPayment('ticket'); setMessage(''); setPrize(null); }}>
+            <button type="button" disabled={busy || !!gachaReveal || !candidates.length || wallet.tickets < TICKET_DRAW_COST}
+              onClick={() => { setPendingPayment('ticket'); setMessage(''); }}>
               <RewardIcon kind="ticket" /> チケット {TICKET_DRAW_COST}枚で引く
             </button>
           </div>
           {!candidates.length && <p>このガチャのアイテムはすべて獲得済みです。</p>}
-          {message && !gachaReveal && <p role="status" className={prize ? 'gacha-win' : undefined}>{message}</p>}
-          {prize && !gachaReveal && <div className="gacha-win-preview"><div className="gacha-prize-art"><PrizeArt id={prize}/></div>
-            <strong>{gachaItemName(prize)}</strong>
-            <p>{isInteriorPrize(prize) ? 'ルームの模様替えから配置できます。' : 'コーデ画面から着せ替えできます。'}</p>
-          </div>}
+          {message&&<p role="status">{message}</p>}
         </div>
 
-        {prize && gachaReveal && <div className="gacha-confirm-backdrop" role="presentation">
-          <section className="gacha-confirm gacha-reveal-dialog" role="dialog" aria-modal="true"
-            aria-labelledby="gacha-reveal-title">
-            {gachaReveal === 'playing' ? <>
-              <h2 id="gacha-reveal-title">おくすりガチャ、開封中… ✨</h2>
-              <img className="gacha-reveal-animation"
-                src={`${process.env.PUBLIC_URL}/gacha/kokoro_gacha.gif`}
-                alt="ガチャマシンが回り、お薬カプセルが左右に開くアニメーション"
-                onLoad={() => setGachaAnimationLoaded(true)}
-                onError={() => setGachaReveal('revealed')} />
-              <button type="button" autoFocus className="gacha-reveal-action"
-                onClick={() => setGachaReveal('revealed')}>演出をスキップ</button>
-            </> : <>
-              <span className="gacha-reveal-sparkle" aria-hidden="true">✦ ✧ ✦</span>
-              <h2 id="gacha-reveal-title">アイテム獲得！</h2>
-              <div className="gacha-reveal-prize"><PrizeArt id={prize} /></div>
-              <strong className="gacha-reveal-name">{gachaItemName(prize)}</strong>
-              <p>{isInteriorPrize(prize) ? 'マイルームに飾れるアイテムです。' : 'コーデ画面で着せ替えできます。'}</p>
-              <button type="button" autoFocus className="gacha-reveal-action"
-                onClick={() => setGachaReveal(null)}>受け取る・閉じる</button>
-            </>}
-          </section>
-        </div>}
         {pendingPayment && <div className="gacha-confirm-backdrop" role="presentation">
           <div className="gacha-confirm" role="dialog" aria-modal="true" aria-labelledby="gacha-confirm-title">
             <button type="button" className="gacha-confirm-close" disabled={busy} aria-label="閉じる" onClick={() => setPendingPayment(null)}>×</button>
@@ -270,7 +232,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
           </div>
           <p className="gacha-rate">確率は現在の所持状況に基づく表示です。未所持アイテムをほぼ均等な確率（0.01%単位）で抽選します。</p>
           <button type="button" className="gacha-lineup-to-draw" onClick={() => {
-            setView('draw'); setPreviewId(null); setMessage(''); setPrize(null);
+            setView('draw'); setPreviewId(null); setMessage('');
           }}>このガチャを選ぶ ›</button>
         </section>
         {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={closePreview}>
@@ -311,6 +273,8 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
         <progress id="ticket-progress" value={progress} max={LOGIN_DAYS_PER_TICKET} />
       </>}
     </>}
+    {drawResult&&gachaReveal==='playing'&&<GachaDrawSequence key={drawResult.id} drawId={drawResult.id} rarity={gachaRarity(drawResult.itemId)} audio={getAudio()} soundOn={soundOn} onSoundChange={toggleSound} onComplete={()=>setGachaReveal('revealed')}/>}
+    {drawResult&&gachaReveal==='revealed'&&<GachaRewardModal itemId={drawResult.itemId} form={previewForm} equipped={previewEquipment} roomLayout={roomLayout} busy={busy} error={resultError} onClose={()=>void closeResult()}/>}
     {(section === 'shop' || view === 'catalog') && <details className="gacha-owned">
       <summary>所持アイテム（{owned.length}種類）</summary>
       {owned.length ? <ul>{owned.map(id => <li key={id}>{gachaItemName(id)}</li>)}</ul> : <p>獲得したアイテムはここに表示されます。</p>}
