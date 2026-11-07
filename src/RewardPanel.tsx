@@ -10,6 +10,7 @@ import GachaRewardModal from './GachaRewardModal';
 import { GachaAudio,readGachaAudio,saveGachaAudio } from './gachaAudio';
 import { gachaRarity } from './gachaRarity';
 import { confirmGachaDraw,acknowledgeGachaResult } from './gachaDraw';
+import { confirmDevGachaDraw, acknowledgeDevGachaResult } from './devGachaSandbox';
 
 export function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className="reward-icon"
@@ -62,9 +63,10 @@ function GachaBanner({ gacha, onOpen, onLineup }: {
   </article>;
 }
 
-export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, onWalletChange, previewForm, previewEquipment, roomLayout }: {
+export default function RewardPanel({ wallet, error, testMode = false, section, roomOwnedItemIds, onWalletChange, previewForm, previewEquipment, roomLayout }: {
   wallet: RewardState;
   error: boolean;
+  testMode?: boolean;
   section: 'gacha' | 'shop';
   roomOwnedItemIds: readonly string[];
   onWalletChange: (next: RewardState) => void;
@@ -106,7 +108,8 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     if(!drawResult||busy)return;
     setBusy(true);setResultError('');
     try {
-      const next=await acknowledgeGachaResult(drawResult.id);onWalletChange(next);
+      const next=testMode ? acknowledgeDevGachaResult(wallet,drawResult.id) : await acknowledgeGachaResult(drawResult.id);
+      onWalletChange(next);
       if(mounted.current){setDrawResult(null);setGachaReveal(null);drawLock.current=false;}
     }catch{if(mounted.current)setResultError('確認状態を保存できませんでした。獲得アイテムは保存済みです。もう一度OKを押してください。');}
     finally{if(mounted.current)setBusy(false);}
@@ -144,7 +147,9 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     // Unlock during this user gesture, before any asynchronous storage work.
     if(soundOn)getAudio().unlock();
     try {
-      const committed=await confirmGachaDraw(selected,pendingPayment,roomOwnedItemIds);
+      const committed=testMode
+        ? confirmDevGachaDraw(wallet,selected,pendingPayment)
+        : await confirmGachaDraw(selected,pendingPayment,roomOwnedItemIds);
       if(mounted.current){setDrawResult(committed.result);setGachaReveal('playing');setPendingPayment(null);}
       onWalletChange(committed.wallet);
     }catch(reason){
@@ -160,6 +165,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
       <h1 id="reward-title">{section === 'gacha' ? (selected ? selected.name : 'ガチャ') : 'ショップ'}</h1>
     </header>
     {error ? <p role="alert">報酬データを読み込めないため、抽選は利用できません。</p> : <>
+      {testMode && <p className="gacha-test-notice" role="status">🧪 テストモード：通貨・獲得アイテムは仮のものです。実際の所持品には反映されません。</p>}
       <RewardBalances wallet={wallet} />
       {section==='gacha'&&<div className="gacha-sound-setting"><button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={toggleSound}>効果音 {soundOn?'ON':'OFF'}</button><small>小さな音で再生します。初期設定はOFF。</small>{soundMessage&&<span role="status">{soundMessage}</span>}</div>}
       {section === 'gacha' ? !selected || view === 'catalog' ? <>
@@ -274,7 +280,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
       </>}
     </>}
     {drawResult&&gachaReveal==='playing'&&<GachaDrawSequence key={drawResult.id} drawId={drawResult.id} rarity={gachaRarity(drawResult.itemId)} audio={getAudio()} soundOn={soundOn} onSoundChange={toggleSound} onComplete={()=>setGachaReveal('revealed')}/>}
-    {drawResult&&gachaReveal==='revealed'&&<GachaRewardModal itemId={drawResult.itemId} form={previewForm} equipped={previewEquipment} roomLayout={roomLayout} busy={busy} error={resultError} onClose={()=>void closeResult()}/>}
+    {drawResult&&gachaReveal==='revealed'&&<GachaRewardModal itemId={drawResult.itemId} testMode={testMode} form={previewForm} equipped={previewEquipment} roomLayout={roomLayout} busy={busy} error={resultError} onClose={()=>void closeResult()}/>}
     {(section === 'shop' || view === 'catalog') && <details className="gacha-owned">
       <summary>所持アイテム（{owned.length}種類）</summary>
       {owned.length ? <ul>{owned.map(id => <li key={id}>{gachaItemName(id)}</li>)}</ul> : <p>獲得したアイテムはここに表示されます。</p>}
