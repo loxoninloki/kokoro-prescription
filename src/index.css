@@ -1070,3 +1070,22 @@ button.home-progress {
 .reward-panel--gacha .gacha-draw-choices{margin-top:12px}
 .reward-panel--gacha .gacha-lineup-page .gacha-detail-overview{padding-top:6px}
 @media(max-width:350px){.reward-panel--gacha .gacha-banner-main{min-height:130px;padding:10px 9px}.reward-panel--gacha .gacha-banner-footer{padding:0 9px 10px}}
+
+/* Read-only gacha trial: local component state only, never stored or charged. */
+.gacha-tryon-start,.gacha-preview-close{display:block;width:100%;margin-top:12px}
+.gacha-tryon-start{min-height:48px;padding:10px 12px;border:1px solid #a87dbd;border-radius:14px;background:#915ab3;color:#fff;font:inherit;font-weight:750}
+.gacha-tryon-unsupported{margin:12px 0 5px;padding:10px;border-radius:12px;background:#fff8ec;color:#75536b;font-size:12px!important;line-height:1.5}
+.gacha-item-preview{max-width:430px;max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px));padding:18px 14px 16px}
+.gacha-tryon-badge{display:inline-block;margin:4px 30px 0;border:1px solid #a777bf;border-radius:99px;padding:7px 12px;background:#f4e3fb;color:#754997;font-size:12px;font-weight:750}
+.gacha-tryon-stage{display:flex;align-items:center;justify-content:center;width:100%;margin:12px auto 6px;border-radius:17px;border:1px solid #cfb2e2;background:radial-gradient(ellipse,#fffaff,#eee1fa 80%);overflow:hidden}
+.gacha-tryon-character{height:clamp(170px,32dvh,250px)}
+.gacha-tryon-character .roki-character{width:min(225px,75%)!important}
+.gacha-tryon-room{max-height:clamp(160px,34dvh,275px)}
+.gacha-tryon-room .interior-stage{width:100%;max-height:inherit;aspect-ratio:1.23;border-radius:14px;box-shadow:none}
+.gacha-tryon-room .roki-room-actor{width:min(115px,36%);}
+.gacha-tryon-room .roki-room-actor .roki-character{width:100%!important}
+.gacha-tryon-notice{font-size:11px!important;line-height:1.5;color:#775788}
+.gacha-tryon-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.gacha-tryon-actions button{min-height:44px;border:1px solid #b597d2;border-radius:12px;background:#fbf4ff;color:#674583;font:inherit;font-size:12px;font-weight:750}
+.gacha-tryon-actions button:first-child{background:#e2ccf4}
+@media(max-height:670px){.gacha-tryon-character{height:155px}.gacha-tryon-room{max-height:175px}.gacha-item-preview{padding:12px 10px}.gacha-tryon-actions{margin:7px 0}.gacha-tryon-notice{margin:5px 0}}
