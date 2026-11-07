@@ -174,7 +174,7 @@ export default function App() {
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
-        equipped={visibleEquipment} room={room} onChange={setRoom} onRewards={() => setLoginRewardsOpen(true)} />}
+        equipped={visibleEquipment} room={room} onChange={setRoom} />}
       {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
@@ -220,7 +220,7 @@ export default function App() {
       </section>}
       {page === 'invite' && <AppInvite />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
-      {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
+      {page !== 'home' && page !== 'room' && page !== 'dressup' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
       {roomError && <p role="alert">{roomError}</p>}
       {(loginRewardsOpen || stampDay !== null) && <LoginRewards days={wallet.loginDays} room={room} stampDay={stampDay} receipt={receipt} onClose={closeRewards} />}
       <BottomNavigation page={page} onNavigate={navigate} />
