@@ -1159,3 +1159,45 @@ button.home-progress {
 @media(prefers-reduced-motion:reduce){
   .gacha-reveal-dialog,.gacha-reveal-prize{animation:none!important;transition:none!important}
 }
+
+/* Gacha presentation: probability-independent, gentle and readable. */
+.gacha-sound-setting {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0;color:#8d729e}
+.gacha-sound-setting small {font-size:11px}
+.gacha-sound-toggle {min-height:44px;padding:7px 13px;border:1px solid #bd9cd0;border-radius:14px;background:#f5edff;color:#64417e;font-size:12px}
+.gacha-sound-toggle[aria-pressed=true] {background:#e5d2f3;color:#503067}
+.gacha-confirm.gacha-sequence,.gacha-confirm.gacha-reward-modal {
+ --rarity-light:#bea1e2;--rarity-ink:#71508d;
+ width:min(100%,430px);max-height:calc(100vh - 24px);max-height:calc(100dvh - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));
+ overflow:auto;overscroll-behavior:contain;color:#59416c;background:#faf6ff;border:2px solid var(--rarity-light);border-radius:25px;padding:18px;
+ box-shadow:0 12px 50px #29143a44;text-align:center;
+}
+.gacha-confirm[data-rarity=rare] {--rarity-light:#aaa5f5;--rarity-ink:#5654a7;background:linear-gradient(145deg,#f8f7ff,#e9e7fc)}
+.gacha-confirm[data-rarity=highest] {--rarity-light:#bea5dc;--rarity-ink:#7c508e;background:linear-gradient(135deg,#fcebf4,#f0e8ff 33%,#e4f4ff 66%,#fff3db);border-color:#c49fd7;box-shadow:0 8px 40px #a895d44d}
+.gacha-sequence h2,.gacha-reward-modal h2 {font-size:clamp(16px,4.5vw,21px);margin:5px 0 12px}
+.gacha-sequence-scene {position:relative;isolation:isolate;margin:12px auto;max-width:309px}
+.gacha-sequence .gacha-reveal-animation {display:block;max-width:100%;width:auto;height:auto;max-height:48dvh;object-fit:contain;border-radius:18px;margin:auto}
+.gacha-rarity-halo {position:absolute;inset:10%;pointer-events:none;border-radius:50%;box-shadow:0 0 32px 8px var(--rarity-light);opacity:0;z-index:-1}
+.gacha-sequence[data-phase=glow] .gacha-rarity-halo {animation:gacha-soft-glow .65s ease-out both}
+.gacha-sequence[data-rarity=highest] .gacha-rarity-halo {background:conic-gradient(#f2c8dc88,#c0b4ff88,#aad9ef88,#f3dda588,#f2c8dc88);filter:blur(15px)}
+.gacha-rarity-particles {position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:18px}
+.gacha-rarity-particles i {position:absolute;left:calc(8% + var(--particle)*7%);top:calc(15% + var(--particle)*5%);font-size:20px;color:#f4e4ff;opacity:0;text-shadow:0 0 5px var(--rarity-ink);font-style:normal}
+.gacha-sequence[data-phase=glow] .gacha-rarity-particles i {animation:gacha-soft-particle .6s ease-out both}
+.gacha-quiet-cross {display:grid;place-items:center;height:130px;font-size:65px;color:var(--rarity-ink)}
+.gacha-rarity-badge {display:inline-block;padding:5px 15px;border-radius:20px;background:#ffffffb8;border:1px solid var(--rarity-light);color:var(--rarity-ink);font-size:13px;font-weight:700}
+.gacha-reward-modal .gacha-reveal-prize {display:grid;place-items:center;width:min(100%,220px);height:190px;margin:12px auto;background:#ffffffb8;border:1px solid var(--rarity-light);border-radius:22px}
+.gacha-reward-modal .gacha-reveal-prize img {max-width:90%;max-height:170px;object-fit:contain}
+.gacha-reward-modal .gacha-furniture-icon {display:grid;place-items:center;width:130px;height:130px;border-radius:22px}
+.gacha-reward-modal .gacha-furniture-icon svg {width:85px;height:85px;color:#694a80}
+.gacha-reward-modal .gacha-reveal-name {display:block;font-size:20px;line-height:1.4;overflow-wrap:anywhere;margin:10px 0}
+.gacha-reward-kind {font-size:12px;color:var(--rarity-ink)}
+.gacha-reward-actions {display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.gacha-reward-actions button {min-height:44px;padding:10px 18px;border-radius:14px;border:1px solid var(--rarity-light);background:#f2e8fa;color:#62427b;font-size:14px}
+.gacha-reward-actions .gacha-reward-ok {background:#79539f;color:white;min-width:100px}
+.gacha-reward-actions button:disabled {opacity:.5}
+.gacha-reward-saved {font-size:11px;color:#8f779e}
+.gacha-sequence:focus,.gacha-reward-modal:focus {outline:none}
+.gacha-sequence button:focus-visible,.gacha-reward-modal button:focus-visible {outline:3px solid #79539f;outline-offset:3px}
+@keyframes gacha-soft-glow {from{opacity:0;transform:scale(.96)}to{opacity:.65;transform:scale(1.03)}}
+@keyframes gacha-soft-particle {from{opacity:0;transform:translateY(10px)}to{opacity:.85;transform:translateY(-8px)}}
+@media(max-height:650px) {.gacha-confirm.gacha-reward-modal{padding:12px}.gacha-reward-modal .gacha-reveal-prize{height:140px;margin:8px auto}.gacha-reward-modal .gacha-reveal-prize img{max-height:125px}.gacha-reward-modal .gacha-furniture-icon{height:100px;width:100px}.gacha-reward-modal .gacha-reveal-name{font-size:17px;margin:6px 0}}
+@media(prefers-reduced-motion:reduce) {.gacha-sequence *,.gacha-reward-modal *{animation:none!important;transition:none!important}.gacha-rarity-particles{display:none}}

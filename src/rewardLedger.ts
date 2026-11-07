@@ -5,6 +5,9 @@ export const REWARD_KEY = 'kokoro-rewards-v1';
 export const LOGIN_DAYS_PER_TICKET = 7;
 export const TICKET_DRAW_COST = 1;
 
+export interface PendingGachaResult {
+ id:string; itemId:string; gachaId:string; payment:'ticket'|'macaron'; amount:number; confirmedAt:string;
+}
 export interface RewardState {
   version: 1;
   earned: number;
@@ -15,6 +18,7 @@ export interface RewardState {
   creditedXp: Record<string, number>;
   ownedItemIds: string[];
   medicationPolicy?: MedicationRewardPolicy;
+  pendingGachaResult?: PendingGachaResult;
 }
 
 export const EMPTY_REWARDS: RewardState = {
@@ -87,6 +91,13 @@ export function parseRewards(raw: unknown): RewardState {
       !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|medication-day|steps|meditation):/.test(id) && isCount(xp)) ||
       !Array.isArray(value.ownedItemIds) || !value.ownedItemIds.every(id => typeof id === 'string')) {
     throw new Error('報酬の保存データを読み込めませんでした。');
+  }
+  if(value.pendingGachaResult!==undefined){
+    const p=value.pendingGachaResult;
+    if(!p||typeof p.id!=='string'||!p.id||p.id.length>150||typeof p.itemId!=='string'||!value.ownedItemIds.includes(p.itemId)||
+      typeof p.gachaId!=='string'||!['standard','outfit','interior'].includes(p.gachaId)||
+      !['ticket','macaron'].includes(p.payment)||!isCount(p.amount)||p.amount<1||
+      typeof p.confirmedAt!=='string'||!Number.isFinite(Date.parse(p.confirmedAt)))throw new Error('ガチャの確定結果を読み込めませんでした。');
   }
   if(value.medicationPolicy!==undefined)parseMedicationPolicy(value.medicationPolicy);
   return value as RewardState;
