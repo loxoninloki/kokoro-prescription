@@ -1,5 +1,5 @@
 import { ROOM_KEY, parseRoom } from './interior';
-import { REWARD_KEY, parseRewards } from './rewardLedger';
+import { REWARD_KEY, parseRewards, readRewards, migrateMedicationRewards, tokyoDay } from './rewardLedger';
 import { APPEARANCE_KEY, parseAppearance, readAppearance } from './appearance';
 import type { BackupData } from './BackupExport';
 
@@ -62,7 +62,14 @@ export function restoreBackup(backup: BackupData): void {
     values.push(rewardDays ? { ...backup.appearance, rewardDays } : backup.appearance);
   }
   if (backup.room !== undefined) { keys.push(ROOM_KEY); values.push(parseRoom(backup.room)); }
-  if (backup.rewards !== undefined) { keys.push(REWARD_KEY); values.push(parseRewards(backup.rewards)); }
+  keys.push(REWARD_KEY);
+  if(backup.rewards===undefined){
+    const current=readRewards();
+    const imported=migrateMedicationRewards({...current,medicationPolicy:undefined},backup.medication,current.medicationPolicy?.effectiveDate||tokyoDay());
+    const frozen={...imported.medicationPolicy!.legacyDayXp};
+    for(const [day,xp] of Object.entries(current.medicationPolicy?.legacyDayXp||{}))frozen[day]=Math.max(frozen[day]||0,xp);
+    values.push({...imported,medicationPolicy:{...imported.medicationPolicy!,legacyDayXp:frozen}});
+  }else values.push(migrateMedicationRewards(parseRewards(backup.rewards),backup.medication,tokyoDay()));
   let previous: Array<string | null>;
   try {
     previous = keys.map(key => localStorage.getItem(key));
@@ -81,3 +88,4 @@ export function restoreBackup(backup: BackupData): void {
     throw new Error('保存できませんでした。端末の空き容量やブラウザ設定をご確認ください。');
   }
 }
+

@@ -1,3 +1,5 @@
+import { MedicationRewardPolicy, makeMedicationPolicy, parseMedicationPolicy, legacyMedicationEvents, MEDICATION_DAILY_XP } from './medicationPolicy';
+import type { MedicationData } from './MedicationTracker';
 import { withStorageLock } from './storageLock';
 export const REWARD_KEY = 'kokoro-rewards-v1';
 export const LOGIN_DAYS_PER_TICKET = 7;
@@ -12,6 +14,7 @@ export interface RewardState {
   lastLoginDate: string | null;
   creditedXp: Record<string, number>;
   ownedItemIds: string[];
+  medicationPolicy?: MedicationRewardPolicy;
 }
 
 export const EMPTY_REWARDS: RewardState = {
@@ -33,15 +36,27 @@ export function tokyoDay(date = new Date()): string {
 export function creditXp(state: RewardState, events: Readonly<Record<string, number>>): RewardState {
   let earned = state.earned;
   let creditedXp: RewardState['creditedXp'] | undefined;
-  for (const [id, xp] of Object.entries(events)) {
+  for (const [id, requestedXp] of Object.entries(events)) {
+    const legacy=/^medication:(\d{4}-\d{2}-\d{2})\|[^|]+$/.exec(id);
+    // After migration legacy per-dose credits are immutable; a daily credit also blocks later legacy replay.
+    if(id.startsWith('medication:')&&(state.medicationPolicy||(legacy&&(state.creditedXp['medication-day:'+legacy[1]]||0)>0)))continue;
+    const daily=/^medication-day:(\d{4}-\d{2}-\d{2})$/.exec(id);
+    const xp=daily?Math.min(requestedXp,MEDICATION_DAILY_XP):requestedXp;
     const previous = state.creditedXp[id] ?? 0;
     if (xp > previous) {
-      earned += xp - previous;
+      const alreadyPaid=daily&&(Object.entries(state.creditedXp).some(([key,value])=>key.startsWith('medication:'+daily[1]+'|')&&value>0)||(state.medicationPolicy?.legacyDayXp[daily[1]]||0)>0);
+      if(!alreadyPaid)earned+=xp-previous;
       creditedXp ??= { ...state.creditedXp };
       creditedXp[id] = xp;
     }
   }
   return creditedXp ? { ...state, earned, creditedXp } : state;
+}
+
+export function migrateMedicationRewards(state:RewardState,data:MedicationData,adoptionDay:string):RewardState {
+ if(state.medicationPolicy)return state;
+ const settled=creditXp(state,legacyMedicationEvents(data));
+ return {...settled,medicationPolicy:makeMedicationPolicy(data,settled.creditedXp,adoptionDay)};
 }
 
 export function registerLogin(state: RewardState, day: string): RewardState {
@@ -69,10 +84,11 @@ export function parseRewards(raw: unknown): RewardState {
       value.tickets > Math.floor(value.loginDays / LOGIN_DAYS_PER_TICKET) ||
       !(value.lastLoginDate === null || (typeof value.lastLoginDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.lastLoginDate))) ||
       !value.creditedXp || typeof value.creditedXp !== 'object' || Array.isArray(value.creditedXp) ||
-      !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|steps|meditation):/.test(id) && isCount(xp)) ||
+      !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|medication-day|steps|meditation):/.test(id) && isCount(xp)) ||
       !Array.isArray(value.ownedItemIds) || !value.ownedItemIds.every(id => typeof id === 'string')) {
     throw new Error('報酬の保存データを読み込めませんでした。');
   }
+  if(value.medicationPolicy!==undefined)parseMedicationPolicy(value.medicationPolicy);
   return value as RewardState;
 }
 
@@ -121,3 +137,4 @@ export function drawItem(state: RewardState, config: GachaConfig, payment: 'tick
     : { ...paid, ownedItemIds: [...paid.ownedItemIds, winner.id] };
   return { state: next, itemId: winner.id };
 }
+

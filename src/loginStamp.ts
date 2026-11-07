@@ -1,5 +1,6 @@
+import { readMedication } from './MedicationTracker';
 import { CHECKIN_XP } from './evolution';
-import { creditXp, readRewards, registerLogin, REWARD_KEY, RewardState } from './rewardLedger';
+import { creditXp, readRewards, migrateMedicationRewards, registerLogin, REWARD_KEY, RewardState } from './rewardLedger';
 import { grantInterior, readRoom, ROOM_KEY, RoomState } from './interior';
 import { withStorageLock } from './storageLock';
 export const CHECKIN_KEY='kokoro-checkins-v1';
@@ -36,7 +37,7 @@ export function syncLogin(day:string, readXp:()=>Record<string,number>):Promise<
  return withStorageLock(()=>{
   recoverLogin();
   const previous=KEYS.map(k=>localStorage.getItem(k));
-  const result=calculateLogin(readRewards(),readCheckins(),readRoom(),day,readXp());
+  const result=calculateLogin(migrateMedicationRewards(readRewards(),readMedication(),day),readCheckins(),readRoom(),day,readXp());
   const next=[result.days,result.wallet,result.room].map(v=>JSON.stringify(v));
   if(next.every((v,i)=>v===previous[i]))return result;
   localStorage.setItem(JOURNAL_KEY,JSON.stringify(previous));
@@ -45,3 +46,4 @@ export function syncLogin(day:string, readXp:()=>Record<string,number>):Promise<
   return result;
  });
 }
+

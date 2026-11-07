@@ -791,3 +791,7 @@ button.home-progress {
  .roki-room[data-editing=true] .interior-tabs svg{width:20px;height:20px}
  .roki-room[data-editing=true] .roki-room-actor{width:min(82px,30%)}
 }
+
+
+.medication-reward-explanation{padding:12px;border-radius:14px;background:#eee4f7;color:#634778;font-size:13px;line-height:1.7}
+.medication-bonus-earned{padding:10px 12px;border-radius:12px;background:#e8ddef;color:#72538a;font-size:12px;line-height:1.5}

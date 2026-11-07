@@ -1,6 +1,7 @@
+import { medicationDays, MEDICATION_DAILY_XP } from './medicationPolicy';
 import { CHECKIN_XP } from './evolution';
 import { DIARY_XP, MOOD_XP, type DiaryEntries } from './DiaryCalendar';
-import { MEDICATION_XP, type MedicationData } from './MedicationTracker';
+import { type MedicationData } from './MedicationTracker';
 import { MEDITATION_XP, type MeditationEntries } from './Meditation';
 import { stepDayExperience, type StepEntries } from './StepTracker';
 
@@ -14,10 +15,7 @@ export function collectXpEvents(
     if (entry.mood) events['mood:' + day] = MOOD_XP;
     if (entry.text.trim()) events['diary:' + day] = DIARY_XP;
   }
-  const medicineIds = new Set(medication.medicines.map(medicine => medicine.id));
-  for (const [key, taken] of Object.entries(medication.taken)) {
-    if (taken && medicineIds.has(key.slice(11))) events['medication:' + key] = MEDICATION_XP;
-  }
+  for (const day of medicationDays(medication)) events['medication-day:' + day] = MEDICATION_DAILY_XP;
   for (const [day, count] of Object.entries(steps)) {
     const xp = stepDayExperience(count);
     if (xp) events['steps:' + day] = xp;
@@ -27,3 +25,4 @@ export function collectXpEvents(
   }
   return events;
 }
+

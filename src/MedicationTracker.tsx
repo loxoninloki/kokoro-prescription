@@ -1,10 +1,11 @@
+import { MEDICATION_DAILY_XP, medicationTotalXp, MedicationRewardPolicy } from './medicationPolicy';
 import { Icon } from './Icon';
 import React, { useEffect, useState } from 'react';
 
 export interface Medicine { id: string; name: string; time: string; archived?: boolean }
 export interface MedicationData { medicines: Medicine[]; taken: Record<string, boolean> }
 const KEY = 'kokoro-medication-v1';
-export const MEDICATION_XP = 10;
+export const MEDICATION_XP = MEDICATION_DAILY_XP;
 export const doseKey = (date: string, id: string) => date + '|' + id;
 
 export function readMedication(): MedicationData {
@@ -23,18 +24,18 @@ export function readMedication(): MedicationData {
   } catch { return { medicines: [], taken: {} }; }
 }
 
-export function medicationExperience(data: MedicationData): number {
-  const ids = new Set(data.medicines.map(m => m.id));
-  return Object.entries(data.taken).filter(([key, taken]) => taken && ids.has(key.slice(11))).length * MEDICATION_XP;
+export function medicationExperience(data:MedicationData,policy?:MedicationRewardPolicy,creditedXp?:Readonly<Record<string,number>>):number {
+ return medicationTotalXp(data,policy,creditedXp);
 }
 
 interface Props {
   data: MedicationData;
   setData: React.Dispatch<React.SetStateAction<MedicationData>>;
   today: string;
+  bonusEarned?: boolean;
 }
 
-export default function MedicationTracker({ data, setData, today }: Props) {
+export default function MedicationTracker({ data, setData, today, bonusEarned=false }: Props) {
   const [name, setName] = useState('');
   const [time, setTime] = useState('08:00');
   const [selectedDate, setSelectedDate] = useState(today);
@@ -78,6 +79,8 @@ export default function MedicationTracker({ data, setData, today }: Props) {
     <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f5efff' }}>
       <h2><Icon name="medication" /> お薬の記録</h2>
       <p style={{ fontSize: 13 }}>処方されたお薬と時刻を登録できます。服薬量や時刻は医師・薬剤師の指示に従ってください。</p>
+      <p className="medication-reward-explanation">服薬を記録すると、1日最大10 EXP＋10マカロンを獲得できます。お薬の種類や回数によって報酬は増えません。</p>
+      {bonusEarned && <p role="status" className="medication-bonus-earned">今日の服薬記録ボーナスは獲得済みです ✓</p>}
       <form onSubmit={addMedicine} style={{ display: 'grid', gap: 10 }}>
         <label>お薬の名前<input required maxLength={80} value={name} onChange={e => setName(e.target.value)} placeholder="例：朝のお薬" style={{ display: 'block', boxSizing: 'border-box', width: '100%', padding: 12, borderRadius: 10, border: '1px solid #c9b9dc' }} /></label>
         <label>服薬予定時刻<input required type="time" value={time} onChange={e => setTime(e.target.value)} style={{ display: 'block', padding: 10, borderRadius: 10, border: '1px solid #c9b9dc' }} /></label>
@@ -104,3 +107,4 @@ export default function MedicationTracker({ data, setData, today }: Props) {
     </section>
   );
 }
+
