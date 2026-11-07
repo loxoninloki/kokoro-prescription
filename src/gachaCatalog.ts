@@ -17,7 +17,7 @@ const furniture = INTERIOR_ITEMS.map(item => item.id);
 // Adding a gacha category only requires adding another entry here.
 export const GACHA_TYPES: readonly GachaType[] = [
   { id: 'standard', name: '通常ガチャ', description: '衣装・インテリアの両方が登場します。', icon: '✦', itemIds: [...clothing, ...furniture], macaronCost: 50 },
-  { id: 'outfit', name: '衣装セレクトガチャ', description: 'コーデ用のアイテムだけが登場します。', icon: '♧', itemIds: clothing, macaronCost: 50 },
+  { id: 'outfit', name: 'ファッションセレクトガチャ', description: '衣装・髪型・メイク・アクセサリーが登場します。', icon: '♧', itemIds: clothing, macaronCost: 50 },
   { id: 'interior', name: 'インテリアセレクトガチャ', description: 'ルーム用の家具・内装だけが登場します。', icon: '⌂', itemIds: furniture, macaronCost: 50 },
 ];
 
