@@ -42,17 +42,29 @@ function PrizeArt({ id }: { id: string }) {
   return <span aria-hidden="true">✦</span>;
 }
 
-function GachaBanner({ gacha, onOpen }: { gacha: GachaChoice; onOpen: () => void }) {
+function GachaBanner({ gacha, onOpen, onLineup }: {
+  gacha: GachaChoice;
+  onOpen: () => void;
+  onLineup: () => void;
+}) {
   const highlights = gacha.itemIds.slice(0, 3);
-  return <button type="button" className={'gacha-banner gacha-banner--' + gacha.id} onClick={onOpen}
-    aria-label={gacha.name + 'の詳細と排出アイテムを見る'}>
-    <span className="gacha-banner-caption"><span className="gacha-banner-label">GACHA COLLECTION</span>
-      <strong>{gacha.name}</strong><span className="gacha-banner-copy">{gacha.description}</span>
-      <span className="gacha-banner-more">ラインナップを見る　›</span>
-    </span>
-    <span className="gacha-banner-arts" aria-hidden="true">{highlights.map(id =>
-      <span className="gacha-banner-art" key={id}><PrizeArt id={id}/></span>)}</span>
-  </button>;
+  return <article className={'gacha-banner gacha-banner--' + gacha.id}>
+    <button type="button" className="gacha-banner-main" onClick={onOpen}
+      aria-label={gacha.name + 'を選ぶ'}>
+      <span className="gacha-banner-caption"><span className="gacha-banner-label">GACHA COLLECTION</span>
+        <strong>{gacha.name}</strong><span className="gacha-banner-copy">{gacha.description}</span>
+        <span className="gacha-banner-select">このガチャを選ぶ ›</span>
+      </span>
+      <span className="gacha-banner-arts" aria-hidden="true">{highlights.map(id =>
+        <span className="gacha-banner-art" key={id}><PrizeArt id={id}/></span>)}</span>
+    </button>
+    <div className="gacha-banner-footer">
+      <button type="button" className="gacha-banner-more" onClick={onLineup}
+        aria-label={gacha.name + 'のラインナップを見る'}>
+        ラインナップを見る　›
+      </button>
+    </div>
+  </article>;
 }
 
 export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, onWalletChange }: {
@@ -63,6 +75,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
   onWalletChange: (next: RewardState) => void;
 }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [view, setView] = React.useState<'catalog' | 'draw' | 'lineup'>('catalog');
   const [pendingPayment, setPendingPayment] = React.useState<Payment | null>(null);
   const [previewId, setPreviewId] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
@@ -79,8 +92,9 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     ? wallet.tickets >= TICKET_DRAW_COST
     : macaronBalance(wallet) >= (selected?.macaronCost ?? 0);
 
-  const openGacha = (id: string) => {
+  const openGacha = (id: string, target: 'draw' | 'lineup') => {
     setSelectedId(id);
+    setView(target);
     setPendingPayment(null);
     setPreviewId(null);
     setMessage('');
@@ -88,7 +102,9 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
   };
   const backToList = () => {
     setSelectedId(null);
+    setView('catalog');
     setPendingPayment(null);
+    setPreviewId(null);
     setMessage('');
     setPrize(null);
   };
@@ -120,17 +136,20 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
 
   return <section className={'reward-panel reward-panel--' + section} aria-labelledby="reward-title">
     <header className="gacha-header">
-      {selected && section === 'gacha' && <button className="gacha-back" type="button" onClick={backToList} disabled={busy}>‹ 一覧へ</button>}
+      {selected && section === 'gacha' &&
+        <button className="gacha-back" type="button" onClick={backToList} disabled={busy}>‹ 一覧へ</button>}
       <h1 id="reward-title">{section === 'gacha' ? (selected ? selected.name : 'ガチャ') : 'ショップ'}</h1>
     </header>
     {error ? <p role="alert">報酬データを読み込めないため、抽選は利用できません。</p> : <>
       <RewardBalances wallet={wallet} />
-      {section === 'gacha' ? !selected ? <>
-        <p className="gacha-help">今日はどれにしよう？ 気になるガチャを選んでラインナップを見てみましょう。</p>
+      {section === 'gacha' ? !selected || view === 'catalog' ? <>
+        <p className="gacha-help">今日はどれにしよう？ 気になるガチャを選んでください。ラインナップは引く前に確認できます。</p>
         <div className="gacha-catalog-scroll" role="region" aria-label="ガチャ一覧（縦スクロール）" tabIndex={0}>
-          {GACHA_TYPES.map(gacha => <GachaBanner gacha={gacha} key={gacha.id} onOpen={() => openGacha(gacha.id)} />)}
+          {GACHA_TYPES.map(gacha => <GachaBanner gacha={gacha} key={gacha.id}
+            onOpen={() => openGacha(gacha.id, 'draw')}
+            onLineup={() => openGacha(gacha.id, 'lineup')} />)}
         </div>
-      </> : <>
+      </> : view === 'draw' ? <>
         <div className={'gacha-featured gacha-featured--' + selected.id}>
           <span className="gacha-featured-tag">SELECT GACHA</span>
           <strong>{selected.name}</strong>
@@ -138,36 +157,17 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
           <div className="gacha-featured-art" aria-hidden="true">{selected.itemIds.slice(0, 3).map(id =>
             <span key={id}><PrizeArt id={id}/></span>)}</div>
         </div>
-        <div className="gacha-detail-overview">
-          <h2>このガチャのラインナップ</h2>
-          <p>左右にスワイプしてラインナップを見られます。アイテムをタップすると拡大表示できます。未所持のアイテムから抽選されます。</p>
-          <p>排出対象：<strong>{candidates.length}種類</strong> ／ 全{selected.itemIds.length}種類</p>
-        </div>
-        <div className="gacha-prize-grid" role="region" aria-label="排出アイテムのラインナップ（横スクロール）" tabIndex={0}>
-          {selected.itemIds.map(id => {
-            const itemOwned = owned.includes(id);
-            const chance = pool.find(item => item.id === id)?.weight ?? 0;
-            return <button type="button" key={id} className="gacha-prize-card" data-owned={itemOwned}
-              onClick={() => setPreviewId(id)} aria-label={gachaItemName(id) + 'を拡大表示'}>
-              <div className="gacha-prize-art"><PrizeArt id={id}/></div>
-              <strong>{gachaItemName(id)}</strong>
-              <span>{itemOwned ? '所持済み' : '排出対象'}</span>
-              <small>{(chance / 100).toFixed(2)}%</small>
-            </button>;
-          })}
-        </div>
-        <p className="gacha-rate">表示確率は現在の所持状況に基づく値です。対象アイテムはほぼ均等確率（0.01%単位）で抽選されます。</p>
-        <div className="gacha-detail-choices">
-          <h2>このガチャを引く</h2>
-          <p>支払い方法を選んだあと、確認画面が表示されます。</p>
+        <div className="gacha-detail-choices gacha-draw-choices">
+          <h2>どちらで引きますか？</h2>
+          <p>支払い方法を選ぶと、抽選前の確認画面が表示されます。</p>
           <div className="gacha-actions">
             <button type="button" disabled={busy || !candidates.length || macaronBalance(wallet) < selected.macaronCost}
               onClick={() => { setPendingPayment('macaron'); setMessage(''); setPrize(null); }}>
-              <RewardIcon kind="macaron" /> マカロン {selected.macaronCost}個
+              <RewardIcon kind="macaron" /> マカロン {selected.macaronCost}個で引く
             </button>
             <button type="button" disabled={busy || !candidates.length || wallet.tickets < TICKET_DRAW_COST}
               onClick={() => { setPendingPayment('ticket'); setMessage(''); setPrize(null); }}>
-              <RewardIcon kind="ticket" /> チケット {TICKET_DRAW_COST}枚
+              <RewardIcon kind="ticket" /> チケット {TICKET_DRAW_COST}枚で引く
             </button>
           </div>
           {!candidates.length && <p>このガチャのアイテムはすべて獲得済みです。</p>}
@@ -177,16 +177,6 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
             <p>{isInteriorPrize(prize) ? 'ルームの模様替えから配置できます。' : 'コーデ画面から着せ替えできます。'}</p>
           </div>}
         </div>
-        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
-          <div className="gacha-confirm gacha-item-preview" role="dialog" aria-modal="true"
-            aria-label={gachaItemName(previewId) + 'のプレビュー'} onClick={event => event.stopPropagation()}>
-            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={() => setPreviewId(null)}>×</button>
-            <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
-            <h2>{gachaItemName(previewId)}</h2>
-            <p>{owned.includes(previewId) ? '所持済み' : 'このガチャから排出されるアイテムです。'}</p>
-            <button type="button" className="gacha-preview-close" onClick={() => setPreviewId(null)}>ラインナップに戻る</button>
-          </div>
-        </div>}
         {pendingPayment && <div className="gacha-confirm-backdrop" role="presentation">
           <div className="gacha-confirm" role="dialog" aria-modal="true" aria-labelledby="gacha-confirm-title">
             <button type="button" className="gacha-confirm-close" disabled={busy} aria-label="閉じる" onClick={() => setPendingPayment(null)}>×</button>
@@ -203,6 +193,42 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
           </div>
         </div>}
       </> : <>
+        <section className="gacha-lineup-page" aria-label={selected.name + 'のラインナップ'}>
+          <div className="gacha-detail-overview">
+            <h2>{selected.name} のラインナップ</h2>
+            <p>{selected.description}</p>
+            <p>左右にスワイプしてアイテムを見られます。タップすると拡大表示できます。</p>
+            <p>未所持の排出対象：<strong>{candidates.length}種類</strong> ／ 全{selected.itemIds.length}種類</p>
+          </div>
+          <div className="gacha-prize-grid" role="region" aria-label="排出アイテムのラインナップ（横スクロール）" tabIndex={0}>
+            {selected.itemIds.map(id => {
+              const itemOwned = owned.includes(id);
+              const chance = pool.find(item => item.id === id)?.weight ?? 0;
+              return <button type="button" key={id} className="gacha-prize-card" data-owned={itemOwned}
+                onClick={() => setPreviewId(id)} aria-label={gachaItemName(id) + 'を拡大表示'}>
+                <div className="gacha-prize-art"><PrizeArt id={id}/></div>
+                <strong>{gachaItemName(id)}</strong>
+                <span>{itemOwned ? '所持済み' : '排出対象'}</span>
+                <small>{(chance / 100).toFixed(2)}%</small>
+              </button>;
+            })}
+          </div>
+          <p className="gacha-rate">確率は現在の所持状況に基づく表示です。未所持アイテムをほぼ均等な確率（0.01%単位）で抽選します。</p>
+          <button type="button" className="gacha-lineup-to-draw" onClick={() => {
+            setView('draw'); setPreviewId(null); setMessage(''); setPrize(null);
+          }}>このガチャを選ぶ ›</button>
+        </section>
+        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
+          <div className="gacha-confirm gacha-item-preview" role="dialog" aria-modal="true"
+            aria-label={gachaItemName(previewId) + 'のプレビュー'} onClick={event => event.stopPropagation()}>
+            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={() => setPreviewId(null)}>×</button>
+            <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
+            <h2>{gachaItemName(previewId)}</h2>
+            <p>{owned.includes(previewId) ? '所持済み' : 'このガチャから排出されるアイテムです。'}</p>
+            <button type="button" className="gacha-preview-close" onClick={() => setPreviewId(null)}>ラインナップに戻る</button>
+          </div>
+        </div>}
+      </> : <>
         <h2>着せ替え・インテリアショップ</h2>
         <p>ショップの商品と販売価格は準備中です。</p>
         <p>ガチャは下の「ガチャ」タブから利用できます。</p>
@@ -210,9 +236,9 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
         <progress id="ticket-progress" value={progress} max={LOGIN_DAYS_PER_TICKET} />
       </>}
     </>}
-    <details className="gacha-owned">
+    {(section === 'shop' || view === 'catalog') && <details className="gacha-owned">
       <summary>所持アイテム（{owned.length}種類）</summary>
       {owned.length ? <ul>{owned.map(id => <li key={id}>{gachaItemName(id)}</li>)}</ul> : <p>獲得したアイテムはここに表示されます。</p>}
-    </details>
+    </details>}
   </section>;
 }
