@@ -635,3 +635,11 @@ button.home-progress {
 .avatar-checkin-compact button { flex: none; white-space: nowrap; }
 @media (max-width: 350px) { .checkin-total-xp { display: none; } }
 @media (max-width: 279px) { .avatar-summary-grid { grid-template-columns: 1fr; } }
+.avatar-home .avatar-progress { display: flex; flex-direction: column; gap: 8px; margin-top: 9px; padding: 0; border: 0; background: none; box-shadow: none; }
+.avatar-progress .avatar-summary-grid { margin-top: 0; }
+.avatar-progress .avatar-checkin-compact { margin-top: 0; }
+.avatar-summary-grid .avatar-growth-title { display: grid; gap: 2px; }
+.avatar-summary-grid .avatar-growth-xp { font-size: 11px; }
+.avatar-summary-grid .avatar-login { position: relative; padding-left: 34px; }
+.avatar-summary-grid .avatar-login > .kokoro-icon { position: absolute; left: 9px; top: 20px; width: 20px; height: 20px; }
+.avatar-summary-grid .avatar-login-heading strong { display: block; font-size: 15px; }
