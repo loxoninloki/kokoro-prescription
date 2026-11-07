@@ -35,6 +35,26 @@ export interface DressUpItem {
 
 export const ITEMS: readonly DressUpItem[] = [
   {
+    id: 'growth-gift-development', name: '芽吹きのひかり', category: 'effects', supportedForms: ['development'],
+    layers: [{ image: 'dressup/form_gift_sprout.svg', order: 12 }],
+  },
+  {
+    id: 'growth-gift-birth', name: '誕生のきらめき', category: 'effects', supportedForms: ['birth'],
+    layers: [{ image: 'dressup/form_gift_birth.svg', order: 12 }],
+  },
+  {
+    id: 'growth-gift-growth', name: '成長の星めぐり', category: 'effects', supportedForms: ['growth'],
+    layers: [{ image: 'dressup/form_gift_growth.svg', order: 12 }],
+  },
+  {
+    id: 'growth-gift-mature', name: '成熟の月光', category: 'effects', supportedForms: ['mature'],
+    layers: [{ image: 'dressup/form_gift_mature.svg', order: 12 }],
+  },
+  {
+    id: 'growth-gift-human', name: 'ヒューマンの祝福', category: 'effects', supportedForms: ['human'],
+    layers: [{ image: 'dressup/form_gift_human.svg', order: 12 }],
+  },
+  {
     id: 'night-beret',
     category: 'hats',
     supportedForms: ['mature'],

@@ -2,11 +2,12 @@ import { GACHA_TYPES, drawCandidates, equalWeightPool, isInteriorPrize } from '.
 import { drawItem, EMPTY_REWARDS } from './rewardLedger';
 import { ITEMS } from './appearance';
 import { INTERIOR_ITEMS } from './interior';
+import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 test('3種類のガチャは用途別のラインナップを持ち、あとから追加可能', () => {
   expect(GACHA_TYPES.map(g => g.name)).toEqual(['通常ガチャ', '衣装セレクトガチャ', 'インテリアセレクトガチャ']);
-  expect(GACHA_TYPES[0].itemIds).toHaveLength(ITEMS.length + INTERIOR_ITEMS.length);
-  expect(GACHA_TYPES[1].itemIds).toEqual(ITEMS.map(item => item.id));
+  expect(GACHA_TYPES[0].itemIds).toHaveLength(ITEMS.length - FIRST_GIFT_IDS.length + INTERIOR_ITEMS.length);
+  expect(GACHA_TYPES[1].itemIds).toEqual(ITEMS.filter(item => !FIRST_GIFT_IDS.includes(item.id)).map(item => item.id));
   expect(GACHA_TYPES[2].itemIds).toEqual(INTERIOR_ITEMS.map(item => item.id));
   expect(GACHA_TYPES[1].itemIds.every(id => !isInteriorPrize(id))).toBe(true);
   expect(GACHA_TYPES[2].itemIds.every(isInteriorPrize)).toBe(true);
@@ -38,4 +39,8 @@ test('セレクトガチャは既存の抽選処理とチケット・マカロ�
   const macaron = drawItem(state, config, 'macaron', () => 0);
   expect(macaron.state).toMatchObject({ tickets: 1, spent: gacha.macaronCost, ownedItemIds: [first] });
   expect(state).toMatchObject({ tickets: 1, spent: 0, ownedItemIds: [] });
+});
+
+test('フォルムの初回ボーナスはガチャ排出対象に入らない',()=>{
+ for (const gacha of GACHA_TYPES) for(const id of FIRST_GIFT_IDS)expect(gacha.itemIds).not.toContain(id);
 });

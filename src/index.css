@@ -1332,3 +1332,14 @@ button.home-progress {
   color:#694380;
   background:#f1e2fa;
 }
+
+/* First-time evolution gift: read-only presentation, prize already saved in ledger. */
+.form-gift-backdrop{position:fixed;inset:0;z-index:1400;display:flex;align-items:center;justify-content:center;padding:20px;background:#281136b5}
+.form-gift-dialog{width:min(100%,380px);max-height:calc(100dvh - 40px);overflow-y:auto;padding:23px 18px;border:2px solid #fff7ff;border-radius:24px;background:linear-gradient(155deg,#e6d3fb,#fff7ff 65%,#e4d9fc);box-shadow:0 14px 34px #24123c70;text-align:center;color:#563978}
+.form-gift-sparkle{display:block;font-size:25px;letter-spacing:.35em;color:#a567c7}
+.form-gift-dialog h2{font-size:19px;line-height:1.4;margin:12px 0 4px}
+.form-gift-dialog p{font-size:12px;line-height:1.6}
+.form-gift-dialog strong{display:block;margin-top:8px;font-size:18px}
+.form-gift-art{display:grid;place-items:center;margin:10px auto;width:150px;max-width:65%;aspect-ratio:1;border:2px solid #dfbceb;border-radius:24px;background:radial-gradient(circle,#fffaff,#eed7fa)}
+.form-gift-art img{width:94%;height:94%;object-fit:contain}
+.form-gift-dialog button{width:100%;min-height:48px;margin-top:10px;border:0;border-radius:15px;background:#8657ab;color:#fff;font:inherit;font-weight:750}

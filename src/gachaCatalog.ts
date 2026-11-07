@@ -1,5 +1,6 @@
 import { ITEMS } from './appearance';
 import { INTERIOR_ITEMS } from './interior';
+import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 export interface GachaType {
   id: 'standard' | 'outfit' | 'interior';
@@ -10,7 +11,7 @@ export interface GachaType {
   macaronCost: number;
 }
 
-const clothing = ITEMS.map(item => item.id);
+const clothing = ITEMS.filter(item => !FIRST_GIFT_IDS.includes(item.id)).map(item => item.id);
 const furniture = INTERIOR_ITEMS.map(item => item.id);
 
 // Adding a gacha category only requires adding another entry here.
