@@ -91,11 +91,12 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
   // The draw and payment are committed before the visual reveal begins.
   // The GIF only presents the saved outcome; it never initiates another draw.
   const [gachaReveal, setGachaReveal] = React.useState<'playing' | 'revealed' | null>(null);
+  const [gachaAnimationLoaded, setGachaAnimationLoaded] = React.useState(false);
   React.useEffect(() => {
-    if (gachaReveal !== 'playing') return;
+    if (gachaReveal !== 'playing' || !gachaAnimationLoaded) return;
     const timer = window.setTimeout(() => setGachaReveal('revealed'), 3840);
     return () => window.clearTimeout(timer);
-  }, [gachaReveal]);
+  }, [gachaReveal, gachaAnimationLoaded]);
   React.useEffect(() => {
     if (!gachaReveal) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -155,7 +156,8 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
       onWalletChange(next);
       setPendingPayment(null);
       setPrize(winner);
-      setGachaReveal('playing');
+      setGachaAnimationLoaded(false);
+      setGachaReveal(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'revealed' : 'playing');
       setMessage('「' + gachaItemName(winner) + '」を獲得しました！');
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : '抽選できませんでした。');
@@ -215,6 +217,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
               <img className="gacha-reveal-animation"
                 src={`${process.env.PUBLIC_URL}/gacha/kokoro_gacha.gif`}
                 alt="ガチャマシンが回り、お薬カプセルが左右に開くアニメーション"
+                onLoad={() => setGachaAnimationLoaded(true)}
                 onError={() => setGachaReveal('revealed')} />
               <button type="button" autoFocus className="gacha-reveal-action"
                 onClick={() => setGachaReveal('revealed')}>演出をスキップ</button>
