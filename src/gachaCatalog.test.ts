@@ -5,7 +5,7 @@ import { INTERIOR_ITEMS } from './interior';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 test('3種類のガチャは用途別のラインナップを持ち、あとから追加可能', () => {
-  expect(GACHA_TYPES.map(g => g.name)).toEqual(['通常ガチャ', '衣装セレクトガチャ', 'インテリアセレクトガチャ']);
+  expect(GACHA_TYPES.map(g => g.name)).toEqual(['通常ガチャ', 'ファッションセレクトガチャ', 'インテリアセレクトガチャ']);
   expect(GACHA_TYPES[0].itemIds).toHaveLength(ITEMS.length - FIRST_GIFT_IDS.length + INTERIOR_ITEMS.length);
   expect(GACHA_TYPES[1].itemIds).toEqual(ITEMS.filter(item => !FIRST_GIFT_IDS.includes(item.id)).map(item => item.id));
   expect(GACHA_TYPES[2].itemIds).toEqual(INTERIOR_ITEMS.map(item => item.id));

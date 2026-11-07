@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ITEMS, FORM_CHOICES } from './appearance';
+import { ITEMS, FORM_CHOICES, layersForForm } from './appearance';
 import { Icon } from './Icon';
 import ChibiAtlasTile from './ChibiAtlasTile';
 
@@ -13,9 +13,11 @@ export default function RokiCharacter({ form, size, equipped = [] }: Props) {
   const [failed, setFailed] = useState(false);
   const [readyFit, setReadyFit] = useState<string>();
   const baseImage = 'forms/' + form.image;
+  const formId=FORM_CHOICES.find(candidate=>candidate.image===form.image)?.id;
   const layers = [
     { image: baseImage, order: 20, position: undefined, portraitClip: undefined, clipPath: undefined, atlasIndex: undefined as number | undefined },
-    ...ITEMS.filter(item => equipped.includes(item.id) && item.supportedForms.some(id=>FORM_CHOICES.some(f=>f.id===id&&f.image===form.image))).flatMap(item => item.layers),
+    ...ITEMS.filter(item => equipped.includes(item.id) && item.supportedForms.some(id=>FORM_CHOICES.some(f=>f.id===id&&f.image===form.image))).flatMap(item => formId?layersForForm(item,formId):item.layers),
+
   ].sort((a, b) => a.order - b.order);
 
   const activeFit = layers.find(layer => layer.portraitClip && layer.image === readyFit);

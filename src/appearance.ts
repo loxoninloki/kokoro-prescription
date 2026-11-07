@@ -1,5 +1,6 @@
 import { FORM_STAGES, HUMAN_FORM } from './evolution';
 import { CHIBI_GACHA_ITEMS, CHIBI_GACHA_ASSETS_READY } from './chibiGachaCatalog';
+export const ALL_FORM_IDS = [...FORM_STAGES.map(form=>form.id), 'human'] as const;
 export const APPEARANCE_KEY = 'kokoro-roki-appearance-v1';
 
 export const CATEGORIES = {
@@ -41,23 +42,23 @@ export interface DressUpItem {
 export const ITEMS: readonly DressUpItem[] = [
   ...(CHIBI_GACHA_ASSETS_READY ? CHIBI_GACHA_ITEMS : []),
   {
-    id: 'growth-gift-development', name: '芽吹きのひかり', category: 'effects', supportedForms: ['development'],
+    id: 'growth-gift-development', name: '芽吹きのひかり', category: 'effects', supportedForms: ALL_FORM_IDS,
     layers: [{ image: 'dressup/form_gift_sprout_back.svg', order: 12 }, { image: 'dressup/form_gift_sprout_front.svg', order: 24 }],
   },
   {
-    id: 'growth-gift-birth', name: '誕生のきらめき', category: 'effects', supportedForms: ['birth'],
+    id: 'growth-gift-birth', name: '誕生のきらめき', category: 'effects', supportedForms: ALL_FORM_IDS,
     layers: [{ image: 'dressup/form_gift_birth_back.svg', order: 12 }, { image: 'dressup/form_gift_birth_front.svg', order: 24 }],
   },
   {
-    id: 'growth-gift-growth', name: '成長の星めぐり', category: 'effects', supportedForms: ['growth'],
+    id: 'growth-gift-growth', name: '成長の星めぐり', category: 'effects', supportedForms: ALL_FORM_IDS,
     layers: [{ image: 'dressup/form_gift_growth_back.svg', order: 12 }, { image: 'dressup/form_gift_growth_front.svg', order: 24 }],
   },
   {
-    id: 'growth-gift-mature', name: '成熟の月光', category: 'effects', supportedForms: ['mature'],
+    id: 'growth-gift-mature', name: '成熟の月光', category: 'effects', supportedForms: ALL_FORM_IDS,
     layers: [{ image: 'dressup/form_gift_mature_back.svg', order: 12 }, { image: 'dressup/form_gift_mature_front.svg', order: 24 }],
   },
   {
-    id: 'growth-gift-human', name: 'ヒューマンの祝福', category: 'effects', supportedForms: ['human'],
+    id: 'growth-gift-human', name: 'ヒューマンの祝福', category: 'effects', supportedForms: ALL_FORM_IDS,
     layers: [{ image: 'dressup/form_gift_human.svg', order: 12 }],
   },
   {
@@ -166,4 +167,15 @@ export function outfitView(a:Appearance,id:FormId):Appearance {return {...a,equi
 export function saveFormEquipment(a:Appearance,id:FormId,ids:string[]):Appearance {
  const supported=ids.filter(itemId=>ITEMS.some(i=>i.id===itemId&&i.supportedForms.includes(id)));
  return {...a,...(id==='mature'?{equipped:supported}:{}),formEquipment:{...a.formEquipment,[id]:supported}};
+}
+
+export const FORM_EFFECT_PLACEMENT: Record<FormId,{left:number;top:number;width:number;backOrder?:number;frontOrder?:number}> = {
+ tablet:{left:4,top:-7,width:92}, development:{left:0,top:0,width:100},
+ birth:{left:0,top:0,width:100},growth:{left:0,top:0,width:100},
+ mature:{left:0,top:0,width:100},human:{left:0,top:0,width:100},
+};
+export function layersForForm(item:DressUpItem,form:FormId):readonly OutfitLayer[] {
+ if(item.category!=='effects')return item.layers;
+ const placement=FORM_EFFECT_PLACEMENT[form];
+ return item.layers.map(layer=>({...layer,position:layer.position??placement,order:layer.order<20?(placement.backOrder??layer.order):(placement.frontOrder??layer.order)}));
 }
