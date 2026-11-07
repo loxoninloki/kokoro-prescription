@@ -20,7 +20,8 @@ import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
-import { tokyoDay } from './rewardLedger';
+import { tokyoDay, RewardState } from './rewardLedger';
+import { freshDevGachaWallet, isDevGachaHost } from './devGachaSandbox';
 import { readCheckins } from './loginStamp';
 import { Icon } from './Icon';
 
@@ -64,6 +65,10 @@ export default function App() {
     setDays(previous => JSON.stringify(previous) === JSON.stringify(nextDays) ? previous : nextDays);
     setRoom(nextRoom);
   });
+  const devGachaHost = isDevGachaHost();
+  const [devGachaWallet, setDevGachaWallet] = useState<RewardState | null>(() =>
+    devGachaHost ? freshDevGachaWallet() : null);
+  const displayedWallet = devGachaWallet ?? wallet;
   // Gacha furniture is recorded in the reward ledger and mirrored into room ownership.
   // Reconciliation also repairs an interrupted previous write without duplicating a draw.
   useEffect(() => {
@@ -180,9 +185,19 @@ export default function App() {
 
   return (
     <main className="kokoro-app" data-page={page}>
+      {devGachaHost && <aside className="dev-gacha-banner" aria-label="開発版のガチャテスト設定">
+        <span>🧪 {devGachaWallet ? "テスト残高：マカロン " + (devGachaWallet.earned - devGachaWallet.spent) + "／チケット " + devGachaWallet.tickets : "ガチャテスト：OFF"}</span>
+        <div>
+          <button type="button" disabled={!!devGachaWallet?.pendingGachaResult} onClick={() => setDevGachaWallet(freshDevGachaWallet())}>
+            {devGachaWallet ? "リセット" : "テスト開始"}
+          </button>
+          {devGachaWallet && <button type="button" disabled={!!devGachaWallet.pendingGachaResult} onClick={() => setDevGachaWallet(null)}>終了</button>}
+        </div>
+      </aside>}
+
       {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
         equipped={visibleEquipment}
-        wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
+        wallet={displayedWallet} realWallet={wallet} walletError={walletError && !devGachaWallet} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
         equipped={visibleEquipment} room={room} onChange={setRoom} />}
@@ -233,8 +248,8 @@ export default function App() {
         </details>
       </>}
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
-      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} section={page === 'gacha' ? 'gacha' : 'shop'}
-        roomOwnedItemIds={room.ownedItemIds} onWalletChange={setWallet} previewForm={displayForm}
+      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page + (devGachaWallet ? '-test' : '-real')} wallet={displayedWallet} error={walletError && !devGachaWallet} testMode={!!devGachaWallet} section={page === 'gacha' ? 'gacha' : 'shop'}
+        roomOwnedItemIds={devGachaWallet ? [] : room.ownedItemIds} onWalletChange={devGachaWallet ? setDevGachaWallet : setWallet} previewForm={displayForm}
         previewEquipment={visibleEquipment} roomLayout={room.layout} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
