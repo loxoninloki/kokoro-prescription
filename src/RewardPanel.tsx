@@ -64,6 +64,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
 }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = React.useState<Payment | null>(null);
+  const [previewId, setPreviewId] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [prize, setPrize] = React.useState<string | null>(null);
@@ -81,6 +82,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
   const openGacha = (id: string) => {
     setSelectedId(id);
     setPendingPayment(null);
+    setPreviewId(null);
     setMessage('');
     setPrize(null);
   };
@@ -145,12 +147,13 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
           {selected.itemIds.map(id => {
             const itemOwned = owned.includes(id);
             const chance = pool.find(item => item.id === id)?.weight ?? 0;
-            return <div key={id} className="gacha-prize-card" data-owned={itemOwned}>
+            return <button type="button" key={id} className="gacha-prize-card" data-owned={itemOwned}
+              onClick={() => setPreviewId(id)} aria-label={gachaItemName(id) + 'を拡大表示'}>
               <div className="gacha-prize-art"><PrizeArt id={id}/></div>
               <strong>{gachaItemName(id)}</strong>
               <span>{itemOwned ? '所持済み' : '排出対象'}</span>
               <small>{(chance / 100).toFixed(2)}%</small>
-            </div>;
+            </button>;
           })}
         </div>
         <p className="gacha-rate">表示確率は現在の所持状況に基づく値です。対象アイテムはほぼ均等確率（0.01%単位）で抽選されます。</p>
@@ -174,6 +177,16 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
             <p>{isInteriorPrize(prize) ? 'ルームの模様替えから配置できます。' : 'コーデ画面から着せ替えできます。'}</p>
           </div>}
         </div>
+        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
+          <div className="gacha-confirm gacha-item-preview" role="dialog" aria-modal="true"
+            aria-label={gachaItemName(previewId) + 'のプレビュー'} onClick={event => event.stopPropagation()}>
+            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={() => setPreviewId(null)}>×</button>
+            <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
+            <h2>{gachaItemName(previewId)}</h2>
+            <p>{owned.includes(previewId) ? '所持済み' : 'このガチャから排出されるアイテムです。'}</p>
+            <button type="button" className="gacha-preview-close" onClick={() => setPreviewId(null)}>ラインナップに戻る</button>
+          </div>
+        </div>}
         {pendingPayment && <div className="gacha-confirm-backdrop" role="presentation">
           <div className="gacha-confirm" role="dialog" aria-modal="true" aria-labelledby="gacha-confirm-title">
             <button type="button" className="gacha-confirm-close" disabled={busy} aria-label="閉じる" onClick={() => setPendingPayment(null)}>×</button>
