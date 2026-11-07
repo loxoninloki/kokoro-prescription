@@ -6,6 +6,7 @@ on:
     branches:
       - rebuild/kokoro-v2
       - integration/kokoro-unified-v3
+      - feature/gacha-tryon-preview-20261107
       - feature/gacha-direct-lineup-draw-20261107
       - feature/gacha-prize-horizontal-scroll-20261107
       - feature/gacha-catalog-detail-preview-20261107

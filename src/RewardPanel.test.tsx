@@ -17,7 +17,8 @@ test('通常ガチャを含む全ガチャで、一覧から直接横スクロ�
   };
   try {
     await act(async () => root.render(<RewardPanel wallet={wallet} error={false} section="gacha"
-      roomOwnedItemIds={[]} onWalletChange={onWalletChange} />));
+      roomOwnedItemIds={[]} onWalletChange={onWalletChange}
+      previewForm={{id:'tablet',name:'錠剤フォルム',image:'lv1_tablet.webp'}} previewEquipment={[]} roomLayout={{}} />));
     expect(target.querySelector('.gacha-catalog-scroll')).not.toBeNull();
     expect(target.querySelectorAll('.gacha-banner')).toHaveLength(3);
     expect(target.querySelectorAll('.gacha-banner-more')).toHaveLength(3);
@@ -58,7 +59,8 @@ test('カード選択後はガチャ説明と2種類の支払いだけ、抽選�
   };
   try {
     await act(async () => root.render(<RewardPanel wallet={wallet} error={false} section="gacha"
-      roomOwnedItemIds={[]} onWalletChange={onWalletChange} />));
+      roomOwnedItemIds={[]} onWalletChange={onWalletChange}
+      previewForm={{id:'tablet',name:'錠剤フォルム',image:'lv1_tablet.webp'}} previewEquipment={[]} roomLayout={{}} />));
     await click(target.querySelectorAll<HTMLButtonElement>('.gacha-banner-main')[1]);
     expect(target.querySelector('.gacha-catalog-scroll')).toBeNull();
     expect(target.querySelector('.gacha-lineup-page')).toBeNull();
@@ -93,7 +95,8 @@ test('ショップはガチャ一覧とは別画面', async () => {
   const root = createRoot(target);
   try {
     await act(async () => root.render(<RewardPanel wallet={EMPTY_REWARDS} error={false} section="shop"
-      roomOwnedItemIds={[]} onWalletChange={jest.fn()} />));
+      roomOwnedItemIds={[]} onWalletChange={jest.fn()}
+      previewForm={{id:'tablet',name:'錠剤フォルム',image:'lv1_tablet.webp'}} previewEquipment={[]} roomLayout={{}} />));
     expect(target.querySelector('#reward-title')?.textContent).toBe('ショップ');
     expect(target.querySelector('.gacha-catalog-scroll')).toBeNull();
   } finally {

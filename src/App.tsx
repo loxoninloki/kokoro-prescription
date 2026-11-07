@@ -233,7 +233,9 @@ export default function App() {
         </details>
       </>}
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
-      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} section={page === 'gacha' ? 'gacha' : 'shop'} roomOwnedItemIds={room.ownedItemIds} onWalletChange={setWallet} />}
+      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} section={page === 'gacha' ? 'gacha' : 'shop'}
+        roomOwnedItemIds={room.ownedItemIds} onWalletChange={setWallet} previewForm={displayForm}
+        previewEquipment={visibleEquipment} roomLayout={room.layout} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
