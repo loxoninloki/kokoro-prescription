@@ -4,6 +4,7 @@ import RokiCharacter from './RokiCharacter';
 import WardrobeIcon from './WardrobeIcon';
 import GachaPrizeArt from './GachaPrizeArt';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
+import { isChibiGachaItem } from './chibiGachaCatalog';
 
 const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
   { name: 'ファッション', icon: 'tops', categories: ['tops', 'bottoms', 'shoes'] },
@@ -29,7 +30,7 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
   const details = current.categories.filter(key => ITEMS.some(item => item.category === key));
   const owned = (item: typeof ITEMS[number]) => ownedItemIds.includes(item.id) ||
     saved.equipped.includes(item.id) ||
-    (!FIRST_GIFT_IDS.includes(item.id) && rewardDays >= (item.requiredRecordDays ?? 0));
+    (!FIRST_GIFT_IDS.includes(item.id) && !isChibiGachaItem(item.id) && rewardDays >= (item.requiredRecordDays ?? 0));
   const items = ITEMS.filter(item => current.categories.includes(item.category) && (!category || item.category === category))
     .slice().sort((a, b) => Number(owned(b)) - Number(owned(a)));
   const dirty = JSON.stringify(draft.equipped) !== JSON.stringify(saved.equipped);
@@ -65,7 +66,7 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
             <span className="coordinate-thumbnail"><GachaPrizeArt id={item.id}/>
               {selected && <span className="coordinate-check" aria-hidden="true">✓</span>}</span>
             <span className="coordinate-item-name">{item.name}</span>
-            <small>{unsupported ? FIRST_GIFT_IDS.includes(item.id)?'別フォルムの記念エフェクト':'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? FIRST_GIFT_IDS.includes(item.id)?'初回フォルム選択で獲得':`累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
+            <small>{unsupported ? FIRST_GIFT_IDS.includes(item.id)?'別フォルムの記念エフェクト':'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? FIRST_GIFT_IDS.includes(item.id)?'初回フォルム選択で獲得':isChibiGachaItem(item.id)?'ファッションガチャで獲得':`累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
           </button>;
         })}</div>}
     </div>
