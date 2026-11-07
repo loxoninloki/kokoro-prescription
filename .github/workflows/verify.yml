@@ -6,6 +6,7 @@ on:
     branches:
       - rebuild/kokoro-v2
       - integration/kokoro-unified-v3
+      - feature/gacha-catalog-detail-preview-20261107
       - feature/select-gacha-shop-split-20261107
       - feature/compact-growth-screen-20261107
       - feature/locked-form-silhouettes-20261107
