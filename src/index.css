@@ -731,3 +731,63 @@ button.home-progress {
 .roki-room[data-editing=true] .room-actions {flex-shrink:0;padding:4px 0}
 .roki-room[data-editing=true] .room-form-select {display:none}
 .roki-room[data-editing=true]>[role=status] {margin:0;font-size:11px}
+
+/* Shared wardrobe/interior workspace. Independent inventory scroll, fixed actions. */
+.coordinate-page {min-height:0;height:calc(100dvh - 114px - env(safe-area-inset-bottom,0px));grid-template-rows:auto minmax(135px,1.15fr) auto auto minmax(118px,1fr) auto;border-radius:22px}
+.coordinate-heading h2 {font-size:18px}.coordinate-heading{padding:8px 12px}
+.coordinate-preview {background:linear-gradient(155deg,#fbf7ff,#e7d9f3)}
+.coordinate-tabs,.coordinate-details {min-height:54px;padding:5px;gap:5px;scrollbar-width:none}
+.coordinate-tabs button,.coordinate-details button{min-width:64px;border-radius:13px;font-size:11px;min-height:44px;padding:4px 8px}
+.coordinate-tabs svg,.coordinate-details svg {width:23px;height:23px}
+.coordinate-grid {gap:7px}.coordinate-item-name {font-size:11px}.coordinate-item small{font-size:10px}.coordinate-item small b{display:block;color:#88539d;font-weight:500}
+.coordinate-controls {padding:6px 8px 9px;border-top:1px solid #cdb5df}.coordinate-controls>div{gap:6px;grid-template-columns:1fr 1.2fr .85fr}.coordinate-controls button{min-height:44px;font-size:11px}.coordinate-controls p{font-size:11px;margin-bottom:6px;line-height:1.4}
+.roki-room-header h1{font-size:20px}.roki-room-header p{margin:6px 0}
+.roki-room:not([data-editing]) .interior-stage {aspect-ratio:1.18;max-height:480px}
+.roki-room-actor{width:min(148px,38%)}
+.roki-room-actor .roki-character{width:100%!important}
+.interior-object svg {width:55%;height:70%;max-height:55px;stroke-width:1.2}
+.roki-room[data-editing=true] {height:calc(100dvh - 118px - env(safe-area-inset-bottom,0px));min-height:0;gap:5px}
+.roki-room[data-editing=true] .interior-stage {flex:1.2 1 43%;min-height:140px;max-height:none}
+.roki-room[data-editing=true] .interior-editor{flex:1 1 48%;padding:0;min-height:220px;overflow:hidden;border:1px solid #dbc7ea;border-radius:18px;gap:0}
+.interior-tabs {flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:none;background:#e9ddf3}
+.interior-tabs button {display:flex;flex:none;align-items:center;justify-content:center;flex-direction:column;gap:2px;min-width:64px;font-size:11px;border:0;background:transparent;padding:4px 8px;border-radius:12px}
+.interior-tabs svg{width:23px;height:23px}.interior-tabs [aria-selected=true]{background:#805aa1;color:white}.interior-tabs [aria-pressed=true]{background:#d8c1e9;color:#513665}
+.roki-room[data-editing=true] .interior-tabs{padding:5px 7px;min-height:54px;box-sizing:border-box}
+.roki-room[data-editing=true] .interior-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;align-items:start;gap:7px;padding:8px;min-height:90px;max-height:none;background:#fcf9ff}
+.roki-room[data-editing=true] .interior-grid span{aspect-ratio:1}.interior-thumbnail svg {width:64%;height:64%;stroke-width:1.25}
+.interior-grid button{border:1px solid #d7c3e5;padding:4px;background:#f5eefb;border-radius:12px}.interior-grid [aria-pressed=true]{border:2px solid #9a69b6;padding:3px}.interior-grid button:disabled{opacity:.5}.interior-grid small{font-size:10px}.interior-grid b{font-size:10px;color:#795390}
+.roki-room[data-editing=true] .room-actions {display:grid;grid-template-columns:1fr 1.3fr;gap:5px;padding:8px;border-top:1px solid #d6c1e6;background:#ebdff4}
+.roki-room[data-editing=true] .room-actions button {font-size:11px;min-height:40px;padding:4px 6px;border-radius:12px}.room-actions button:last-child{background:#79539f;color:white}
+.form-picker{text-align:left;margin-top:20px}.form-picker h3{margin-bottom:6px}.form-picker>p{font-size:12px}.form-picker>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.form-picker button{border:1px solid #d3bce3;border-radius:16px;background:#f3eafa;color:#583c6e;min-width:0;padding:8px 4px;font:inherit}.form-picker button[aria-pressed=true]{border:2px solid #9a65b5;background:#e6d4f2}.form-picker button:disabled{opacity:.48}.form-picker img{width:100%;height:85px;object-fit:contain}.form-picker span,.form-picker small{display:block;font-size:11px;line-height:1.5}.form-picker small{color:#7e5e93}
+.stamp-modal>section {padding:16px;border:1px solid #e0cee9;border-radius:26px;max-height:90dvh}
+.stamp-heading>span{font-size:12px;letter-spacing:.06em;color:#9474a7}.stamp-heading h2{clear:both;margin:0;padding-top:15px!important;font-size:21px}.stamp-heading>strong{display:block;font-size:28px;margin:8px 0;color:#75528f}.stamp-heading p{margin:4px 0 12px}
+.stamp-receipt{border-radius:16px;background:#e8dcf2;padding:12px;font-size:13px;margin:12px 0}.stamp-receipt p{margin:5px 0}
+.stamp-next{display:flex;flex-direction:column;gap:7px;font-size:12px;padding:12px;background:#f1e8f8;border-radius:14px}.stamp-next b{color:#8b549b}
+.stamp-pagination{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:14px 0;font-size:12px}.stamp-pagination button{float:none;background:#eee4f5;color:#77528d;border:1px solid #d9c3e6;padding:6px 9px;font-size:11px;min-height:40px}.stamp-pagination button:disabled{opacity:.4}
+.stamp-calendar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.stamp-calendar article{position:relative;min-width:0;min-height:94px;border:1px solid #ddcce8;border-radius:12px;background:#f7f1fc;display:flex;flex-direction:column;align-items:center;padding:7px 3px;overflow:hidden;color:#7a5d8d}
+.stamp-calendar small{font-size:10px}.stamp-art{width:30px;height:31px;display:grid;place-items:center;margin:4px 0;color:#ad94be;font-size:22px}.stamp-art svg{width:29px;height:29px}.stamp-gift{font-size:9px;text-align:center;line-height:1.35;overflow-wrap:anywhere}.stamp-calendar em{font-size:9px;font-style:normal;color:#8754a2;margin-top:3px}.stamp-calendar [data-special=true]{background:#efe2f8;border-color:#b288c8}.stamp-calendar [data-stamped=true]{background:#e9e0f0}.stamp-calendar [data-today=true]{border:2px solid #ac6eae;padding:6px 2px;background:#f2dff4}
+.stamp-seal{position:absolute;top:24px;left:50%;transform:translateX(-50%) rotate(-13deg);width:31px;height:31px;border:2px solid #a56bad;border-radius:50%;display:grid;place-items:center;font-size:15px;background:#f7ecfae8;color:#a56bad}
+[data-today=true] .stamp-seal{animation:stamp-press .38s ease-out}.stamp-footnote{font-size:10px!important;color:#92759f}
+@keyframes stamp-press{from{opacity:0;transform:translateX(-50%) rotate(-13deg) scale(1.7)}to{opacity:1;transform:translateX(-50%) rotate(-13deg) scale(1)}}
+@media(max-width:350px){.coordinate-grid,.roki-room[data-editing=true] .interior-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stamp-calendar{gap:4px}.stamp-gift{font-size:8px}.form-picker span{font-size:10px}}
+@media(max-height:650px){.coordinate-page{grid-template-rows:auto minmax(100px,.9fr) auto auto minmax(95px,1fr) auto}.coordinate-tabs,.coordinate-details,.roki-room[data-editing=true] .interior-tabs{min-height:48px}.coordinate-tabs button,.coordinate-details button{min-width:58px}.roki-room[data-editing=true] .interior-stage{min-height:115px}.roki-room[data-editing=true] .interior-editor{min-height:200px}.roki-room[data-editing=true] .room-actions{padding:5px;gap:4px}.roki-room[data-editing=true] .room-actions button{min-height:36px}.roki-room[data-editing=true] .interior-note{font-size:9px}}
+@media(prefers-reduced-motion:reduce){[data-today=true] .stamp-seal{animation:none}}
+.roki-room[data-editing=true] .interior-stage {flex:0 0 28%;min-height:110px;max-height:260px}
+.roki-room[data-editing=true] .interior-editor {flex:1 1 auto;min-height:0}
+.stamp-gift{font-size:10px}.stamp-calendar small{font-size:11px}
+@media(max-height:650px){
+ .roki-room[data-editing=true] .interior-stage{flex-basis:24%;min-height:90px}
+ .roki-room[data-editing=true] .interior-grid{min-height:0;overscroll-behavior:contain}
+ .roki-room[data-editing=true] .room-actions{grid-template-columns:repeat(4,minmax(0,1fr));padding:5px;gap:3px}
+ .roki-room[data-editing=true] .room-actions button{font-size:10px;min-width:0;min-height:44px;line-height:1.25;padding:3px;overflow-wrap:anywhere}
+}
+@media(max-height:650px){
+ .roki-room[data-editing=true] .roki-room-header h1{font-size:16px;line-height:1.3;margin:0}
+ .roki-room[data-editing=true] .roki-room-header p{font-size:11px;line-height:1.3;margin:2px 0}
+ .roki-room[data-editing=true] .interior-stage{flex:0 0 90px}
+ .roki-room[data-editing=true] .interior-tabs{min-height:44px;padding:3px 7px}
+ .roki-room[data-editing=true] .interior-tabs svg{width:20px;height:20px}
+ .roki-room[data-editing=true] .roki-room-actor{width:min(82px,30%)}
+}

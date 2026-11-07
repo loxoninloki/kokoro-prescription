@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Appearance, CATEGORIES, Category, ITEMS, toggleItem } from './appearance';
-import { MATURE_FORM } from './evolution';
+import { Appearance, CATEGORIES, Category, ITEMS, toggleItem, FormId } from './appearance';
 import RokiCharacter from './RokiCharacter';
 import WardrobeIcon from './WardrobeIcon';
 
@@ -12,7 +11,8 @@ const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
   { name: 'エフェクト', icon: 'effects', categories: ['effects'] },
 ];
 
-export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ownedItemIds }: {
+export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ownedItemIds, form }: {
+  form: {id:FormId;name:string;image:string};
   saved: Appearance;
   draft: Appearance;
   setDraft: React.Dispatch<React.SetStateAction<Appearance>>;
@@ -20,7 +20,7 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
   ownedItemIds: string[];
   onSave: (appearance: Appearance) => boolean;
 }) {
-  const [group, setGroup] = useState(3);
+  const [group, setGroup] = useState(4);
   const [category, setCategory] = useState<Category | null>(null);
   const [message, setMessage] = useState('');
   const current = GROUPS[group];
@@ -32,17 +32,17 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
   const dirty = JSON.stringify(draft.equipped) !== JSON.stringify(saved.equipped);
 
   return <section className="coordinate-page" aria-labelledby="wardrobe-title">
-    <header className="coordinate-heading"><h2 id="wardrobe-title">ちびろきの着せ替え</h2><span>{dirty ? '編集中' : '保存済み'}</span></header>
+    <header className="coordinate-heading"><h2 id="wardrobe-title">コーデ</h2><span>{dirty ? '編集中' : '保存済み'}</span></header>
     <div className="coordinate-preview">
-      <RokiCharacter form={MATURE_FORM} size={244} equipped={draft.equipped} />
-      <p>{saved.mode === 'human' ? 'ホームはヒューマン表示中です' : 'アイテムをタップして、自由にコーデ'}</p>
+      <RokiCharacter form={form} size={244} equipped={draft.equipped} />
+      <p>{form.name} · タップしてコーデ</p>
     </div>
     <div className="coordinate-tabs" role="group" aria-label="着せ替えカテゴリ">
       {GROUPS.map((entry, index) => <button type="button" key={entry.name} aria-pressed={group === index}
         onClick={() => { setGroup(index); setCategory(null); }}><WardrobeIcon category={entry.icon} /><span>{entry.name}</span></button>)}
     </div>
     <div className="coordinate-details" role="group" aria-label="詳細カテゴリ">
-      <button type="button" aria-pressed={!category} onClick={() => setCategory(null)}><span aria-hidden="true">▦</span>すべて</button>
+      <button type="button" aria-pressed={!category} onClick={() => setCategory(null)}><WardrobeIcon category={current.icon} />すべて</button>
       {details.map(key => <button type="button" key={key} aria-pressed={category === key} onClick={() => setCategory(key)}>
         <WardrobeIcon category={key} />{CATEGORIES[key].name}</button>)}
     </div>
@@ -52,17 +52,18 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
         <div className="coordinate-grid">{items.map(item => {
           const selected = draft.equipped.includes(item.id);
           const equipped = saved.equipped.includes(item.id);
-          const locked = !owned(item);
+          const unsupported = !item.supportedForms.includes(form.id);
+          const locked = !owned(item) || unsupported;
           return <button type="button" key={item.id} aria-label={item.name} aria-pressed={selected} disabled={locked}
             className="coordinate-item" onClick={() => {
-              if (!owned(item)) return;
+              if (!owned(item) || unsupported) return;
               setDraft(previous => toggleItem(previous, item)); setMessage('');
             }}>
             <span className="coordinate-thumbnail"><img src={`${process.env.PUBLIC_URL}/${item.layers[0].image}`} alt="" loading="lazy"
               onError={event => { event.currentTarget.hidden = true; }} />
               {selected && <span className="coordinate-check" aria-hidden="true">✓</span>}</span>
             <span className="coordinate-item-name">{item.name}</span>
-            <small>{locked ? `累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中・タップで外す' : equipped ? '装備中' : '所持済み'}</small>
+            <small>{unsupported ? 'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? `累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
           </button>;
         })}</div>}
     </div>

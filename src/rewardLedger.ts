@@ -1,3 +1,4 @@
+import { withStorageLock } from './storageLock';
 export const REWARD_KEY = 'kokoro-rewards-v1';
 export const LOGIN_DAYS_PER_TICKET = 7;
 export const TICKET_DRAW_COST = 1;
@@ -83,7 +84,7 @@ export async function updateRewards(change: (current: RewardState) => RewardStat
     return next;
   };
   // Serialise the read/modify/write across tabs where Web Locks is available.
-  return navigator.locks ? navigator.locks.request(REWARD_KEY, update) : update();
+  return withStorageLock(update);
 }
 
 interface GachaConfig {

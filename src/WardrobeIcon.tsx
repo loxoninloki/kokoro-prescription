@@ -25,7 +25,7 @@ const artwork: Record<Category, React.ReactNode> = {
   </>,
   accessories: <>
     <path d="M5 11 19 7c1 0 2 1 2 2s-1 2-2 2L6 15c-2 1-4-3-1-4Z" />
-    <path d="M8 4c1 3 2 4 5 5-3 1-4 2-5 5-1-3-2-4-5-5 3-1 4-2 5-5Z" fill="#fff0ff" />
+    <path d="M8 4c1 3 2 4 5 5-3 1-4 2-5 5-1-3-2-4-5-5 3-1 4-2 5-5Z" fill="none" />
   </>,
   hats: <>
     <path d="M3 15c0-5 4-8 9-9 4-1 8 1 9 5 0 2-2 3-4 4L6 18c-2 0-3-1-3-3Z" />
@@ -38,6 +38,6 @@ const artwork: Record<Category, React.ReactNode> = {
 };
 
 export default function WardrobeIcon({ category }: { category: Category }) {
-  return <svg viewBox="0 0 24 24" aria-hidden="true" fill="#e6cdfb" stroke="currentColor"
+  return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
     strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round">{artwork[category]}</svg>;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ITEMS } from './appearance';
+import { ITEMS, FORM_CHOICES } from './appearance';
 import { Icon } from './Icon';
 
 interface Props {
@@ -14,7 +14,7 @@ export default function RokiCharacter({ form, size, equipped = [] }: Props) {
   const baseImage = 'forms/' + form.image;
   const layers = [
     { image: baseImage, order: 20, position: undefined, portraitClip: undefined, clipPath: undefined },
-    ...ITEMS.filter(item => equipped.includes(item.id)).flatMap(item => item.layers),
+    ...ITEMS.filter(item => equipped.includes(item.id) && item.supportedForms.some(id=>FORM_CHOICES.some(f=>f.id===id&&f.image===form.image))).flatMap(item => item.layers),
   ].sort((a, b) => a.order - b.order);
 
   const activeFit = layers.find(layer => layer.portraitClip && layer.image === readyFit);

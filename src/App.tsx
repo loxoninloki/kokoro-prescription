@@ -1,49 +1,33 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CHECKIN_XP, evolutionFromXp, FORM_STAGES, HUMAN_FORM, MATURE_FORM } from './evolution';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CHECKIN_XP, evolutionFromXp, FORM_STAGES } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
 import MedicationTracker, { MedicationData, medicationExperience, readMedication } from './MedicationTracker';
 import StepTracker, { StepEntries, readSteps, stepsExperience, parseStepImport, StepImport } from './StepTracker';
 import Meditation, { MeditationEntries, readMeditation, meditationExperience } from './Meditation';
 import BackupExport from './BackupExport';
 import AppInvite from './AppInvite';
-import { APPEARANCE_KEY, Appearance, readAppearance } from './appearance';
+import { APPEARANCE_KEY, Appearance, parseAppearance, readAppearance, selectedForm, outfitView, saveFormEquipment, equipmentForForm, FORM_CHOICES, FormId } from './appearance';
 import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
 import LoginRewards from './LoginRewards';
-import { readRoom, EMPTY_ROOM, updateRoom, grantInterior, ROOM_KEY } from './interior';
+import { readRoom, EMPTY_ROOM, ROOM_KEY } from './interior';
 import HomePage from './HomePage';
 import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
+import { tokyoDay } from './rewardLedger';
+import { readCheckins } from './loginStamp';
 import { Icon } from './Icon';
 
-const STORAGE_KEY = 'kokoro-checkins-v1';
 const POINTS_PER_DAY = CHECKIN_XP;
 const HEADER_STICKERS = ['01_erai.png', '02_otsukare.png', '03_yoshiyoshi.png', '04_hitoyasumi.png', '05_yattane.png'] as const;
 
 
-function localDay(date = new Date()): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function loadCheckins(): string[] {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(saved)
-      ? Array.from(new Set<string>(saved.filter((value): value is string =>
-          typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
-        ))).sort()
-      : [];
-  } catch {
-    return [];
-  }
-}
+const localDay = tokyoDay;
+function loadCheckins():string[] {try {return readCheckins();}catch{return [];}}
 
 function readSavedXp() {
   return collectXpEvents(loadCheckins(), readDiary(), readMedication(), readSteps(), readMeditation());
@@ -72,7 +56,10 @@ export default function App() {
   const [page, setPage] = useState<Page>(route);
   const [draft, setDraft] = useState(readAppearance);
   const [pendingPage, setPendingPage] = useState<Page | null>(null);
-  const dirty = page === 'dressup' && JSON.stringify(draft.equipped) !== JSON.stringify(appearance.equipped);
+  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
+  const evolution = evolutionFromXp(totalPoints);
+  const displayForm = selectedForm(appearance,evolution.level,room.selectedFormId);
+  const dirty = page === 'dressup' && JSON.stringify(draft.equipped) !== JSON.stringify(equipmentForForm(appearance,displayForm.id));
   const commitNavigation = (next: Page, push = true) => {
     const url = new URL(window.location.href);
     url.searchParams.set('page', next);
@@ -80,7 +67,7 @@ export default function App() {
     setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
     setHeaderStickerFailed(false);
     if (next !== 'steps') setStepImport(null);
-    if (next === 'dressup') setDraft(appearance);
+    if (next === 'dressup') setDraft(outfitView(appearance, displayForm.id));
     setPage(next);
     window.scrollTo(0, 0);
   };
@@ -134,39 +121,27 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(days));
-    } catch {
-      // Storage can be blocked or full.
-    }
-  }, [days]);
-
   const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
     [days, diary, medication, steps, meditation]);
-  const { wallet, walletError } = useRewards(readSavedXp, xpEvents);
+  const { wallet, walletError, stampDay, receipt, clearStamp } = useRewards(readSavedXp, xpEvents, (nextDays, nextRoom) => {
+    setDays(previous => JSON.stringify(previous) === JSON.stringify(nextDays) ? previous : nextDays);
+    setRoom(nextRoom);
+  });
+  const closeRewards = () => {setLoginRewardsOpen(false);clearStamp();};
   useEffect(() => {
-    if (walletError) return;
-    void updateRoom(s => grantInterior(s, wallet.loginDays)).then(setRoom).catch(() => setRoomError('ルームの保存情報を読み込めませんでした。既存データは保持しています。'));
-  }, [wallet.loginDays, walletError]);
-  useEffect(() => {
-    const sync = (e: StorageEvent) => { if(e.key === ROOM_KEY) {try {setRoom(readRoom());} catch {setRoomError('ルーム情報を読み込めません。');}} };
-    window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync);
-  }, []);
+    const sync=(e:StorageEvent)=>{if(e.key===APPEARANCE_KEY){setAppearance(readAppearance());}if(e.key===ROOM_KEY){try{setRoom(readRoom());}catch{setRoomError('ルーム情報を読み込めません。');}}};
+    window.addEventListener('storage',sync);return()=>window.removeEventListener('storage',sync);
+  },[]);
   const recordDays = countRecordDays(today, days, diary, medication, steps, meditation);
   const rewardDays = Math.max(recordDays, appearance.rewardDays ?? 0);
   const checkedIn = days.includes(today);
-  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
-  const evolution = evolutionFromXp(totalPoints);
-  const mature = evolution.form.id === MATURE_FORM.id;
-  const human = mature && appearance.mode === 'human';
-  const displayForm = human ? HUMAN_FORM : evolution.form;
-  const character = (size: number) => (
-    <RokiCharacter key={displayForm.image} form={displayForm} size={size}
-      equipped={mature && !human ? appearance.equipped : undefined} />
-  );
+  const visibleEquipment = equipmentForForm(appearance,displayForm.id);
+  const draftForm=useRef<FormId>();
+  useEffect(()=>{if(draftForm.current!==displayForm.id){setDraft(outfitView(appearance,displayForm.id));draftForm.current=displayForm.id;}},[appearance,displayForm.id]);
+  const character = (size:number) => <RokiCharacter key={displayForm.image} form={displayForm} size={size} equipped={visibleEquipment}/>;
   const saveAppearance = useCallback((next: Appearance) => {
     try {
+      const raw=localStorage.getItem(APPEARANCE_KEY);if(raw)parseAppearance(JSON.parse(raw));
       const progress = Math.max(recordDays, next.rewardDays ?? 0, readAppearance().rewardDays ?? 0);
       const updated = { ...next, rewardDays: progress };
       localStorage.setItem(APPEARANCE_KEY, JSON.stringify(updated));
@@ -180,25 +155,25 @@ export default function App() {
     if (recordDays > (appearance.rewardDays ?? 0)) saveAppearance(appearance);
   }, [appearance, recordDays, saveAppearance]);
 
-  const switchForm = (mode: Appearance['mode']) => {
-    const saved = saveAppearance({ ...appearance, mode });
-    setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
+  const saveOutfit = (next:Appearance) => saveAppearance(saveFormEquipment(appearance,displayForm.id,next.equipped));
+  const switchForm = (id:FormId) => {
+    if(!FORM_CHOICES.some(f=>f.id===id&&f.level<=evolution.level))return;
+    const saved=saveAppearance({...appearance,selectedFormId:id,mode:id==='human'?'human':'chibi'});
+    setAppearanceMessage(saved?'フォルムを変更しました。':'表示する姿を保存できませんでした。');
   };
-
-  const checkIn = () => {
-    const current = localDay();
-    setToday(current);
-    setDays(previous => previous.includes(current) ? previous : [...previous, current].sort());
-  };
+  // Persist the former room selection once; every screen subsequently reads appearance.selectedFormId.
+  useEffect(()=>{
+    if(!appearance.selectedFormId&&room.selectedFormId)saveAppearance({...appearance,selectedFormId:selectedForm(appearance,evolution.level,room.selectedFormId).id});
+  },[appearance,room.selectedFormId,evolution.level,saveAppearance]);
 
   return (
     <main className="kokoro-app" data-page={page}>
       {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm}
-        equipped={mature && !human ? appearance.equipped : undefined}
+        equipped={visibleEquipment}
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
-        checkinDays={days.length} onCheckIn={checkIn} onNavigate={navigate} />}
-      {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
-        equipped={mature ? appearance.equipped : undefined} room={room} onChange={setRoom} onRewards={() => setLoginRewardsOpen(true)} />}
+        checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
+      {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
+        equipped={visibleEquipment} room={room} onChange={setRoom} onRewards={() => setLoginRewardsOpen(true)} />}
       {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
@@ -210,14 +185,10 @@ export default function App() {
           <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : '成熟フォルムに到達しました！'}</p>
-          {mature ? <>
-            <div className="wardrobe-options" role="group" aria-label="表示する姿">
-              <button type="button" aria-pressed={!human} onClick={() => switchForm('chibi')}>成熟フォルム</button>
-              <button type="button" aria-pressed={human} onClick={() => switchForm('human')}>ヒューマンフォルム</button>
-            </div>
-
-            {appearanceMessage && <p role="status">{appearanceMessage}</p>}
-          </> : <p>Lv.{MATURE_FORM.level}でちびろきの着せ替えが開きます。</p>}
+          <section className="form-picker" aria-label="フォルム変更"><h3>フォルム変更</h3><p>選んだ姿をホーム・ルーム・コーデで表示します。</p>
+          <div>{FORM_CHOICES.map(f=><button type="button" key={f.id} disabled={f.level>evolution.level} aria-pressed={displayForm.id===f.id} onClick={()=>switchForm(f.id)}>
+            <img src={`${process.env.PUBLIC_URL}/forms/${f.image}`} alt=""/><span>{f.name}</span><small>{f.level>evolution.level?`Lv.${f.level}で解放`:displayForm.id===f.id?'選択中 ✓':'解放済み'}</small>
+          </button>)}</div>{appearanceMessage&&<p role="status">{appearanceMessage}</p>}</section>
           <ol className="evolution-stages" aria-label="進化の5段階">
             {FORM_STAGES.map(form => (
               <li key={form.id} aria-current={form.id === evolution.form.id ? 'step' : undefined}>
@@ -232,9 +203,8 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </section>
       </>}
-      {page === 'dressup' && mature && <DressUp saved={appearance} draft={draft} setDraft={setDraft} onSave={saveAppearance} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
+      {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
-      {page === 'dressup' && !mature && <section className="menu-panel"><h1>コーデ</h1><p>Lv.50の成熟フォルムで着せ替えが開きます。</p></section>}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
@@ -243,6 +213,7 @@ export default function App() {
         <h1 id="menu-title"><Icon name="menu" /> メニュー</h1>
         <nav className="menu-links" aria-label="メニュー項目">
           <button type="button" onClick={() => navigate('backup')}><Icon name="backup" /> バックアップ</button>
+          <button type="button" onClick={() => setLoginRewardsOpen(true)}>ログインスタンプ履歴</button>
           <button type="button" onClick={() => navigate('invite')}><Icon name="invite" /> 紹介する</button>
         </nav>
       </section>}
@@ -250,13 +221,13 @@ export default function App() {
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
       {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
       {roomError && <p role="alert">{roomError}</p>}
-      {loginRewardsOpen && <LoginRewards days={wallet.loginDays} room={room} onClose={() => setLoginRewardsOpen(false)} />}
+      {(loginRewardsOpen || stampDay !== null) && <LoginRewards days={wallet.loginDays} room={room} stampDay={stampDay} receipt={receipt} onClose={closeRewards} />}
       <BottomNavigation page={page} onNavigate={navigate} />
       {pendingPage && <div className="navigation-dialog-backdrop">
         <section role="dialog" aria-modal="true" aria-labelledby="unsaved-title" className="navigation-dialog">
           <h2 id="unsaved-title">未保存のコーデがあります</h2>
-          <button type="button" autoFocus onClick={() => { if (saveAppearance(draft)) { commitNavigation(pendingPage); setPendingPage(null); } else setAppearanceMessage('保存できませんでした。'); }}>保存して移動</button>
-          <button type="button" onClick={() => { setDraft(appearance); commitNavigation(pendingPage); setPendingPage(null); }}>保存せず移動</button>
+          <button type="button" autoFocus onClick={() => { if (saveOutfit(draft)) { commitNavigation(pendingPage); setPendingPage(null); } else setAppearanceMessage('保存できませんでした。'); }}>保存して移動</button>
+          <button type="button" onClick={() => { setDraft(outfitView(appearance,displayForm.id)); commitNavigation(pendingPage); setPendingPage(null); }}>保存せず移動</button>
           <button type="button" onClick={() => setPendingPage(null)}>編集を続ける</button>
           {appearanceMessage && <p role="status">{appearanceMessage}</p>}
         </section>

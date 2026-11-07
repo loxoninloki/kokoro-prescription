@@ -88,7 +88,7 @@ function GrowthSummaryCard({ evolution, displayForm, equipped, onNavigate }: Pic
     <button type="button" className="avatar-growth" onClick={() => onNavigate('growth')} aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
       <span className="avatar-mini"><RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={48} /></span>
       <span className="avatar-growth-text">
-        <span className="avatar-growth-title"><strong>Lv.{evolution.level}</strong><span>{evolution.form.name}</span></span>
+        <span className="avatar-growth-title"><strong>Lv.{evolution.level}</strong><span>{displayForm.name}</span></span>
         <span className="avatar-growth-xp">EXP {evolution.currentLevelXp} / {evolution.requiredLevelXp}</span>
         <progress aria-label="ろきちゃんの経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
         <span className="avatar-growth-next">{evolution.nextLevel ? `次の進化は Lv.${evolution.nextLevel}` : '成熟フォルムに到達しました'}</span>
@@ -113,7 +113,7 @@ function CheckInCompactCard({ checkinDays, totalPoints, checkedIn, onCheckIn }: 
  return (
 <section className="avatar-checkin avatar-checkin-compact" aria-label="チェックイン">
       <span>チェックイン {checkinDays}日<span className="checkin-total-xp"> · {totalPoints.toLocaleString('ja-JP')} EXP</span></span>
-      <button type="button" onClick={onCheckIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
+      <button type="button" onClick={onCheckIn}>{checkedIn ? '今日のスタンプ ✓' : 'スタンプ履歴'}</button>
     </section>
  );
 }

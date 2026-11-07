@@ -1,3 +1,4 @@
+import { FORM_STAGES, HUMAN_FORM } from './evolution';
 export const APPEARANCE_KEY = 'kokoro-roki-appearance-v1';
 
 export const CATEGORIES = {
@@ -27,6 +28,7 @@ export interface DressUpItem {
   category: Category;
   name: string;
   requiredRecordDays?: number;
+  supportedForms: readonly FormId[];
   // Layers share a canvas. A hairstyle can contribute both back and front layers.
   layers: readonly OutfitLayer[];
 }
@@ -35,6 +37,7 @@ export const ITEMS: readonly DressUpItem[] = [
   {
     id: 'night-beret',
     category: 'hats',
+    supportedForms: ['mature'],
     name: '星夜のベレー帽',
     layers: [{
       image: 'dressup/night_beret.webp',
@@ -48,6 +51,7 @@ export const ITEMS: readonly DressUpItem[] = [
   {
     id: 'lavender-star-clip',
     category: 'accessories',
+    supportedForms: ['mature'],
     name: 'ラベンダーの星ピン',
     layers: [{
       image: 'dressup/lavender_star_clip.svg',
@@ -58,6 +62,7 @@ export const ITEMS: readonly DressUpItem[] = [
   {
     id: 'lavender-bloom',
     category: 'effects',
+    supportedForms: ['tablet','development','birth','growth','mature','human'],
     name: 'ラベンダーの花あかり',
     requiredRecordDays: 30,
     layers: [{ image: 'dressup/lavender_bloom.svg', order: 11 }],
@@ -65,6 +70,7 @@ export const ITEMS: readonly DressUpItem[] = [
   {
     id: 'moon-sparkles',
     category: 'effects',
+    supportedForms: ['tablet','development','birth','growth','mature','human'],
     name: '月夜のきらめき',
     layers: [
       { image: 'dressup/moon_sparkles_floor.svg', order: 10 },
@@ -73,24 +79,32 @@ export const ITEMS: readonly DressUpItem[] = [
   },
 ];
 
+export type FormId = typeof FORM_STAGES[number]['id'] | 'human';
+export const FORM_CHOICES = [...FORM_STAGES, {id:'human' as const, level:50, ...HUMAN_FORM}];
+
 export interface Appearance {
   version: 1;
   mode: 'chibi' | 'human';
   equipped: string[];
   rewardDays?: number;
+  selectedFormId?: FormId;
+  formEquipment?: Partial<Record<FormId, string[]>>;
 }
 
 export const DEFAULT_APPEARANCE: Appearance = { version: 1, mode: 'chibi', equipped: [] };
 
 export function parseAppearance(value: unknown): Appearance {
   if (typeof value !== 'object' || value === null) throw new Error('コーデのデータが不正です。');
-  const { version, mode, equipped, rewardDays } = value as Partial<Appearance>;
+  const { version, mode, equipped, rewardDays, selectedFormId, formEquipment } = value as Partial<Appearance>;
   if (version !== 1 || (mode !== 'chibi' && mode !== 'human') || !Array.isArray(equipped) ||
       (rewardDays !== undefined && (!Number.isSafeInteger(rewardDays) || rewardDays < 0)) ||
       equipped.length > 128 || !equipped.every(id => typeof id === 'string' && /^[a-z0-9_-]{1,64}$/.test(id))) {
     throw new Error('コーデのデータが不正です。');
   }
-  return { version, mode, equipped: Array.from(new Set(equipped)), ...(rewardDays === undefined ? {} : { rewardDays }) };
+  if (selectedFormId !== undefined && !FORM_CHOICES.some(f=>f.id===selectedFormId)) throw new Error('フォルムの選択が不正です。');
+  if(formEquipment !== undefined && (!formEquipment || typeof formEquipment!=='object' || Array.isArray(formEquipment) ||
+    !Object.entries(formEquipment).every(([form,ids])=>FORM_CHOICES.some(f=>f.id===form)&&Array.isArray(ids)&&ids.length<=128&&ids.every(id=>typeof id==='string'&&/^[a-z0-9_-]{1,64}$/.test(id))))) throw new Error('フォルム別コーデが不正です。');
+  return { ...(selectedFormId===undefined?{}:{selectedFormId}), ...(formEquipment===undefined?{}:{formEquipment}), version, mode, equipped: Array.from(new Set(equipped)), ...(rewardDays === undefined ? {} : { rewardDays }) };
 }
 
 export function readAppearance(): Appearance {
@@ -113,4 +127,17 @@ export function toggleItem(appearance: Appearance, item: DressUpItem): Appearanc
       item.id,
     ],
   };
+}
+
+export function selectedForm(a:Appearance, level:number, legacyRoomForm?:string|null) {
+ const id=a.selectedFormId ?? (a.mode==='human'?'human':legacyRoomForm);
+ return FORM_CHOICES.find(f=>f.id===id&&f.level<=level)||[...FORM_STAGES].reverse().find(f=>f.level<=level)||FORM_STAGES[0];
+}
+export function equipmentForForm(a:Appearance,id:FormId):string[] {
+ return a.formEquipment?.[id] ?? (id==='mature'?a.equipped:[]);
+}
+export function outfitView(a:Appearance,id:FormId):Appearance {return {...a,equipped:equipmentForForm(a,id)};}
+export function saveFormEquipment(a:Appearance,id:FormId,ids:string[]):Appearance {
+ const supported=ids.filter(itemId=>ITEMS.some(i=>i.id===itemId&&i.supportedForms.includes(id)));
+ return {...a,...(id==='mature'?{equipped:supported}:{}),formEquipment:{...a.formEquipment,[id]:supported}};
 }

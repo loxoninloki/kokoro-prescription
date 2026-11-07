@@ -1,3 +1,4 @@
+import { withStorageLock } from './storageLock';
 export const ROOM_KEY = 'kokoro-room-v1';
 export const INTERIOR_ITEMS = [
  { id: 'wall-basic', name: 'やさしい紫の壁', category: '内装', slot: 'wallpaper', day: 1, color: '#eee3f6', symbol: '▥' },
@@ -35,5 +36,5 @@ export function grantInterior(state: RoomState, loginDays: number): RoomState {
 }
 export async function updateRoom(change: (state: RoomState) => RoomState): Promise<RoomState> {
  const write = () => { const current=readRoom(); const next=change(current); if(next!==current) localStorage.setItem(ROOM_KEY, JSON.stringify(parseRoom(next))); return next; };
- return navigator.locks ? navigator.locks.request(ROOM_KEY,write) : write();
+ return withStorageLock(write);
 }
