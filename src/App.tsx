@@ -180,36 +180,47 @@ export default function App() {
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
       {page === 'growth' && <>
-        <section className="growth-card" aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
-          <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>
-          <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
-          <p>{displayForm.name}</p>
-          <label htmlFor="xp-progress">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
-          <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
-          <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : '成熟フォルムに到達しました！'}</p>
-          <section className="form-picker" aria-label="フォルム変更"><h3>フォルム変更</h3><p>選んだ姿をホーム・ルーム・コーデで表示します。</p>
-          <div>{FORM_CHOICES.map(f => {
-            const locked = isFormLocked(f.level, evolution.level);
-            return <button type="button" key={f.id} disabled={locked} data-locked={locked} aria-label={locked ? `？？？、Lv.${f.level}で解放` : f.name} aria-pressed={!locked && displayForm.id===f.id} onClick={()=>switchForm(f.id)}>
-              <img className={locked ? 'form-locked-silhouette' : undefined} src={`${process.env.PUBLIC_URL}/forms/${f.image}`} alt="" aria-hidden="true" />
-              <span>{visibleFormName(f.name, locked)}</span>
-              <small>{locked ? `Lv.${f.level}で解放` : displayForm.id===f.id ? '選択中 ✓' : '解放済み'}</small>
-            </button>;
-          })}</div>{appearanceMessage&&<p role="status">{appearanceMessage}</p>}</section>
-          <ol className="evolution-stages" aria-label="進化の5段階">
-            {FORM_STAGES.map(form => {
-              const locked = isFormLocked(form.level, evolution.level);
-              return <li key={form.id} aria-current={!locked && form.id === evolution.form.id ? 'step' : undefined}>
-                <span>Lv.{form.level}〜</span> {visibleFormName(form.name, locked)}{locked ? `（Lv.${form.level}で解放）` : ''}
-              </li>;
-            })}
-          </ol>
+        <section className="growth-card growth-card-compact" aria-label="ろきちゃんの成長">
+          <div className="growth-overview">
+            <div className="growth-portrait">{character(136)}</div>
+            <div className="growth-overview-info">
+              <h2><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</h2>
+              <p className="growth-current-form">{displayForm.name}</p>
+              <label htmlFor="xp-progress">EXP {evolution.currentLevelXp} / {evolution.requiredLevelXp}</label>
+              <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
+              <p className="growth-next">{evolution.nextLevel ? `次の進化 Lv.${evolution.nextLevel}` : '成熟フォルムに到達しました！'}</p>
+            </div>
+          </div>
+          <section className="form-picker" aria-label="フォルム変更">
+            <h3>フォルム変更</h3>
+            <p className="growth-picker-help">選んだ姿をホーム・ルーム・コーデで表示します。</p>
+            <div>{FORM_CHOICES.map(f => {
+              const locked = isFormLocked(f.level, evolution.level);
+              return <button type="button" key={f.id} disabled={locked} data-locked={locked} aria-label={locked ? `？？？、Lv.${f.level}で解放` : f.name} aria-pressed={!locked && displayForm.id===f.id} onClick={()=>switchForm(f.id)}>
+                <img className={locked ? 'form-locked-silhouette' : undefined} src={`${process.env.PUBLIC_URL}/forms/${f.image}`} alt="" aria-hidden="true" />
+                <span>{visibleFormName(f.name, locked)}</span>
+                <small>{locked ? `Lv.${f.level}で解放` : displayForm.id===f.id ? '選択中 ✓' : '解放済み'}</small>
+              </button>;
+            })}</div>
+            {appearanceMessage && <p role="status">{appearanceMessage}</p>}
+          </section>
+          <details className="growth-disclosure">
+            <summary>進化の5段階を見る</summary>
+            <ol className="evolution-stages" aria-label="進化の5段階">
+              {FORM_STAGES.map(form => {
+                const locked = isFormLocked(form.level, evolution.level);
+                return <li key={form.id} aria-current={!locked && form.id === evolution.form.id ? 'step' : undefined}>
+                  <span>Lv.{form.level}〜</span> {visibleFormName(form.name, locked)}{locked ? `（Lv.${form.level}で解放）` : ''}
+                </li>;
+              })}
+            </ol>
+          </details>
         </section>
-        <section style={{ marginTop: 24 }}>
-          <h2 style={{ fontSize: 18 }}>チェックイン履歴</h2>
+        <details className="growth-disclosure growth-history">
+          <summary>チェックイン履歴（直近14件）</summary>
           {days.length === 0 ? <p>最初のチェックインをお待ちしています。</p> :
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
-        </section>
+        </details>
       </>}
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
