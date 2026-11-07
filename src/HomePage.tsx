@@ -21,6 +21,7 @@ interface Props {
   room: RoomState;
   equipped?: string[];
   wallet: RewardState;
+  onWalletChange:(wallet:RewardState)=>void;
   realWallet?: RewardState;
   walletError: boolean;
   totalPoints: number;
@@ -35,7 +36,7 @@ const careActions = [
 ] as const;
 
 export default function HomePage({ onLoginRewards, evolution, displayForm, room, equipped, wallet, realWallet, walletError,
-  totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
+  totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate,onWalletChange }: Props) {
   const [scene, setScene] = useState<Scene>('avatar');
   const nextScene = scenes[(scenes.indexOf(scene) + 1) % scenes.length];
   const remainingXp = evolution.requiredLevelXp - evolution.currentLevelXp;
@@ -75,10 +76,9 @@ export default function HomePage({ onLoginRewards, evolution, displayForm, room,
           aria-label={`${sceneLabels[nextScene]}表示へ切り替え`} title={`次：${sceneLabels[nextScene]}`}>
           <Icon name="scene" /><span>表示切替</span>
         </button>
+        <PresentBox wallet={realWallet ?? wallet} room={room} onWalletChange={onWalletChange}/>
       </nav>
     </section>
-
-    <PresentBox wallet={realWallet ?? wallet} room={room}/>
 
     <nav className="avatar-care" aria-label="セルフケアのクイックメニュー">
       {careActions.map(([target, label]) =>

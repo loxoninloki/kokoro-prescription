@@ -220,7 +220,7 @@ export default function App() {
         </div>
       </aside>}
 
-      {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
+      {page === 'home' && <HomePage onWalletChange={setWallet} onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
         equipped={visibleEquipment}
         wallet={displayedWallet} realWallet={wallet} walletError={walletError && !devGachaWallet} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
