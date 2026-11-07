@@ -55,3 +55,5 @@ TypeScript、29スイート139テスト、本番ビルド成功。全エフェ�
 
 ## 並行作業の保持
 統合中に6edc976885027275b46504ebcce857f9785ed78aのちびろきガチャ用カタログが追加されたため、appearance.tsのimportを競合解消した。CHIBI_GACHA_ASSETS_READY=false、素材未配置時の登録ガード、atlasIndex/previewAtlasIndexを保持する。これは新固定ベースと標準衣装の承認・個別着脱を満たす素材ではないため、今回の未実装範囲は変わらない。
+
+後続20c15c5b8465bd26c64c9a191210f87451862f8bも取り込み、ChibiAtlasTileによる描画、正式所持チェック、ファッションガチャへの名称変更、2枚アトラスの投入手順を保持した。

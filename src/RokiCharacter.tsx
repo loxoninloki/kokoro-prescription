@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ITEMS, FORM_CHOICES, layersForForm } from './appearance';
 import { Icon } from './Icon';
+import ChibiAtlasTile from './ChibiAtlasTile';
 
 interface Props {
   form: { name: string; image: string };
@@ -14,8 +15,9 @@ export default function RokiCharacter({ form, size, equipped = [] }: Props) {
   const baseImage = 'forms/' + form.image;
   const formId=FORM_CHOICES.find(candidate=>candidate.image===form.image)?.id;
   const layers = [
-    { image: baseImage, order: 20, position: undefined, portraitClip: undefined, clipPath: undefined },
+    { image: baseImage, order: 20, position: undefined, portraitClip: undefined, clipPath: undefined, atlasIndex: undefined as number | undefined },
     ...ITEMS.filter(item => equipped.includes(item.id) && item.supportedForms.some(id=>FORM_CHOICES.some(f=>f.id===id&&f.image===form.image))).flatMap(item => formId?layersForForm(item,formId):item.layers),
+
   ].sort((a, b) => a.order - b.order);
 
   const activeFit = layers.find(layer => layer.portraitClip && layer.image === readyFit);
@@ -24,11 +26,13 @@ export default function RokiCharacter({ form, size, equipped = [] }: Props) {
   return <span className="roki-character" style={{ width: size }} role="img" aria-label={`ろきちゃん：${form.name}`}>
     {failed
       ? <span className="character-fallback" aria-hidden="true"><Icon name="growth" /></span>
-      : layers.map(({ image, position, portraitClip, clipPath }) => {
+      : layers.map(({ image, position, portraitClip, clipPath, atlasIndex }) => {
         const style: React.CSSProperties = position
           ? { inset: 'auto', left: `${position.left}%`, top: `${position.top}%`, width: `${position.width}%`, height: 'auto',
             transform: position.rotation === undefined ? undefined : `rotate(${position.rotation}deg)`, clipPath }
           : { clipPath: image === baseImage ? activeFit?.portraitClip : clipPath };
+        if (atlasIndex !== undefined) return <ChibiAtlasTile key={`${image}:${atlasIndex}`} image={image} index={atlasIndex}
+          className="roki-atlas-layer" style={style} />;
         return <img key={image} src={asset(image)} alt="" decoding="async" style={style}
             onLoad={portraitClip ? () => setReadyFit(image) : undefined}
             onError={event => {

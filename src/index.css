@@ -1597,3 +1597,23 @@ button.home-progress {
 .present-icon-button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:50px;min-height:50px}.present-icon-button span{font-size:9px}.present-count{position:absolute;right:-4px;top:-4px;min-width:17px;height:17px;border-radius:50%;background:#9d6bd0;color:white;font-size:10px;display:grid;place-items:center}.present-dialog-backdrop{position:fixed;inset:0;z-index:1500;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));background:#20102db3;box-sizing:border-box}.present-dialog{width:min(100%,430px);max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;margin:0;padding:18px;text-align:left}.present-dialog h2{font-size:19px;margin:8px 0 14px}.present-close{float:right}.present-dialog:focus{outline:none}
 
 .form-gift-art{position:relative;display:block}.form-gift-art>.gacha-item-art{position:absolute;inset:0;width:100%;height:100%}.coordinate-thumbnail>.gacha-item-art{width:100%;height:100%;border-radius:10px}
+
+
+/* Chibi Roki: independent 4x3 transparent sprite-atlas outfit layers. */
+.roki-character .roki-atlas-layer{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.gacha-item-art .gacha-chibi-icon-tile{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.coordinate-thumbnail .gacha-chibi-icon-tile{
+  border-radius:inherit;
+}
