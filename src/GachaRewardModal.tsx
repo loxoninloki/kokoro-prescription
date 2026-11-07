@@ -6,7 +6,7 @@ import { gachaRarity,RARITY_PRESENTATION } from './gachaRarity';
 import GachaPrizeArt from './GachaPrizeArt';
 import GachaTryOn,{canTryOn} from './GachaTryOn';
 import { useGachaModal,useReducedMotion } from './useGachaModal';
-export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,error,onClose,testMode=false,ownedItemIds=[],onEquip}:{itemId:string;testMode?:boolean;ownedItemIds?:readonly string[];onEquip?:(itemId:string,formId:FormId)=>Promise<void>;form:{id:FormId;name:string;image:string};equipped:readonly string[];roomLayout:Readonly<RoomState['layout']>;busy:boolean;error:string;onClose:()=>void}) {
+export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,error,onClose,testMode=false,ownedItemIds=[],quantity=1,onEquip}:{itemId:string;quantity?:number;testMode?:boolean;ownedItemIds?:readonly string[];onEquip?:(itemId:string,formId:FormId)=>Promise<void>;form:{id:FormId;name:string;image:string};equipped:readonly string[];roomLayout:Readonly<RoomState['layout']>;busy:boolean;error:string;onClose:()=>void}) {
  const [trying,setTrying]=React.useState(false),[applied,setApplied]=React.useState(true);
  const [artExpanded,setArtExpanded]=React.useState(false);
  const [equipping,setEquipping]=React.useState(false),[equipMessage,setEquipMessage]=React.useState('');
@@ -25,7 +25,7 @@ export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,e
    <span className="gacha-tryon-badge">{equipMessage==='着用しました！'?'保存したコーデ':applied?'お試し中 · 保存されません':'元の状態'}</span>
    <GachaTryOn itemId={itemId} form={form} equipped={equipped} roomLayout={roomLayout} applied={applied}/>
   </>}
-  <strong className="gacha-reveal-name">{gachaItemName(itemId)}</strong>
+  <strong className="gacha-reveal-name">{gachaItemName(itemId)} ×{quantity}</strong>
   <p className="gacha-reward-kind">種類：{interior?'家具・インテリア':garment?CATEGORIES[garment.category].name:'アイテム'} ／ {RARITY_PRESENTATION[rarity].label}</p>
   {!supported&&<p className="gacha-tryon-unsupported">現在の{form.name}ではお試しできません。対応フォルムになるとお試しできます。アイテム単体の画像はいつでも確認できます。</p>}
   {trying&&<p className="gacha-tryon-notice">{equipMessage==='着用しました！'?'現在のフォルムのコーデに保存しました。':'現在のコーデ・ルームへの仮表示です。保存状態は変わりません。'}</p>}
