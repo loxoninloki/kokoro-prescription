@@ -898,3 +898,29 @@ button.home-progress {
   .stamp-modal .stamp-pagination{font-size:10px}
   .stamp-modal .stamp-pagination button{font-size:10px;padding:4px}
 }
+
+
+/* Home scene selector: avatar -> illustration -> current saved room. */
+.avatar-scene-label{
+  position:absolute;left:8px;bottom:6px;z-index:2;
+  padding:4px 9px;border-radius:999px;
+  background:#352248ae;color:#fff;font-size:11px;font-weight:650;
+  pointer-events:none;
+}
+.avatar-center > .avatar-room-preview{
+  box-sizing:border-box;
+  width:min(100%,38svh,360px);
+  height:auto;
+  max-height:100%;
+  aspect-ratio:1.12;
+  border-radius:20px;
+  box-shadow:0 8px 24px #301d4c35;
+}
+.avatar-room-preview .roki-room-actor{width:min(116px,35%)}
+.avatar-room-preview .interior-object{border-width:2px}
+.avatar-room-preview .interior-desk{border-bottom-width:10px}
+.avatar-room-preview .interior-bed{border-top-width:12px}
+.avatar-room-preview .interior-lamp{border-bottom-width:12px}
+@media(prefers-reduced-motion:reduce){
+  .avatar-room-preview .roki-room-actor{transition:none}
+}

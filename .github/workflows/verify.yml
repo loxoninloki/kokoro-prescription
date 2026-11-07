@@ -6,6 +6,7 @@ on:
     branches:
       - rebuild/kokoro-v2
       - integration/kokoro-unified-v3
+      - feature/home-room-scene-20261107
   pull_request:
     branches:
       - main

@@ -169,7 +169,7 @@ export default function App() {
 
   return (
     <main className="kokoro-app" data-page={page}>
-      {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm}
+      {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
         equipped={visibleEquipment}
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
