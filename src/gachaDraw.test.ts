@@ -17,6 +17,28 @@ test.each(['macaron','ticket'] as const)('%s消費と所有・未確認結果を
  expect(acknowledged.ownedItemIds).toEqual(wallet.ownedItemIds);expect(acknowledged.spent).toBe(wallet.spent);
  random.mockRestore();
 });
+test('同一アイテムを2回引くと所持数×2になり、通貨は2回だけ消費する',async()=>{
+ const random=jest.spyOn(Math,'random').mockReturnValue(0);
+ try {
+  const first=await confirmGachaDraw(GACHA_TYPES[0],'macaron',[]);
+  const id=first.result.itemId;
+  expect(first.wallet.itemCounts?.[id]).toBe(1);
+  await acknowledgeGachaResult(first.result.id);
+  const second=await confirmGachaDraw(GACHA_TYPES[0],'macaron',[]);
+  expect(second.result.itemId).toBe(id);
+  expect(second.wallet.itemCounts?.[id]).toBe(2);
+  expect(second.wallet.ownedItemIds.filter(item=>item===id)).toHaveLength(1);
+  expect(second.wallet.spent).toBe(100);
+ } finally {random.mockRestore();}
+});
+test('旧所持品だけの保存データも重複取得時は×2へ移行する',async()=>{
+ const id=GACHA_TYPES[0].itemIds[0];
+ localStorage.setItem(REWARD_KEY,JSON.stringify({...EMPTY_REWARDS,earned:200,ownedItemIds:[id]}));
+ const random=jest.spyOn(Math,'random').mockReturnValue(0);
+ try { const result=await confirmGachaDraw(GACHA_TYPES[0],'macaron',[]);
+  expect(result.wallet.itemCounts?.[id]).toBe(2);
+ } finally {random.mockRestore();}
+});
 test('保存失敗で消費や結果が保存されない・再抽選は発生しない',async()=>{
  const before=localStorage.getItem(REWARD_KEY),random=jest.spyOn(Math,'random').mockReturnValue(0);
  const set=jest.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
