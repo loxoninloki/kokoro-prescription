@@ -1,6 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 import { Icon } from './Icon';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import {CareHeading,CareSection,CareRing} from './SelfcareUI';
+import StepHistoryChart from './StepHistoryChart';
+import {displayDay,mondayOf,shiftDay,stepMonthSummary} from './selfcareView';
 
 export type StepEntries = Record<string, number>;
 const KEY = 'kokoro-steps-v1';
@@ -56,8 +59,23 @@ interface Props {
 
 export default function StepTracker({ entries, setEntries, today, incoming, clearIncoming }: Props) {
   const [selected, setSelected] = useState(today);
+  const previousToday=useRef(today);
+  useEffect(()=>{const prior=previousToday.current;previousToday.current=today;setSelected(value=>value===prior?today:value);},[today]);
   const [draft, setDraft] = useState('');
   const [saved, setSaved] = useState(false);
+  const [chartView,setChartView]=useState<'week'|'day'|'month'>('week');
+  const [weekStart,setWeekStart]=useState(()=>mondayOf(today));
+  const [period,setPeriod]=useState(today.slice(0,7));
+  const summary=stepMonthSummary(entries,period,today);
+  const count=entries[today];
+  const nextStage=[1000,3000,5000].find(value=>value>(count??0));
+  const changePeriod=(delta:number)=>{
+    if(chartView==='week'){setWeekStart(value=>shiftDay(value,delta*7));return;}
+    const date=new Date(period+'-01T12:00:00Z');
+    if(chartView==='month')date.setUTCFullYear(date.getUTCFullYear()+delta);else date.setUTCMonth(date.getUTCMonth()+delta);
+    const next=date.toISOString().slice(0,7);setPeriod(next>today.slice(0,7)?today.slice(0,7):next);
+  };
+
 
   useEffect(() => {
     setDraft(entries[selected] === undefined ? '' : String(entries[selected]));
@@ -93,15 +111,9 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
   };
 
   return (
-    <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f4efff' }}>
-      <h2><Icon name="steps" /> 今日の歩数</h2>
-      <p className="step-count">{entries[today] === undefined ? '未記録' : `${entries[today].toLocaleString()} 歩`}</p>
-      {Capacitor.isNativePlatform() ? (
-        <p style={{ fontSize: 13 }}>この試作版では、iPhoneのヘルスケアで確認した歩数を手入力できます。</p>
-      ) : <>
-        <p style={{ fontSize: 13 }}>初回設定のあとは、ショートカットを開いて今日の歩数を保存できます。</p>
-        <p><a href={`shortcuts://run-shortcut?name=${encodeURIComponent('こころの歩数')}`}>iPhoneから歩数を取り込む</a></p>
-      </>}
+    <section className="selfcare-page step-care" aria-label="歩数">
+      <CareHeading icon="steps" title="歩数" note="歩いた日も、休んだ日も。あなたのペースで。"/>
+      {incoming&&<div className="care-card care-import-notice">
       {incoming === 'invalid' && <p role="alert">歩数を取り込めませんでした。ショートカットの日付と歩数をご確認ください。</p>}
       {incoming && incoming !== 'invalid' && (
         <div className="diary-entry">
@@ -112,6 +124,31 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
           <button type="button" onClick={clearIncoming}>キャンセル</button>
         </div>
       )}
+      </div>}
+      <div className="care-card care-step-hero">
+        <CareRing value={count??0} max={5000} label="今日の歩数。リングは5,000歩の報酬段階を基準に表示"><Icon name="steps"/><span>今日の歩数</span><strong className="care-step-number">{count===undefined?'未取得':count.toLocaleString('ja-JP')}<small>{count===undefined?'':'歩'}</small></strong><small>{displayDay(today)}</small></CareRing>
+        <div className="care-step-message"><span className="care-badge">小さな積み重ね</span><p>{encouragement(count)}</p><p className="care-help">{count===undefined?'歩数の取得・保存をお待ちしています。':nextStage?`次のEXP段階まで あと${(nextStage-count).toLocaleString('ja-JP')}歩`:'今日の歩数EXPは最大段階です。'}</p></div>
+        <p className="care-ring-caption">5,000歩で歩数EXPの最大段階。自分のペースで積み重ねましょう。</p>
+      </div>
+
+      <CareSection title={chartView==='week'?'週間グラフ':'歩数グラフ'}>
+        <div className="care-segment" role="group" aria-label="歩数グラフの期間">{(['week','day','month'] as const).map(mode=><button type="button" key={mode} aria-pressed={chartView===mode} onClick={()=>setChartView(mode)}>{mode==='week'?'週間':mode==='day'?'日ごと':'月ごと'}</button>)}</div>
+        <div className="care-period"><button type="button" aria-label={chartView==='week'?'前の週':chartView==='month'?'前の年':'前の月'} onClick={()=>changePeriod(-1)}>‹</button><strong>{chartView==='week'?`${displayDay(weekStart)} – ${displayDay(shiftDay(weekStart,6))}`:chartView==='month'?period.slice(0,4)+'年':period.replace('-','年')+'月'}</strong><button type="button" aria-label={chartView==='week'?'次の週':chartView==='month'?'次の年':'次の月'} disabled={chartView==='week'?weekStart>=mondayOf(today):chartView==='month'?period.slice(0,4)>=today.slice(0,4):period>=today.slice(0,7)} onClick={()=>changePeriod(1)}>›</button></div>
+        <StepHistoryChart steps={entries} month={period} monthly={chartView==='month'} today={today} weekStart={chartView==='week'?weekStart:undefined} selectedDay={selected} onSelectDay={day=>{setSelected(day);setSaved(false);}}/>
+        {chartView==='week'&&<p className="care-help">— は未取得。0は0歩の記録です。日をタップして入力欄で確認できます。</p>}
+      </CareSection>
+      <CareSection title={`${period.replace('-','年')}月のサマリー`}>
+        <div className="care-stats"><div><span>合計歩数</span><strong>{summary.days?summary.total.toLocaleString('ja-JP'):'—'}<small>歩</small></strong></div><div><span>1日平均（記録日）</span><strong>{summary.average===null?'—':summary.average.toLocaleString('ja-JP')}<small>歩</small></strong></div><div><span>最多歩数の日</span><strong className="care-stat-day">{summary.best?displayDay(summary.best[0]):'記録なし'}</strong><small>{summary.best?summary.best[1].toLocaleString('ja-JP')+'歩':''}</small></div></div>
+        <p className="care-help">保存済みの{summary.days}日分から集計しています。</p>
+      </CareSection>
+      <CareSection title="歩数の記録">
+
+      {Capacitor.isNativePlatform() ? (
+        <p style={{ fontSize: 13 }}>この試作版では、iPhoneのヘルスケアで確認した歩数を手入力できます。</p>
+      ) : <>
+        <p style={{ fontSize: 13 }}>初回設定のあとは、ショートカットを開いて今日の歩数を保存できます。</p>
+        <p><a href={`shortcuts://run-shortcut?name=${encodeURIComponent('こころの歩数')}`}>iPhoneから歩数を取り込む</a></p>
+      </>}
       {!Capacitor.isNativePlatform() && (
         <details style={{ marginBottom: 14, fontSize: 13 }}>
           <summary>初回だけ · ショートカットを作る</summary>
@@ -150,9 +187,9 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
           <p>日付を送らない設定では、歩数は今日の分として取り込まれます。過去の歩数を送る場合は、検索対象の日と送る日付を同じ日にしてください。</p>
         </details>
       )}
-      <form onSubmit={save} style={{ display: 'grid', gap: 12 }}>
+      <form className="care-form" onSubmit={save}>
         <label>記録する日
-          <input type="date" value={selected} max={today} onChange={event => { setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
+          <input type="date" value={selected} max={today} onChange={event => { if(event.target.value)setSelected(event.target.value); setSaved(false); }} required style={{ display: 'block', marginTop: 6, padding: 10 }} />
         </label>
         <label>歩数
           <input type="number" inputMode="numeric" min={0} max={100000} step={1} required value={draft}
@@ -161,9 +198,10 @@ export default function StepTracker({ entries, setEntries, today, incoming, clea
         </label>
         <button type="submit" style={{ padding: 12, border: 0, borderRadius: 20, color: '#fff', background: '#7653a6' }}>歩数を保存</button>
       </form>
-      <p role="status" style={{ fontWeight: 600, marginTop: 16 }}>{encouragement(entries[selected])}</p>
+      <p role="status" className="care-selected-steps">{displayDay(selected)}：{entries[selected]===undefined?'未取得':entries[selected].toLocaleString('ja-JP')+'歩'} · {encouragement(entries[selected])}</p>
       {saved && !storageError && <p>歩数を保存しました 💜</p>}
       <p style={{ fontSize: 12, color: '#766b82' }}>0歩でも大丈夫。経験値は1,000歩で+5、3,000歩で合計+15、5,000歩で合計+30。歩数の編集で重複加算されません。</p>
+      </CareSection>
       {storageError && <p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
     </section>
   );

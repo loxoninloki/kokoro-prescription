@@ -1,14 +1,23 @@
 import React from 'react';
 import type { StepEntries } from './StepTracker';
+import {shiftDay} from './selfcareView';
 
 interface Props {
   steps: StepEntries;
   month: string;
   monthly: boolean;
   today: string;
+  weekStart?: string;
+  selectedDay?: string;
+  onSelectDay?: (day:string)=>void;
 }
 
-export default function StepHistoryChart({ steps, month, monthly, today }: Props) {
+export default function StepHistoryChart({ steps, month, monthly, today,weekStart,selectedDay,onSelectDay }: Props) {
+  if(weekStart){
+    const week=Array.from({length:7},(_,i)=>{const day=shiftDay(weekStart,i);return {day,label:['月','火','水','木','金','土','日'][i],count:day<=today?steps[day]:undefined};});
+    const peak=Math.max(1,...week.map(v=>v.count??0));
+    return <div className="care-week-chart" role="group" aria-label="月曜日から日曜日の歩数">{week.map(({day,label,count})=><button key={day} type="button" disabled={day>today} aria-pressed={day===selectedDay} aria-label={`${day} ${count===undefined?'未取得':count+'歩'}`} onClick={()=>onSelectDay?.(day)}><strong>{count===undefined?'—':count.toLocaleString('ja-JP')}</strong><span className="care-week-bar-track"><span className="care-week-bar" style={{height:count===undefined?'0%':`${Math.max(3,95*count/peak)}%`}} data-empty={count===undefined}/></span><span>{label}</span><small>{Number(day.slice(-2))}日</small></button>)}</div>;
+  }
   const [year, monthNumber] = month.split('-').map(Number);
   const totals = new Map<string, number>();
   const prefix = monthly ? String(year) : month;
@@ -35,12 +44,13 @@ export default function StepHistoryChart({ steps, month, monthly, today }: Props
     <p><strong>合計 {total.toLocaleString()} 歩</strong></p>
     <svg className="step-history-chart" viewBox="0 0 316 132" role="img"
       aria-label={monthly ? `${year}年の月ごとの歩数` : `${monthNumber}月の日ごとの歩数`}>
-      <line x1="8" y1="106" x2="308" y2="106" stroke="#baa5d2" />
+      <defs><linearGradient id={`step-bars-${monthly?'year':'month'}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#9cb8e8"/><stop offset="100%" stopColor="#7754a8"/></linearGradient></defs>
+      <line x1="8" y1="106" x2="308" y2="106" stroke="#c5b3d3" />
       {periods.map(({ key, number, label, count }) => {
         const height = count === undefined ? 0 : Math.max(2, 96 * count / maximum);
         const x = 8 + (number - 0.5) * spacing;
         return <g key={key}>
-          {count !== undefined && <rect x={x - spacing * 0.32} y={106 - height} width={spacing * 0.64} height={height} rx="2" fill="#7653a6">
+          {count !== undefined && <rect x={x - spacing * 0.32} y={106 - height} width={spacing * 0.64} height={height} rx="2" fill={`url(#step-bars-${monthly?'year':'month'})`}>
             <title>{label} {count.toLocaleString()}歩</title>
           </rect>}
           {(monthly || number === 1 || number % 5 === 0) &&

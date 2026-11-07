@@ -1245,6 +1245,155 @@ button.home-progress {
   line-height:1.6;
 }
 
+/* LUX Healing Interface — scoped to self-care, preserving home/gacha/room styles. */
+.kokoro-app:not([data-page="home"])>section.selfcare-page {
+ --care-ink:#463457;--care-purple:#7754a8;--care-blue:#9cb8e8;--care-base:#faf7ff;
+ padding:0!important;margin-top:6px!important;background:transparent!important;border:0;box-shadow:none;animation:none;color:var(--care-ink);min-width:0;
+}
+.selfcare-page .care-heading {padding:18px 20px;margin-bottom:16px;border:1px solid #d9c5ec88;border-radius:24px;background:linear-gradient(125deg,#68448fcf,#9071bbd9);color:#fff;box-shadow:0 8px 24px #21153322;backdrop-filter:blur(12px)}
+.selfcare-page .care-heading h1 {display:flex;align-items:center;gap:10px;font-size:26px;line-height:1.3;margin:6px 0}
+.selfcare-page .care-heading .kokoro-icon {width:28px;height:28px}
+.selfcare-page .care-heading p {font-size:13px;line-height:1.6;margin:5px 0 0;color:#faf7ff}
+.care-eyebrow {font-size:12px;letter-spacing:.08em;color:#f1e7fb}
+.selfcare-page .care-card {min-width:0;padding:18px;margin:14px 0;border-radius:23px;border:1px solid #fff9;background:linear-gradient(145deg,#faf7fff5,#eee6f6f0);box-shadow:0 7px 22px #2415381c,inset 0 1px #fff;backdrop-filter:blur(12px)}
+.selfcare-page .care-section-title {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.kokoro-app .selfcare-page .care-section-title h2 {font-size:17px;line-height:1.5;margin:0;color:#533c6e}
+.selfcare-page .care-section-title:before {content:"";width:5px;height:19px;background:linear-gradient(#9cb8e8,#b196d2);border-radius:9px;flex-shrink:0}
+.selfcare-page .care-section-title h2 {flex:1}
+.selfcare-page button {min-height:44px;touch-action:manipulation}
+.selfcare-page button:disabled {opacity:.5}
+.selfcare-page :is(input,textarea,button):focus-visible {outline:3px solid #7754a8;outline-offset:3px}
+.selfcare-page .care-segment {display:flex;gap:4px;background:#eee6f6e8;border:1px solid #e0d2ed;padding:4px;border-radius:16px;margin:12px 0}
+.selfcare-page .care-segment button {flex:1;min-width:0;padding:8px 5px;border:0;border-radius:12px;background:transparent;color:#644d7b;font-size:14px;font-weight:600;line-height:1.4}
+.selfcare-page .care-segment button[aria-pressed=true] {background:linear-gradient(120deg,#8a66b6,#7754a8);box-shadow:0 3px 9px #7754a82b;color:#fff}
+.selfcare-page .care-primary,.selfcare-page .care-form button[type=submit] {display:flex;justify-content:center;align-items:center;gap:8px;width:100%;min-height:48px;padding:12px 18px;border:0;border-radius:15px;color:#fff;background:linear-gradient(115deg,#9170bd,#7754a8);font-size:16px;font-weight:650;box-shadow:0 5px 12px #7754a825}
+.selfcare-page .care-secondary {width:100%;padding:10px 15px;border:1px solid #c5b3d3;border-radius:14px;background:#fff9;color:#664782;font-size:14px}
+.selfcare-page .care-text-button {border:0;background:transparent;color:#68458d;padding:6px;font-size:13px;white-space:nowrap}
+.selfcare-page .care-help,.selfcare-page .care-empty {font-size:13px;line-height:1.75;color:#715f83;overflow-wrap:anywhere}
+.selfcare-page .care-empty {margin:12px 0;padding:16px;border-radius:14px;background:#fff8}
+.care-mood-summary {display:flex;align-items:center;gap:12px}
+.care-mood-summary time {font-size:13px;line-height:1.6;max-width:85px;font-weight:700;color:#654d7f}
+.care-mood-face {display:grid;place-items:center;flex-shrink:0;width:50px;height:50px;border-radius:50%;background:#f4eafa;color:#9a75c0}
+.care-mood-face .mood-icon {width:42px;height:42px}
+.care-mood-face .kokoro-icon {width:29px;height:29px}
+.care-mood-summary>div {min-width:0;flex:1}
+.care-mood-summary strong {font-size:15px}
+.care-mood-summary p {font-size:12px;line-height:1.6;margin:5px 0 0;color:#715f83}
+.selfcare-page .care-date-label {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:#715f83;margin-top:14px}
+.selfcare-page input[type=date],.selfcare-page input[type=time] {min-width:0;max-width:100%;padding:9px 10px;color:#463457;background:#fff9;border:1px solid #d5c5e3;border-radius:12px}
+.selfcare-page .care-moods {gap:5px;margin:10px 0 18px}
+.selfcare-page .care-moods button {min-height:76px;padding:5px 2px;border-radius:14px;font-size:11px;background:#fff9;border:1px solid #dfd0eb}
+.selfcare-page .care-moods button[aria-pressed=true] {background:#e7d8f3;border:2px solid #9976bd;box-shadow:0 2px 8px #7754a81c}
+.selfcare-page .care-moods .mood-icon {width:28px;height:28px;color:#9771b5}
+.care-field {display:block;font-size:14px;margin:12px 0 8px;font-weight:650}
+.selfcare-page textarea {display:block;width:100%;padding:15px;border-radius:17px;resize:vertical;min-height:170px;line-height:1.9;border-color:#d5c5e3;background:#fff9;scroll-margin-bottom:130px}
+.selfcare-page textarea::placeholder {color:#9a88aa}
+.care-input-meta {display:flex;justify-content:space-between;gap:8px;margin:7px 0;font-size:11px;line-height:1.5;color:#79658b}
+.care-prompt-chips {display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px}
+.care-prompt-chips button {padding:7px 10px;border:1px solid #d9c6e8;border-radius:20px;background:#fff9;color:#74558e;font-size:12px}
+.care-recent {list-style:none;margin:0;padding:0}
+.care-recent li+li {border-top:1px solid #e1d5eb}
+.care-recent button {display:flex;align-items:center;gap:10px;width:100%;padding:12px 0;border:0;background:transparent;color:#624778;text-align:left}
+.care-recent button>span {min-width:0;flex:1;display:grid;gap:4px}
+.care-recent time {font-size:12px;font-weight:600;color:#8c72a2}
+.care-recent button>span>span {font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.care-recent b {font-size:24px;font-weight:400}
+.selfcare-page .care-period {display:flex;align-items:center;justify-content:space-between;gap:6px;margin:12px 0}
+.selfcare-page .care-period button {flex-shrink:0;min-width:44px;min-height:44px;font-size:26px;line-height:1;border:0;border-radius:13px;color:#7754a8;background:#fff8}
+.care-period strong {font-size:14px;text-align:center;line-height:1.5}
+.care-month-count {font-size:13px;color:#79658b;text-align:right;margin:0 0 12px}
+.care-month-count strong {color:#7754a8}
+.care-calendar-grid {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.care-weekday {font-size:12px;color:#7d648f;text-align:center;padding:6px 0;font-weight:650}
+.care-calendar-grid button {min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:56px;padding:5px 0;border:1px solid #e4d8ee;background:#fff8;color:#463457;border-radius:12px;font-size:14px}
+.care-calendar-grid button[aria-pressed=true] {border:2px solid #9a77bd;background:#e5d5f1;color:#553674;font-weight:750;box-shadow:0 3px 9px #7754a824}
+.care-calendar-grid button[aria-current=date]:not([aria-pressed=true]) {background:#e8ecff;border-color:#abbce3}
+.care-record-dots {display:flex;justify-content:center;gap:2px;min-height:6px;flex-wrap:wrap;max-width:100%}
+.care-record-dots i,.care-calendar-legend i {display:inline-block;width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.care-dot-diary {background:#8966bb}.care-dot-mood {background:#d389b7}.care-dot-medicine {background:#81b8b0}.care-dot-steps {background:#799dd7}
+.care-checkin-mark {position:absolute;right:2px;top:1px;font-size:9px;color:#9277a7}
+.care-calendar-legend {display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:13px;font-size:11px;color:#79658b}
+.care-calendar-legend>span {display:flex;align-items:center;gap:4px}
+.care-day-records {margin:0}
+.care-day-records>div {display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;padding:12px 0;border-bottom:1px solid #dfd3e8;line-height:1.6}
+.care-day-records dt {display:flex;align-items:flex-start;gap:7px;font-size:13px;color:#87649f}
+.care-day-records dt .kokoro-icon {width:18px;height:18px;flex-shrink:0;margin-top:2px}
+.care-day-records dd {min-width:0;margin:0;font-size:14px;overflow-wrap:anywhere}
+.care-day-records dd ul {padding-left:18px;margin:6px 0 0}
+.care-day-records+.care-secondary {margin-top:15px}
+.care-ring {position:relative;display:grid;place-items:center;width:180px;max-width:100%;aspect-ratio:1;margin:auto;color:#7754a8;flex-shrink:0}
+.care-ring>svg {position:absolute;width:100%;height:100%;inset:0;overflow:visible}
+.care-ring-track,.care-ring-value {fill:none;stroke-width:10}
+.care-ring-track {stroke:#e8ddf1}.care-ring-value {stroke:#ab87d0;stroke-linecap:round}
+.care-ring>div {position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;max-width:80%;text-align:center}
+.care-ring>div>.kokoro-icon {width:26px;height:26px}
+.care-ring>div>span {font-size:13px}
+.care-ring>div>small {font-size:11px;color:#8d76a0}
+.care-step-number {font-size:32px;line-height:1.3;color:#594173;font-variant-numeric:tabular-nums;white-space:nowrap}
+.care-step-number small {font-size:13px;margin-left:2px}
+.care-step-hero {display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+.care-step-hero .care-ring {width:165px}
+.care-step-message {flex:1;min-width:110px;font-size:14px;line-height:1.8}
+.care-badge {font-size:11px;padding:5px 10px;border-radius:20px;background:#e9def4;color:#7a5798}
+.care-ring-caption {width:100%;font-size:11px;line-height:1.6;color:#7f6a91;text-align:center;margin:0}
+.care-week-chart {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:10px 0}
+.care-week-chart button {display:flex;min-width:0;flex-direction:column;align-items:center;gap:5px;padding:5px 1px;border-radius:12px;border:1px solid transparent;color:#73538c;background:transparent}
+.care-week-chart button[aria-pressed=true] {background:#e8ddf5;border-color:#cab3de}
+.care-week-chart strong {font-size:10px;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.care-week-chart button>span:last-of-type {font-size:13px}
+.care-week-chart small {font-size:10px;color:#8d76a0}
+.care-week-bar-track {height:105px;display:flex;width:75%;justify-content:center;align-items:flex-end;border-bottom:1px solid #d2c1e2}
+.care-week-bar {display:block;width:100%;border-radius:9px 9px 3px 3px;background:linear-gradient(#b9b5ee,#ae88d4)}
+.care-week-bar[data-empty=true] {background:none}
+.care-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.care-stats>div {display:flex;align-items:center;flex-direction:column;justify-content:center;gap:9px;min-width:0;min-height:115px;padding:10px 4px;border-radius:16px;background:#fff9;text-align:center}
+.care-stats span {font-size:11px;line-height:1.5;color:#8c6f9f}
+.care-stats strong {font-size:19px;line-height:1.4;overflow-wrap:anywhere;color:#684987;font-variant-numeric:tabular-nums}
+.care-stats small {font-size:11px;font-weight:400;color:#87689e}
+.care-stats .care-stat-day {font-size:12px;line-height:1.5}
+.selfcare-page .care-form {display:grid;gap:14px}
+.selfcare-page .care-form label {display:grid;gap:8px;font-size:14px;font-weight:600;min-width:0}
+.selfcare-page .care-form input {display:block;width:100%;min-width:0;padding:12px;font-weight:400}
+.selfcare-page details {font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.selfcare-page details summary {min-height:44px;padding:11px 0;color:#75568e;cursor:pointer}
+.selfcare-page .care-selected-steps {font-size:14px;line-height:1.8;color:#73548c}
+.care-next-medicine {display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.care-capsule {display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:linear-gradient(#d7c1e9,#eee4f6);color:#8d64b3}
+.care-capsule .kokoro-icon {width:28px;height:28px}
+.care-next-medicine>div {flex:1;min-width:100px}
+.care-next-medicine>div>span {font-size:11px;color:#8a749d}
+.care-next-medicine strong {display:block;font-size:30px;font-variant-numeric:tabular-nums;line-height:1.3}
+.care-next-medicine p {font-size:14px;margin:5px 0;overflow-wrap:anywhere}
+.care-countdown {font-size:12px;padding:8px 11px;background:#e8dbf3;border-radius:15px;color:#77548f}
+.care-medicine-timeline {list-style:none;padding:0;margin:12px 0 0}
+.care-medicine-timeline .medication-dose {display:flex;align-items:flex-start;gap:14px;padding:13px 12px;background:#fff9;border:1px solid #e1d3ec;border-radius:16px;margin:10px 0}
+.care-medicine-timeline time {font-size:18px;font-weight:750;font-variant-numeric:tabular-nums;color:#7754a8;min-width:55px;padding-top:8px}
+.care-medicine-timeline li>div {flex:1;min-width:0}
+.care-medicine-timeline label {display:flex;align-items:center;gap:10px;min-height:44px;line-height:1.5;cursor:pointer}
+.care-medicine-timeline label input {flex-shrink:0}
+.care-medicine-timeline label strong {font-size:14px;overflow-wrap:anywhere}
+.care-medicine-timeline label small {display:block;font-size:12px;color:#8b719d;margin-top:3px}
+.care-dose-actions {display:flex;gap:4px;flex-wrap:wrap}
+.care-dose-actions button {padding:6px 8px;border:0;background:transparent;color:#826498;font-size:12px;text-decoration:underline}
+.care-medication-progress {display:flex;align-items:center;gap:16px}
+.care-medication-progress .care-ring {width:120px;flex-shrink:0}
+.care-medication-progress .care-ring strong {font-size:26px;line-height:1.3}
+.care-medication-progress strong small {font-size:13px}
+.care-medication-progress>div:not(.care-ring) {flex:1;min-width:0}
+.care-medication-progress>div>span {font-size:12px;color:#85669a}
+.care-medication-progress>div>strong {display:block;font-size:30px;margin:6px 0;color:#7754a8}
+.care-medication-progress>div>strong small {font-size:14px;font-weight:400}
+.care-medication-progress p {font-size:12px;line-height:1.7;color:#7c688b;margin:6px 0}
+.selfcare-page .medication-reward-explanation {font-size:12px;line-height:1.8;color:#79658b}
+@media(max-width:365px) {.selfcare-page .care-card{padding:14px}.care-mood-summary{gap:7px}.care-mood-summary time{font-size:12px;max-width:68px}.care-mood-face{width:40px;height:40px}.care-mood-summary strong{font-size:13px}.care-step-hero .care-ring{width:145px}.care-calendar-grid{gap:3px}.care-stats strong{font-size:16px}.care-week-chart strong{font-size:9px}.care-medication-progress{gap:8px}.care-medication-progress .care-ring{width:105px}}
+@media(prefers-reduced-transparency:reduce) {.selfcare-page .care-card{background:#faf7ff;backdrop-filter:none}.selfcare-page .care-heading{background:#7754a8;backdrop-filter:none}}
+
+.selfcare-page>.diary-swipe-hint {color:#f1e7fb;font-size:12px;line-height:1.6}
+.selfcare-page .care-moods button {font-size:12px}
+.selfcare-page .care-week-chart strong {font-size:11px}
+.diary-care[data-view=calendar] .care-heading {padding:14px 18px;margin-bottom:10px}
+.diary-care[data-view=calendar] .care-heading .care-eyebrow,.diary-care[data-view=calendar] .care-heading p {display:none}
+.diary-care[data-view=calendar] .care-heading h1 {font-size:23px;margin:0}
 
 /* Prize artwork: independent of the character's evolution / try-on state. */
 .gacha-item-art {

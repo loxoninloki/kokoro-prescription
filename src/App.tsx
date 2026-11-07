@@ -223,7 +223,7 @@ export default function App() {
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
         equipped={visibleEquipment} room={room} onChange={setRoom} />}
-      {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
+      {page !== 'home' && page !== 'room' && page !== 'dressup' && !['diary','steps','medication'].includes(page) && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
       {page === 'growth' && <>
@@ -273,7 +273,7 @@ export default function App() {
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page + (devGachaWallet ? '-test' : '-real')} wallet={displayedWallet} error={walletError && !devGachaWallet} testMode={!!devGachaWallet} section={page === 'gacha' ? 'gacha' : 'shop'}
         roomOwnedItemIds={devGachaWallet ? [] : room.ownedItemIds} onWalletChange={devGachaWallet ? setDevGachaWallet : setWallet} previewForm={displayForm}
         previewEquipment={visibleEquipment} roomLayout={room.layout} />}
-      {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
+      {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} medicines={medication.medicines} />}
       {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
