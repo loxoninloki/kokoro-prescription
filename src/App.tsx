@@ -20,7 +20,8 @@ import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
-import { tokyoDay, RewardState } from './rewardLedger';
+import { tokyoDay, RewardState, updateRewards } from './rewardLedger';
+import { giftForForm } from './formFirstGifts';
 import { freshDevGachaWallet, isDevGachaHost } from './devGachaSandbox';
 import { readCheckins } from './loginStamp';
 import { Icon } from './Icon';
@@ -48,6 +49,8 @@ export default function App() {
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [appearance, setAppearance] = useState(readAppearance);
   const [appearanceMessage, setAppearanceMessage] = useState('');
+  const [firstFormGift, setFirstFormGift] = useState<{name:string;formName:string;image:string}|null>(null);
+  const formGiftBusy = useRef(false);
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
@@ -174,10 +177,28 @@ export default function App() {
   }, [appearance, recordDays, saveAppearance]);
 
   const saveOutfit = (next:Appearance) => saveAppearance(saveFormEquipment(appearance,displayForm.id,next.equipped));
-  const switchForm = (id:FormId) => {
-    if(!FORM_CHOICES.some(f=>f.id===id&&f.level<=evolution.level))return;
-    const saved=saveAppearance({...appearance,selectedFormId:id,mode:id==='human'?'human':'chibi'});
-    setAppearanceMessage(saved?'フォルムを変更しました。':'表示する姿を保存できませんでした。');
+  const switchForm = async (id:FormId) => {
+    if (formGiftBusy.current || !FORM_CHOICES.some(f => f.id === id && f.level <= evolution.level)) return;
+    formGiftBusy.current = true;
+    try {
+      const saved = saveAppearance({...appearance,selectedFormId:id,mode:id==='human'?'human':'chibi'});
+      if (!saved) { setAppearanceMessage('表示する姿を保存できませんでした。'); return; }
+      setAppearanceMessage('フォルムを変更しました。');
+      const gift = giftForForm(id, evolution.level);
+      if (!gift) return;
+      let granted = false;
+      const next = await updateRewards(current => {
+        if (current.ownedItemIds.includes(gift.item.id)) return current;
+        granted = true;
+        return {...current, ownedItemIds:[...current.ownedItemIds,gift.item.id]};
+      });
+      setWallet(next);
+      if (granted) setFirstFormGift({name:gift.item.name,formName:gift.form.name,image:gift.item.layers[0].image});
+    } catch {
+      setAppearanceMessage('フォルムの記念アイテムを保存できませんでした。再度フォルムを選択すると受け取れます。');
+    } finally {
+      formGiftBusy.current = false;
+    }
   };
   // Persist the former room selection once; every screen subsequently reads appearance.selectedFormId.
   useEffect(()=>{
@@ -270,6 +291,17 @@ export default function App() {
       {roomError && <p role="alert">{roomError}</p>}
       {(loginRewardsOpen || stampDay !== null) && <LoginRewards days={wallet.loginDays} room={room} stampDay={stampDay} receipt={receipt} onClose={closeRewards} />}
       <BottomNavigation page={page} onNavigate={navigate} />
+      {firstFormGift && <div className="form-gift-backdrop">
+        <section className="form-gift-dialog" role="dialog" aria-modal="true" aria-labelledby="form-gift-title">
+          <span className="form-gift-sparkle" aria-hidden="true">✦ ✧ ✦</span>
+          <h2 id="form-gift-title">進化おめでとうございます！</h2>
+          <p>{firstFormGift.formName}の初回ボーナス</p>
+          <div className="form-gift-art"><img src={`${process.env.PUBLIC_URL}/${firstFormGift.image}`} alt="" /></div>
+          <strong>{firstFormGift.name}</strong>
+          <p>このフォルムで使える記念エフェクトをプレゼントしました。</p>
+          <button type="button" onClick={() => setFirstFormGift(null)}>受け取る</button>
+        </section>
+      </div>}
       {pendingPage && <div className="navigation-dialog-backdrop">
         <section role="dialog" aria-modal="true" aria-labelledby="unsaved-title" className="navigation-dialog">
           <h2 id="unsaved-title">未保存のコーデがあります</h2>
