@@ -1,0 +1,40 @@
+name: Freeze pre-redesign development backup
+on:
+  push:
+    branches: [chore/kokoro-ui-backup-20261108]
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a47ea9cb3cb49d0454b2b9e0ec7d39f8d333fda8
+          fetch-depth: 0
+      - name: Freeze both refs without replacing an existing backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup_sha=a47ea9cb3cb49d0454b2b9e0ec7d39f8d333fda8
+          backup_branch=backup/kokoro-dev-pre-ui-redesign-20261108
+          backup_tag=backup-kokoro-dev-pre-ui-redesign-20261108
+          test "$(git rev-parse HEAD)" = "$backup_sha"
+          for backup_ref in "refs/heads/$backup_branch" "refs/tags/$backup_tag"; do
+            if test -n "$(git ls-remote origin "$backup_ref")"; then
+              echo "Backup name already exists; refusing to overwrite."
+              exit 1
+            fi
+          done
+          git push --atomic origin "$backup_sha:refs/heads/$backup_branch" "$backup_sha:refs/tags/$backup_tag"
+          test "$(git ls-remote origin "refs/heads/$backup_branch" | cut -f1)" = "$backup_sha"
+          test "$(git ls-remote origin "refs/tags/$backup_tag" | cut -f1)" = "$backup_sha"
+          git archive --format=tar.gz --output=kokoro-pre-ui-source.tar.gz "$backup_sha"
+          printf '%s\n' "$backup_sha" "$backup_branch" "$backup_tag" > backup-source.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kokoro-pre-ui-source-20261108
+          path: |
+            kokoro-pre-ui-source.tar.gz
+            backup-source.txt
+          retention-days: 30
