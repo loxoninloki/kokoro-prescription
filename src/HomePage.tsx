@@ -17,6 +17,7 @@ type Destination = 'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditat
 interface Props {
   onLoginRewards: () => void;
   evolution: Evolution;
+  level: number;
   displayForm: { name: string; image: string };
   room: RoomState;
   equipped?: string[];
@@ -35,7 +36,7 @@ const careActions = [
   ['diary', '気分・日記'], ['medication', 'お薬'], ['steps', '歩数'], ['meditation', '瞑想BGM'],
 ] as const;
 
-export default function HomePage({ onLoginRewards, evolution, displayForm, room, equipped, wallet, realWallet, walletError,
+export default function HomePage({ onLoginRewards, evolution, level, displayForm, room, equipped, wallet, realWallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate,onWalletChange }: Props) {
   const [scene, setScene] = useState<Scene>('avatar');
   const nextScene = scenes[(scenes.indexOf(scene) + 1) % scenes.length];
@@ -76,7 +77,7 @@ export default function HomePage({ onLoginRewards, evolution, displayForm, room,
           aria-label={`${sceneLabels[nextScene]}表示へ切り替え`} title={`次：${sceneLabels[nextScene]}`}>
           <Icon name="scene" /><span>表示切替</span>
         </button>
-        <PresentBox wallet={realWallet ?? wallet} room={room} onWalletChange={onWalletChange}/>
+        <PresentBox wallet={realWallet ?? wallet} room={room} level={level} onWalletChange={onWalletChange}/>
       </nav>
     </section>
 
