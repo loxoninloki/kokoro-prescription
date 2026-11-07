@@ -613,3 +613,25 @@ button.home-progress {
 .avatar-bottom button { display: grid; justify-items: center; align-content: center; gap: 3px; min-height: 48px; padding: 4px 0; border: 0; border-radius: 14px; background: transparent; font-size: 10px; }
 .avatar-bottom .kokoro-icon { width: 21px; height: 21px; }
 .avatar-bottom button[aria-current="page"] { background: #70548f; }
+
+.avatar-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 9px;
+}
+.avatar-summary-grid > * { min-width: 0; margin: 0; }
+.avatar-summary-grid .avatar-growth { grid-template-columns: 32px minmax(0, 1fr); gap: 5px; padding: 8px; }
+.avatar-summary-grid .avatar-mini { width: 32px; height: 38px; }
+.avatar-summary-grid .avatar-mini .roki-character { width: 32px !important; }
+.avatar-summary-grid .avatar-growth-title strong { font-size: 14px; }
+.avatar-summary-grid .avatar-growth-xp { font-size: 10px; }
+.avatar-summary-grid .avatar-growth-next { display: none; }
+.avatar-summary-grid .avatar-login { display: flex; flex-direction: column; justify-content: center; padding: 8px; }
+.avatar-summary-grid .avatar-login-heading { display: grid; gap: 3px; font-size: 11px; }
+.avatar-summary-grid progress { height: 5px; }
+.avatar-checkin-compact { flex-wrap: nowrap; padding: 5px 9px; border: 1px solid var(--home-border); border-radius: 18px; background: var(--home-panel); }
+.avatar-checkin-compact > span { min-width: 0; font-size: 11px; }
+.avatar-checkin-compact button { flex: none; white-space: nowrap; }
+@media (max-width: 350px) { .checkin-total-xp { display: none; } }
+@media (max-width: 279px) { .avatar-summary-grid { grid-template-columns: 1fr; } }
