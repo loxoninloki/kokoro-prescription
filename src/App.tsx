@@ -209,7 +209,7 @@ export default function App() {
         equipped={visibleEquipment}
         wallet={displayedWallet} realWallet={wallet} walletError={walletError && !devGachaWallet} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
-      {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
+      {page === 'room' && <RokiRoom level={evolution.level} ownedItemIds={wallet.ownedItemIds} itemCounts={wallet.itemCounts} form={displayForm}
         equipped={visibleEquipment} room={room} onChange={setRoom} />}
       {page !== 'home' && page !== 'room' && page !== 'dressup' && !['diary','steps','medication'].includes(page) && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
@@ -257,7 +257,7 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </details>
       </>}
-      {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
+      {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} itemCounts={wallet.itemCounts} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page + (devGachaWallet ? '-test' : '-real')} wallet={displayedWallet} error={walletError && !devGachaWallet} testMode={!!devGachaWallet} section={page === 'gacha' ? 'gacha' : 'shop'}
         roomOwnedItemIds={devGachaWallet ? [] : room.ownedItemIds} onWalletChange={devGachaWallet ? setDevGachaWallet : setWallet} previewForm={displayForm}
         previewEquipment={visibleEquipment} roomLayout={room.layout} onEquip={async(itemId,formId)=>{
