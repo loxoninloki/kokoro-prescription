@@ -16,6 +16,7 @@ import RokiRoom from './RokiRoom';
 import LoginRewards from './LoginRewards';
 import { readRoom, EMPTY_ROOM, ROOM_KEY, updateRoom, INTERIOR_ITEMS } from './interior';
 import HomePage from './HomePage';
+import { syncPresentReceipts } from './PresentBox';
 import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
 import { equipGachaPrize } from './gachaEquip';
@@ -84,6 +85,7 @@ export default function App() {
       ownedItemIds: Array.from(new Set([...current.ownedItemIds, ...acquired])),
     })).then(setRoom).catch(() => setRoomError('獲得した家具をルームに同期できませんでした。再読み込みしてください。'));
   }, [wallet.ownedItemIds, room.ownedItemIds]);
+  useEffect(()=>{try{syncPresentReceipts(wallet,room);}catch{/* The present card reports storage errors without blocking existing rewards. */}},[wallet,room]);
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication, wallet.medicationPolicy ?? makeMedicationPolicy(medication,wallet.creditedXp,today), wallet.creditedXp) + stepsExperience(steps) + meditationExperience(meditation);
   const evolution = evolutionFromXp(totalPoints);
   const displayForm = selectedForm(appearance,evolution.level,room.selectedFormId);

@@ -4,6 +4,7 @@ import RokiCharacter from './RokiCharacter';
 import RoomStage from './RoomStage';
 import type { RoomState } from './interior';
 import HomeIllustration from './HomeIllustration';
+import PresentBox from './PresentBox';
 import { evolutionFromXp } from './evolution';
 import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState } from './rewardLedger';
 import { RewardIcon } from './RewardPanel';
@@ -76,6 +77,8 @@ export default function HomePage({ onLoginRewards, evolution, displayForm, room,
         </button>
       </nav>
     </section>
+
+    <PresentBox wallet={realWallet ?? wallet} room={room}/>
 
     <nav className="avatar-care" aria-label="セルフケアのクイックメニュー">
       {careActions.map(([target, label]) =>
