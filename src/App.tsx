@@ -219,7 +219,7 @@ export default function App() {
             <ul>{[...days].reverse().slice(0, 14).map(day => <li key={day}>{day} ✓</li>)}</ul>}
         </section>
       </>}
-      {page === 'dressup' && mature && <DressUp saved={appearance} draft={draft} setDraft={setDraft} onSave={saveAppearance} rewardDays={rewardDays} />}
+      {page === 'dressup' && mature && <DressUp saved={appearance} draft={draft} setDraft={setDraft} onSave={saveAppearance} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
       {page === 'dressup' && !mature && <section className="menu-panel"><h1>コーデ</h1><p>Lv.50の成熟フォルムで着せ替えが開きます。</p></section>}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}

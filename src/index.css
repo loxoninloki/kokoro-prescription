@@ -646,3 +646,43 @@ button.home-progress {
 .navigation-dialog button { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #a786c4; border-radius: 12px; background: #e6d1f5; color: #302044; }
 
 .page-sticker { float: right; width: 54px; height: 44px; margin: 0 0 4px 8px; object-fit: contain; pointer-events: none; }
+
+/* Dedicated coordinate workspace: inventory scrolls without hiding save actions. */
+.coordinate-page { height: calc(100dvh - 122px - env(safe-area-inset-bottom, 0px)); min-height: 510px; display: grid; grid-template-rows: auto minmax(170px, 1fr) auto auto minmax(150px, .7fr) auto; overflow: hidden; border: 1px solid #dac6eb; border-radius: 24px; background: #f1e7fa; color: #402653; }
+.coordinate-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; }
+.coordinate-heading h2 { margin: 0; font-size: 18px; }
+.coordinate-heading > span { font-size: 11px; color: #75568e; white-space: nowrap; }
+.coordinate-preview { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; background: radial-gradient(ellipse, #fffcff, #e5d4f3); overflow: hidden; padding: 6px; }
+.coordinate-preview .roki-character { height: calc(100% - 22px); max-height: 310px; width: auto !important; aspect-ratio: 1; flex-shrink: 1; }
+.coordinate-preview p { margin: 3px 0 0; font-size: 11px; color: #705582; }
+.coordinate-tabs, .coordinate-details { display: flex; overflow-x: auto; gap: 4px; padding: 6px; scrollbar-width: thin; }
+.coordinate-tabs { background: #e6d6f1; }
+.coordinate-tabs button, .coordinate-details button { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 44px; border: 1px solid #c7afdc; border-radius: 12px; background: #fcf8ff; color: #654080; font: inherit; font-size: 11px; padding: 5px 9px; }
+.coordinate-tabs svg, .coordinate-details svg { width: 24px; height: 24px; }
+.coordinate-tabs button[aria-pressed=true] { background: #765094; color: white; border-color: #765094; }
+.coordinate-details button[aria-pressed=true] { background: #dfc6f3; border-color: #8354a4; }
+.coordinate-details button > span { font-size: 24px; line-height: 24px; }
+.coordinate-inventory { overflow-y: auto; overscroll-behavior: contain; min-height: 0; padding: 8px; background: #fbf7ff; }
+.coordinate-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; align-content: start; }
+.coordinate-item { min-width: 0; padding: 3px; border-radius: 12px; border: 1px solid #d5bfe5; background: #f4eafa; color: #56346e; font: inherit; }
+.coordinate-item[aria-pressed=true] { border: 2px solid #b95dba; background: #f5dcf5; padding: 2px; }
+.coordinate-item:disabled { opacity: .55; }
+.coordinate-thumbnail { display: grid; place-items: center; position: relative; width: 100%; aspect-ratio: 1; background: #fff9ff; border-radius: 8px; }
+.coordinate-thumbnail img { width: 92%; height: 92%; object-fit: contain; }
+.coordinate-check { position: absolute; right: 2px; bottom: 2px; background: #a64baf; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 13px; }
+.coordinate-item-name { display: block; font-size: 10px; line-height: 1.4; margin-top: 3px; overflow-wrap: anywhere; }
+.coordinate-item small { display: block; font-size: 9px; line-height: 1.4; }
+.coordinate-empty { padding: 10px; text-align: center; font-size: 12px; }
+.coordinate-empty > svg { width: 32px; height: 32px; display: block; margin: 0 auto 5px; }
+.coordinate-empty p { margin: 6px 0 0; }
+.coordinate-controls { background: #eadcf4; padding: 5px 7px 8px; }
+.coordinate-controls p { min-height: 16px; margin: 0 0 5px; text-align: center; font-size: 10px; }
+.coordinate-controls > div { display: grid; grid-template-columns: 1fr 1.25fr .75fr; gap: 5px; }
+.coordinate-controls button { min-height: 44px; padding: 4px; border: 1px solid #ba9ccd; border-radius: 12px; background: #fffaff; color: #59366d; font: inherit; font-size: 11px; font-weight: bold; }
+.coordinate-controls .coordinate-save { background: #80509e; color: white; }
+.coordinate-controls button:disabled { opacity: .45; }
+@media (min-height: 780px) { .coordinate-page { grid-template-rows: auto minmax(240px, 1fr) auto auto minmax(190px, .7fr) auto; } }
+.kokoro-app[data-page="dressup"] > .coordinate-page { padding: 0 !important; margin-top: 0 !important; }
+.coordinate-tabs, .coordinate-details { min-height: 64px; align-items: stretch; }
+.coordinate-tabs button, .coordinate-details button { flex-shrink: 0; }
+.kokoro-app[data-page="dressup"] .coordinate-heading h2 { margin: 0; font-size: 18px; }
