@@ -1,6 +1,9 @@
 import { Icon, MoodIcon } from './Icon';
 import React, { useEffect, useRef, useState } from 'react';
 import StepHistoryChart from './StepHistoryChart';
+import {CareHeading,CareSection} from './SelfcareUI';
+import {displayDay} from './selfcareView';
+import type {Medicine} from './MedicationTracker';
 
 export interface DiaryEntry { mood: number | null; text: string }
 export type DiaryEntries = Record<string, DiaryEntry>;
@@ -44,10 +47,13 @@ interface Props {
   today: string;
   steps: Record<string, number>;
   medicationTaken: Record<string, boolean>;
+  medicines?: readonly Medicine[];
 }
 
-export default function DiaryCalendar({ entries, setEntries, checkins, today, steps, medicationTaken }: Props) {
+export default function DiaryCalendar({ entries, setEntries, checkins, today, steps, medicationTaken, medicines=[] }: Props) {
   const [selected, setSelected] = useState(today);
+  const previousToday=useRef(today);
+  useEffect(()=>{const prior=previousToday.current;previousToday.current=today;setSelected(value=>value===prior?today:value);},[today]);
   const [view, setView] = useState<'diary' | 'calendar'>('diary');
   const [calendarView, setCalendarView] = useState<'calendar' | 'steps'>('calendar');
   const [monthly, setMonthly] = useState(false);
@@ -59,6 +65,12 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
   const [saved, setSaved] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const selectedEntry = entries[selected];
+  const recent=Object.keys(entries).filter(day=>day<=today&&(entries[day].mood||entries[day].text.trim())).sort().reverse().slice(0,3);
+  const recordedInMonth=datesForMonth(entries,steps,medicationTaken,month,today);
+  const savedMood=selectedEntry?.mood;
+  const selectedDoses=Object.keys(medicationTaken).filter(key=>medicationTaken[key]&&key.startsWith(selected+'|'));
+  const openDiary=(day:string)=>{setSelected(day);setSaved(false);setView('diary');};
+
   const reply = mood === null ? null : MOOD_REPLIES[mood <= 2 ? 'difficult' : mood === 3 ? 'neutral' : 'good'];
 
   useEffect(() => {
@@ -95,100 +107,53 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
     setSaved(true);
   };
 
-  return (
-    <section style={{ marginTop: 28, padding: 18, borderRadius: 24, background: '#faf5ff' }}>
-      <h2><Icon name="diary" /> 気分・日記</h2>
-      <div className="diary-switch" role="group" aria-label="記録画面">
-        <button type="button" aria-pressed={view === 'diary'} onClick={() => setView('diary')}>日記</button>
-        <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')}>カレンダー</button>
+  return <section className="selfcare-page diary-care" data-view={view} aria-label={view==='diary'?'日記':'カレンダー'}>
+    <CareHeading icon="diary" title={view==='diary'?'日記':'カレンダー'} note="小さな気持ちも、あなたの大切な記録。"/>
+    <div className="care-segment diary-switch" role="group" aria-label="記録画面">
+      <button type="button" aria-pressed={view==='diary'} onClick={()=>setView('diary')}>日記</button>
+      <button type="button" aria-pressed={view==='calendar'} onClick={()=>setView('calendar')}>カレンダー</button>
+    </div>
+    {view==='diary'?<>
+      <CareSection title={selected===today?'今日のこころ':'この日のこころ'}>
+        <div className="care-mood-summary"><time dateTime={selected}>{displayDay(selected,true)}</time><span className="care-mood-face">{savedMood?<MoodIcon index={savedMood-1}/>:<Icon name="growth"/>}</span><div><strong>{savedMood?MOOD_LABELS[savedMood-1]:'気分はまだ未記録'}</strong><p>書けない日があっても大丈夫。自分のペースで。</p></div></div>
+        <label className="care-date-label">記録する日<input type="date" value={selected} max={today} onChange={e=>{if(e.target.value){setSelected(e.target.value);setSaved(false);}}}/></label>
+      </CareSection>
+      <CareSection title="気持ちを、ことばに">
+        <p className="care-help">この日の気分はいかがでしたか？</p>
+        <div className="mood-options care-moods" role="group" aria-label="5段階の気分">{MOOD_LABELS.map((label,index)=><button key={label} type="button" aria-pressed={mood===index+1} onClick={()=>{setMood(index+1);setSaved(false);}}><MoodIcon index={index}/><span>{label}</span></button>)}</div>
+        <label className="care-field" htmlFor="diary-text">日記（任意）</label>
+        <textarea id="diary-text" value={draft} maxLength={2000} rows={6} onChange={e=>{setDraft(e.target.value);setSaved(false);}} placeholder="嬉しかったこと、疲れたこと。なんでも大丈夫です。"/>
+        <div className="care-input-meta"><span>保存するまで、記録は変わりません</span><span>{draft.length} / 2000</span></div>
+        <div className="care-prompt-chips" role="group" aria-label="日記の入力補助">{['ほっとした','疲れた','がんばった','不安だった','楽しかった'].map(chip=><button key={chip} type="button" disabled={draft.length+chip.length+(draft?1:0)>2000} onClick={()=>{setDraft(value=>value+(value?'\n':'')+chip);setSaved(false);}}>{chip}</button>)}</div>
+        <button className="care-primary" type="button" onClick={save} disabled={selected>today}><Icon name="diary"/>記録を保存</button>
+        <div role="status">{saved&&(reply?<div className="diary-mood-reply"><img src={`${process.env.PUBLIC_URL}/stickers/${reply.image}`} alt="" width="64" height="64"/><div><span>保存しました</span><strong>{reply.title}</strong><p>{reply.message}</p></div></div>:<p className="care-saved">保存しました。今日もお疲れさまです。</p>)}</div>
+      </CareSection>
+      <CareSection title="最近の日記" action={<button type="button" className="care-text-button" onClick={()=>{setMonth(today.slice(0,7));setView('calendar');setCalendarView('calendar');}}>もっと見る ›</button>}>
+        {recent.length?<ul className="care-recent">{recent.map(day=><li key={day}><button type="button" onClick={()=>openDiary(day)}><Icon name="diary"/><span><time dateTime={day}>{displayDay(day)}</time><span>{entries[day].text.trim()||(entries[day].mood?MOOD_LABELS[entries[day].mood!-1]:'記録なし')}</span></span><b aria-hidden="true">›</b></button></li>)}</ul>:<p className="care-empty">日記はまだありません。ひとことからでも大丈夫。</p>}
+      </CareSection>
+    </>:<>
+      <div className="care-segment diary-switch" role="group" aria-label="カレンダー内の表示"><button type="button" aria-pressed={calendarView==='calendar'} onClick={()=>setCalendarView('calendar')}>記録カレンダー</button><button type="button" aria-pressed={calendarView==='steps'} onClick={()=>setCalendarView('steps')}>歩数グラフ</button></div>
+      <p className="diary-swipe-hint">{calendarView==='calendar'?'左にスワイプで歩数グラフ →':'← 右にスワイプで記録カレンダー'}</p>
+      <div className="care-card diary-swipe-panel" onTouchStart={event=>{const touch=event.touches[0];swipeStart.current=event.touches.length===1?{x:touch.clientX,y:touch.clientY}:null;}} onTouchCancel={()=>{swipeStart.current=null;}} onTouchEnd={event=>{const start=swipeStart.current;swipeStart.current=null;const touch=event.changedTouches[0];if(!start||!touch)return;const dx=touch.clientX-start.x,dy=touch.clientY-start.y;if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.5)setCalendarView(dx<0?'steps':'calendar');}}>
+        {calendarView==='steps'&&<div className="care-segment diary-switch" role="group" aria-label="歩数の集計"><button type="button" aria-pressed={!monthly} onClick={()=>setMonthly(false)}>日ごと</button><button type="button" aria-pressed={monthly} onClick={()=>setMonthly(true)}>月ごと</button></div>}
+        <div className="care-period diary-period"><button type="button" onClick={()=>changePeriod(-1)} aria-label={showYear?'前の年':'前の月'}>‹</button><strong>{year}年{showYear?'':` ${monthNumber}月`}</strong><button type="button" onClick={()=>changePeriod(1)} disabled={showYear?year>=Number(today.slice(0,4)):month>=today.slice(0,7)} aria-label={showYear?'次の年':'次の月'}>›</button></div>
+        {calendarView==='steps'?<StepHistoryChart steps={steps} month={month} monthly={monthly} today={today}/>:<>
+          <p className="care-month-count">この月の記録 <strong>{recordedInMonth}日</strong></p>
+          <div className="care-calendar-grid">{['日','月','火','水','木','金','土'].map(day=><span className="care-weekday" key={day}>{day}</span>)}{dates.map((date,index)=>date?<button type="button" key={date} aria-label={date} aria-pressed={selected===date} aria-current={date===today?'date':undefined} disabled={date>today} onClick={()=>{setSelected(date);setSaved(false);}}><span>{Number(date.slice(-2))}</span><span className="care-record-dots">{entries[date]?.text?.trim()&&<i className="care-dot-diary" aria-label="日記の記録あり"/>}{entries[date]?.mood&&<i className="care-dot-mood" aria-label="気分の記録あり"/>}{hasMedication(date)&&<i className="care-dot-medicine" aria-label="服薬の記録あり"/>}{steps[date]!==undefined&&<i className="care-dot-steps" aria-label="歩数の記録あり"/>}</span>{checkins.includes(date)&&<span className="care-checkin-mark" aria-label="チェックイン済み">✓</span>}</button>:<span key={'empty'+index}/>)}</div>
+          <div className="care-calendar-legend"><span><i className="care-dot-diary"/>日記</span><span><i className="care-dot-mood"/>気分</span><span><i className="care-dot-medicine"/>服薬</span><span><i className="care-dot-steps"/>歩数</span><span>✓ ログイン</span></div>
+        </>}
       </div>
-      {view === 'diary' ? <>
-        <p style={{ fontSize: 13 }}>書けない日があっても大丈夫。自分のペースで記録しましょう。</p>
-        <div className="diary-entry">
-          <h3>{selected} の記録</h3>
-          <p style={{ fontSize: 13 }}>歩数：{steps[selected] === undefined ? '未記録' : `${steps[selected].toLocaleString()}歩`} ／ 服薬：{hasMedication(selected) ? '記録あり' : '記録なし'}</p>
-          <p>この日の気分はいかがでしたか？</p>
-          <div className="mood-options" role="group" aria-label="5段階の気分">
-            {MOOD_LABELS.map((label, index) =>
-              <button key={label} type="button" aria-pressed={mood === index + 1} onClick={() => { setMood(index + 1); setSaved(false); }}><MoodIcon index={index} /><span>{label}</span>
-              </button>)}
-          </div>
-          <label htmlFor="diary-text" style={{ display: 'block', marginTop: 16, marginBottom: 6 }}>日記（任意）</label>
-          <textarea id="diary-text" value={draft} maxLength={2000} onChange={event => { setDraft(event.target.value); setSaved(false); }}
-            placeholder="今日の出来事や気持ちを、自由に書いてください。" rows={5}
-            style={{ width: '100%', boxSizing: 'border-box', borderRadius: 12, border: '1px solid #cab8da', padding: 12, font: 'inherit' }} />
-          <button type="button" onClick={save} style={{ marginTop: 10, border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '12px 24px' }}>記録を保存</button>
-          <div role="status">
-            {saved && (reply ? (
-              <div className="diary-mood-reply">
-                <img src={`${process.env.PUBLIC_URL}/stickers/${reply.image}`} alt="" width="80" height="80" />
-                <div>
-                  <span>保存しました</span>
-                  <strong>{reply.title}</strong>
-                  <p>{reply.message}</p>
-                </div>
-              </div>
-            ) : <p>保存しました。今日もお疲れさまです 💜</p>)}
-          </div>
-        </div>
-      </> : <>
-        <div className="diary-switch" role="group" aria-label="カレンダー内の表示">
-          <button type="button" aria-pressed={calendarView === 'calendar'} onClick={() => setCalendarView('calendar')}>記録カレンダー</button>
-          <button type="button" aria-pressed={calendarView === 'steps'} onClick={() => setCalendarView('steps')}>歩数グラフ</button>
-        </div>
-        <p className="diary-swipe-hint">{calendarView === 'calendar' ? '左にスワイプで歩数グラフ →' : '← 右にスワイプで記録カレンダー'}</p>
-        <div className="diary-swipe-panel"
-          onTouchStart={event => {
-            const touch = event.touches[0];
-            swipeStart.current = event.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null;
-          }}
-          onTouchCancel={() => { swipeStart.current = null; }}
-          onTouchEnd={event => {
-            const start = swipeStart.current;
-            swipeStart.current = null;
-            if (!start) return;
-            const touch = event.changedTouches[0];
-            if (!touch) return;
-            const dx = touch.clientX - start.x;
-            const dy = touch.clientY - start.y;
-            if (Math.abs(dx) >= 55 && Math.abs(dx) > Math.abs(dy) * 1.5) setCalendarView(dx < 0 ? 'steps' : 'calendar');
-          }}>
-          {calendarView === 'steps' && <div className="diary-switch" role="group" aria-label="歩数の集計">
-            <button type="button" aria-pressed={!monthly} onClick={() => setMonthly(false)}>日ごと</button>
-            <button type="button" aria-pressed={monthly} onClick={() => setMonthly(true)}>月ごと</button>
-          </div>}
-          <div className="diary-period">
-            <button type="button" onClick={() => changePeriod(-1)} aria-label={showYear ? '前の年' : '前の月'}>‹</button>
-            <strong>{year}年{showYear ? '' : ` ${monthNumber}月`}</strong>
-            <button type="button" onClick={() => changePeriod(1)}
-              disabled={showYear ? year >= Number(today.slice(0, 4)) : month >= today.slice(0, 7)}
-              aria-label={showYear ? '次の年' : '次の月'}>›</button>
-          </div>
-          {calendarView === 'steps' ? <StepHistoryChart steps={steps} month={month} monthly={monthly} today={today} /> : <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 4, textAlign: 'center' }}>
-              {['日','月','火','水','木','金','土'].map(day => <strong key={day} style={{ fontSize: 12 }}>{day}</strong>)}
-              {dates.map((date, index) => date ?
-                <button type="button" key={date} aria-label={date} onClick={() => { setSelected(date); setSaved(false); }} aria-pressed={selected === date} disabled={date > today}
-                  style={{ minHeight: 48, padding: '4px 0', borderRadius: 10, border: selected === date ? '2px solid #7950a8' : '1px solid #e5d7f1', background: selected === date ? '#e9d8fd' : '#fff', opacity: date > today ? 0.45 : 1, color: '#392b4d' }}>
-                  <span>{Number(date.slice(-2))}</span>
-                  <span style={{ display: 'block', fontSize: 11 }}>{checkins.includes(date) ? '✓' : ''}{entries[date]?.mood ? '♥' : ''}{entries[date]?.text?.trim() ? '✎' : ''}{steps[date] !== undefined ? '👟' : ''}{hasMedication(date) ? '💊' : ''}</span>
-                </button> :
-                <span key={`empty-${index}`} />
-              )}
-            </div>
-            <p style={{ fontSize: 12 }}>✓ チェックイン　♥ 気分　✎ 日記　👟 歩数　💊 服薬</p>
-            {selected.startsWith(month + '-') && <div className="diary-entry">
-              <h3>{selected} の記録</h3>
-              <p>歩数：{steps[selected] === undefined ? '未記録' : `${steps[selected].toLocaleString()}歩`} ／ 服薬：{hasMedication(selected) ? '記録あり' : '記録なし'}</p>
-              {checkins.includes(selected) && <p>チェックイン済み ✓</p>}
-              {selectedEntry?.mood && <p>気分：{MOOD_LABELS[selectedEntry.mood - 1]}</p>}
-              {selectedEntry?.text && <p className="diary-preview-text">{selectedEntry.text}</p>}
-              <button type="button" onClick={() => setView('diary')}>この日の日記を開く</button>
-            </div>}
-          </>}
-        </div>
-      </>}
-      {storageError && <p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
-    </section>
-  );
+      {calendarView==='calendar'&&selected.startsWith(month+'-')&&<CareSection title={`${displayDay(selected)} の記録`}>
+        <dl className="care-day-records"><div><dt><Icon name="growth"/>気分</dt><dd>{selectedEntry?.mood?MOOD_LABELS[selectedEntry.mood-1]:'記録なし'}</dd></div><div><dt><Icon name="diary"/>日記</dt><dd>{selectedEntry?.text?.trim()?<span className="diary-preview-text">{selectedEntry.text}</span>:'記録なし'}</dd></div><div><dt><Icon name="medication"/>服薬</dt><dd>{selectedDoses.length?<><span>{selectedDoses.length}件の記録</span><ul>{selectedDoses.map(key=><li key={key}>{medicines.find(m=>m.id===key.slice(selected.length+1))?.name||'登録情報が見つからないお薬の記録'}</li>)}</ul></>:'記録なし'}</dd></div><div><dt><Icon name="steps"/>歩数</dt><dd>{steps[selected]===undefined?'記録なし':`${steps[selected].toLocaleString('ja-JP')}歩`}</dd></div></dl>
+        <button className="care-secondary" type="button" onClick={()=>openDiary(selected)}>この日の日記を開く</button>
+      </CareSection>}
+    </>}
+    {storageError&&<p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
+  </section>;
+}
+
+function datesForMonth(entries:DiaryEntries,steps:Record<string,number>,taken:Record<string,boolean>,month:string,today:string) {
+ const dates=new Set<string>();
+ Object.entries(entries).forEach(([day,e])=>{if(e.mood||e.text.trim())dates.add(day);});Object.keys(steps).forEach(day=>dates.add(day));Object.keys(taken).forEach(key=>{if(taken[key])dates.add(key.split('|')[0]);});
+ return Array.from(dates).filter(day=>day.startsWith(month+'-')&&day<=today).length;
 }

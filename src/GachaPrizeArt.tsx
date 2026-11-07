@@ -1,13 +1,44 @@
 import React from 'react';
-import { ITEMS } from './appearance';
+import { ITEMS, DressUpItem } from './appearance';
 import { INTERIOR_ITEMS } from './interior';
 import InteriorIcon from './InteriorIcon';
-/** The same item drawing used by the catalog and result: never the GIF's artwork. */
-export default function GachaPrizeArt({id}:{id:string}) {
- const garment=ITEMS.find(item=>item.id===id);
- const [failed,setFailed]=React.useState(false);
- if(garment&&!failed)return <img src={`${process.env.PUBLIC_URL}/${garment.layers[0].image}`} alt={garment.name} onError={()=>setFailed(true)}/>;
- const furnishing=INTERIOR_ITEMS.find(item=>item.id===id);
- if(furnishing)return <span className="gacha-furniture-icon" style={{backgroundColor:furnishing.color}}><InteriorIcon name={furnishing.slot}/></span>;
- return <span className="gacha-art-fallback" role="img" aria-label={garment?`${garment.name}（画像を表示できません）`:'アイテム'}>✦</span>;
+
+/**
+ * Prize artwork is intentionally independent of the current evolution form.
+ * For effects, render EVERY source layer, not just layers[0] (some effects
+ * have a separate foreground layer and otherwise appear almost invisible).
+ * The wearer-specific preview is GachaTryOn and has its own form restrictions.
+ */
+function GarmentArt({ item }: { item: DressUpItem }) {
+  const [failed, setFailed] = React.useState<string[]>([]);
+  const effects = item.category === 'effects';
+  const visible = item.layers.filter(layer => !failed.includes(layer.image));
+  return <span className={`gacha-item-art gacha-item-art--${item.category}`}
+    role="img" aria-label={item.name}>
+    {effects && <span className="gacha-item-art-symbol" aria-hidden="true">
+      {item.id === 'lavender-bloom' ? '✿' : item.id === 'moon-sparkles' ? '☾' : '✦'}
+    </span>}
+    {visible.map((layer, index) =>
+      <img key={layer.image} className="gacha-item-art-layer"
+        src={`${process.env.PUBLIC_URL}/${layer.image}`} alt=""
+        draggable={false} loading="eager" decoding="async"
+        style={{ zIndex: layer.order * 10 + index }}
+        onError={() => setFailed(old => [...old, layer.image])}/>
+    )}
+    {!visible.length && <span className="gacha-art-fallback" aria-hidden="true">
+      {effects ? '✦' : '◇'}
+    </span>}
+  </span>;
+}
+
+/** Shared by the lineup, the item details and the obtained-item popup. */
+export default function GachaPrizeArt({ id }: { id: string }) {
+  const garment = ITEMS.find(item => item.id === id);
+  if (garment) return <GarmentArt key={id} item={garment}/>;
+  const furnishing = INTERIOR_ITEMS.find(item => item.id === id);
+  if (furnishing) return <span className="gacha-furniture-icon"
+    style={{ backgroundColor: furnishing.color }} role="img" aria-label={furnishing.name}>
+    <InteriorIcon name={furnishing.slot}/>
+  </span>;
+  return <span className="gacha-art-fallback" role="img" aria-label="アイテム画像は準備中です">✦</span>;
 }

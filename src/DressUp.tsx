@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Appearance, CATEGORIES, Category, ITEMS, toggleItem, FormId } from './appearance';
 import RokiCharacter from './RokiCharacter';
 import WardrobeIcon from './WardrobeIcon';
+import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
   { name: 'ファッション', icon: 'tops', categories: ['tops', 'bottoms', 'shoes'] },
@@ -26,7 +27,8 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
   const current = GROUPS[group];
   const details = current.categories.filter(key => ITEMS.some(item => item.category === key));
   const owned = (item: typeof ITEMS[number]) => ownedItemIds.includes(item.id) ||
-    rewardDays >= (item.requiredRecordDays ?? 0) || saved.equipped.includes(item.id);
+    saved.equipped.includes(item.id) ||
+    (!FIRST_GIFT_IDS.includes(item.id) && rewardDays >= (item.requiredRecordDays ?? 0));
   const items = ITEMS.filter(item => current.categories.includes(item.category) && (!category || item.category === category))
     .slice().sort((a, b) => Number(owned(b)) - Number(owned(a)));
   const dirty = JSON.stringify(draft.equipped) !== JSON.stringify(saved.equipped);

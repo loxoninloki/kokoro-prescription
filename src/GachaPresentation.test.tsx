@@ -56,7 +56,7 @@ test('離脱・再マウントで未確認結果を再抽選せず復元し、�
  const before=localStorage.getItem(REWARD_KEY);
  await act(async()=>root.unmount());root=createRoot(host);await render();
  expect(host.querySelector('.gacha-sequence')).toBeNull();expect(host.querySelector('.gacha-reward-modal')).not.toBeNull();
- expect(host.textContent).toContain('現在の錠剤フォルムでは試着できません');
+ expect(host.textContent).toContain('現在の錠剤フォルムではお試しできません');
  expect(host.querySelector<HTMLButtonElement>('.gacha-reward-actions button')!.disabled).toBe(true);
  expect(localStorage.getItem(REWARD_KEY)).toBe(before);
 });
