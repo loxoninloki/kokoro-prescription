@@ -5,8 +5,9 @@ import StepTracker,{StepEntries} from './StepTracker';
 import MedicationTracker,{MedicationData} from './MedicationTracker';
 import {EMPTY_REWARDS,REWARD_KEY} from './rewardLedger';
 let host:HTMLDivElement,root:Root;
-const click=async(text:string)=>{const el=Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(b=>b.textContent===text);expect(el).toBeDefined();await act(async()=>el!.click());};
-const input=async(el:HTMLInputElement|HTMLTextAreaElement,value:string)=>{await act(async()=>{Object.getOwnPropertyDescriptor(el instanceof HTMLTextAreaElement?HTMLTextAreaElement.prototype:HTMLInputElement.prototype,'value')!.set!.call(el,value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});};
+const reveal=(el:Element)=>{let parent=el.parentElement;while(parent){if(parent instanceof HTMLDetailsElement)parent.open=true;parent=parent.parentElement;}};
+const click=async(text:string)=>{const el=Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(b=>b.textContent===text);expect(el).toBeDefined();await act(async()=>{reveal(el!);el!.click();});};
+const input=async(el:HTMLInputElement|HTMLTextAreaElement,value:string)=>{await act(async()=>{reveal(el);Object.getOwnPropertyDescriptor(el instanceof HTMLTextAreaElement?HTMLTextAreaElement.prototype:HTMLInputElement.prototype,'value')!.set!.call(el,value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});};
 beforeEach(()=>{(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;localStorage.clear();localStorage.setItem(REWARD_KEY,JSON.stringify(EMPTY_REWARDS));host=document.createElement('div');document.body.appendChild(host);root=createRoot(host);});
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();jest.restoreAllMocks();});
 function DiaryHarness(){const [entries,setEntries]=useState<DiaryEntries>({'2026-11-08':{mood:3,text:'残したい文章'},'2026-11-07':{mood:1,text:'前日の記録'}});return <DiaryCalendar entries={entries} setEntries={setEntries} checkins={['2026-11-08']} today="2026-11-08" steps={{'2026-11-08':0}} medicationTaken={{'2026-11-08|a':true}} medicines={[{id:'a',name:'登録済みのお薬',time:'08:00'}]}/>;}
@@ -38,7 +39,7 @@ test('未取得と0歩を区別し、週・日・月グラフを維持してシ�
  await act(async()=>root.render(<StepsHarness incoming={{day:'2026-11-08',count:4280}}/>));const before=localStorage.getItem(REWARD_KEY);
  expect(host.querySelector('.care-step-number')?.textContent).toBe('未取得');expect(host.querySelector('[aria-label="2026-11-07 0歩"]')).not.toBeNull();expect(host.querySelector('[aria-label="2026-11-08 未取得"]')).not.toBeNull();
  expect(localStorage.getItem('kokoro-steps-v1')).toBeNull();await click('この歩数を保存');expect(JSON.parse(localStorage.getItem('kokoro-steps-v1')!)).toEqual({'2026-11-07':0,'2026-11-08':4280});
- await click('日ごと');expect(host.querySelector('svg.step-history-chart')?.getAttribute('aria-label')).toContain('日ごと');await click('月ごと');expect(host.querySelector('svg.step-history-chart')?.getAttribute('aria-label')).toContain('月ごと');expect(localStorage.getItem(REWARD_KEY)).toBe(before);
+ await act(async()=>{const select=host.querySelector<HTMLSelectElement>('select[aria-label="歩数グラフの期間"]')!;select.value='day';select.dispatchEvent(new Event('change',{bubbles:true}));});expect(host.querySelector('svg.step-history-chart')?.getAttribute('aria-label')).toContain('日ごと');await act(async()=>{const select=host.querySelector<HTMLSelectElement>('select[aria-label="歩数グラフの期間"]')!;select.value='month';select.dispatchEvent(new Event('change',{bubbles:true}));});expect(host.querySelector('svg.step-history-chart')?.getAttribute('aria-label')).toContain('月ごと');expect(localStorage.getItem(REWARD_KEY)).toBe(before);
 });
 function MedicineHarness({today='2026-11-08'}:{today?:string}){const [data,setData]=useState<MedicationData>({medicines:[{id:'a',name:'登録A',time:'08:00'},{id:'b',name:'登録B',time:'13:00'}],taken:{'2026-11-07|a':true}});return <MedicationTracker data={data} setData={setData} today={today}/>;}
 test('登録薬を時刻順に表示し、服薬記録・名称編集・非表示でも過去記録を保持する',async()=>{
