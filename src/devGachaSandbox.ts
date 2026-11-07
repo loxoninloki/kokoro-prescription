@@ -1,4 +1,4 @@
-import { drawItem, EMPTY_REWARDS, PendingGachaResult, RewardState } from './rewardLedger';
+import { drawItem, EMPTY_REWARDS, PendingGachaResult, RewardState, addGachaCopy } from './rewardLedger';
 import { drawCandidates, equalWeightPool, GachaType } from './gachaCatalog';
 
 // Only the Cloudflare DEV hostname exposes this isolated, in-memory demo wallet.
@@ -22,11 +22,10 @@ export function confirmDevGachaDraw(
 ): { wallet: RewardState; result: PendingGachaResult } {
   if (wallet.pendingGachaResult) throw new Error('前回のテスト結果を確認してください。');
   const candidates = drawCandidates(gacha, wallet.ownedItemIds);
-  if (!candidates.length) throw new Error('テスト用アイテムをすべて獲得しました。残高をリセットしてください。');
   const drawn = drawItem(wallet, {
     macaronCost: gacha.macaronCost,
     pool: equalWeightPool(candidates),
-    resolveDuplicate: () => { throw new Error('抽選対象が更新されました。'); },
+    resolveDuplicate: (id,state) => addGachaCopy(state,id),
   }, payment);
   const id = typeof window.crypto?.randomUUID === 'function'
     ? window.crypto.randomUUID()
@@ -39,7 +38,8 @@ export function confirmDevGachaDraw(
     amount: payment === 'ticket' ? 1 : gacha.macaronCost,
     confirmedAt: new Date().toISOString(),
   };
-  return { wallet: { ...drawn.state, pendingGachaResult: result }, result };
+  const awarded=drawn.state.itemCounts?.[drawn.itemId] ? drawn.state : {...drawn.state,itemCounts:{...drawn.state.itemCounts,[drawn.itemId]:1}};
+  return { wallet: { ...awarded, pendingGachaResult: result }, result };
 }
 
 export function acknowledgeDevGachaResult(wallet: RewardState, id: string): RewardState {
