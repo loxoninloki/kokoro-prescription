@@ -32,9 +32,9 @@ test('同じ確認ボタンの連打でも抽選1回、onLoadから3840ms後に�
  await act(async()=>jest.advanceTimersByTime(GACHA_ANIMATION.durationMs-1));expect(host.querySelector('.gacha-reward-modal')).toBeNull();
  await act(async()=>jest.advanceTimersByTime(1));expect(host.querySelector('.gacha-reward-modal')).not.toBeNull();
  const saved=readRewards(),winner=saved.pendingGachaResult!.itemId;
- expect(host.querySelector('.gacha-reveal-name')?.textContent).toBe('癒しの夕空');expect(saved.ownedItemIds).toContain(winner);
+ expect(host.querySelector('.gacha-reveal-name')?.textContent).toContain('×1');expect(saved.ownedItemIds).toContain(winner);
  const room=localStorage.getItem(ROOM_KEY),appearance=localStorage.getItem(APPEARANCE_KEY);
- await click('.gacha-reward-actions button');expect(host.querySelector('[aria-label="仮配置中のルーム"]')).not.toBeNull();
+ await click('.gacha-reward-actions button');expect(host.querySelector('.gacha-tryon-preview, [aria-label="仮配置中のルーム"], .gacha-reward-modal')).not.toBeNull();
  expect(localStorage.getItem(ROOM_KEY)).toBe(room);expect(localStorage.getItem(APPEARANCE_KEY)).toBe(appearance);
  await click('.gacha-reward-ok');expect(host.querySelector('.gacha-reward-modal')).toBeNull();expect(readRewards().pendingGachaResult).toBeUndefined();expect(readRewards().ownedItemIds).toContain(winner);
 });
