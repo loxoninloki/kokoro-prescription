@@ -20,6 +20,7 @@ interface Props {
   room: RoomState;
   equipped?: string[];
   wallet: RewardState;
+  realWallet?: RewardState;
   walletError: boolean;
   totalPoints: number;
   checkedIn: boolean;
@@ -32,7 +33,7 @@ const careActions = [
   ['diary', '気分・日記'], ['medication', 'お薬'], ['steps', '歩数'], ['meditation', '瞑想BGM'],
 ] as const;
 
-export default function HomePage({ onLoginRewards, evolution, displayForm, room, equipped, wallet, walletError,
+export default function HomePage({ onLoginRewards, evolution, displayForm, room, equipped, wallet, realWallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
   const [scene, setScene] = useState<Scene>('avatar');
   const nextScene = scenes[(scenes.indexOf(scene) + 1) % scenes.length];
@@ -84,7 +85,7 @@ export default function HomePage({ onLoginRewards, evolution, displayForm, room,
     <section className="home-progress avatar-progress">
       <div className="home-progress-grid avatar-summary-grid">
         <GrowthSummaryCard {...{ evolution, displayForm, equipped, onNavigate }} />
-        <TicketProgressCard {...{ wallet, walletError }} />
+        <TicketProgressCard wallet={realWallet ?? wallet} walletError={walletError} />
       </div>
       <CheckInCompactCard {...{ checkinDays, totalPoints, checkedIn, onCheckIn }} /><button className="login-reward-link" type="button" onClick={onLoginRewards}>累積ログイン報酬を見る</button>
     </section>
