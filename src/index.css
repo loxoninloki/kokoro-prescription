@@ -851,3 +851,50 @@ button.home-progress {
  .roki-room[data-editing=true] .roki-room-header p{font-size:11px;line-height:15px;margin-top:2px}
  .roki-room[data-editing=true] .interior-note{font-size:9px;line-height:13px;padding:3px 10px}
 }
+
+
+/* Login stamp book: fit all 30 stamps into a single phone viewport.
+   Keep scrolling as a fallback for extremely short screens or large text. */
+.stamp-modal>section {
+  display:flex;
+  flex-direction:column;
+  gap:clamp(3px, .65dvh, 8px);
+  max-height:calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  padding:clamp(8px, 1.4dvh, 14px);
+  overflow-y:auto;
+}
+.stamp-modal .stamp-heading h2{padding-top:3px!important;font-size:clamp(15px,2.5dvh,20px)}
+.stamp-modal .stamp-heading>strong{font-size:clamp(18px,3dvh,25px);margin:2px 0}
+.stamp-modal .stamp-heading p{margin:2px 0;font-size:11px}
+.stamp-modal .stamp-receipt{padding:7px 9px;margin:0;font-size:11px}
+.stamp-modal .stamp-receipt p{margin:2px 0;font-size:10px}
+.stamp-modal .stamp-next{padding:7px 9px;gap:2px;font-size:11px}
+.stamp-modal .stamp-pagination{margin:0;flex-shrink:0}
+.stamp-modal .stamp-pagination button{min-height:36px;padding:5px 8px}
+.stamp-modal .stamp-calendar{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-rows:repeat(5,minmax(0,1fr));
+  gap:clamp(2px,.6dvh,5px);
+  min-height:0;
+  flex:1 1 auto;
+}
+.stamp-modal .stamp-calendar article{min-height:0;padding:3px 1px;border-radius:8px;justify-content:center}
+.stamp-modal .stamp-calendar small{font-size:clamp(8px,1.4dvh,10px)}
+.stamp-modal .stamp-art{width:clamp(17px,3dvh,25px);height:clamp(17px,3dvh,25px);margin:1px 0;font-size:17px}
+.stamp-modal .stamp-art svg{width:100%;height:100%}
+.stamp-modal .stamp-gift{font-size:clamp(7px,1.15dvh,9px);line-height:1.1;max-height:2.2em;overflow:hidden}
+.stamp-modal .stamp-calendar em{font-size:8px;margin-top:1px}
+.stamp-modal .stamp-seal{top:50%;width:25px;height:25px;font-size:12px;transform:translate(-50%,-50%) rotate(-13deg)}
+.stamp-modal .stamp-footnote{margin:0;font-size:9px!important}
+@media(max-height:740px){
+  .stamp-modal .stamp-heading>span,.stamp-modal .stamp-heading p{display:none}
+  .stamp-modal .stamp-next span:last-child{display:none}
+  .stamp-modal .stamp-calendar{flex:0 0 auto;grid-auto-rows:minmax(45px,1fr)}
+  .stamp-modal .stamp-calendar article{min-height:45px}
+  .stamp-modal .stamp-gift{font-size:7px}
+}
+@media(max-width:350px){
+  .stamp-modal .stamp-calendar{gap:2px}
+  .stamp-modal .stamp-pagination{font-size:10px}
+  .stamp-modal .stamp-pagination button{font-size:10px;padding:4px}
+}
