@@ -956,3 +956,29 @@ button.home-progress {
 .growth-disclosure p{padding:0 12px 12px;font-size:12px;margin:0}
 .growth-history{margin:10px 0 0}
 @media(max-width:360px){.growth-overview{grid-template-columns:110px minmax(0,1fr);gap:7px}.growth-portrait{height:116px}.growth-overview-info h2{font-size:16px}.growth-card-compact .form-picker img{height:56px}.growth-card-compact .form-picker button{min-height:106px}.growth-card-compact .form-picker span{font-size:10px}}
+
+/* Extensible gacha selector: horizontal swipe on iPhone, keyboard-scrollable on desktop. */
+.gacha-help{font-size:12px;color:#755b88;margin:12px 0 8px}
+.gacha-select-scroll{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding:4px 2px 12px}
+.gacha-select-scroll button{flex:0 0 clamp(138px,42vw,176px);min-height:96px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:18px;border:2px solid #d0b5e3;background:#f0e4f9;color:#593d75;font:inherit;padding:10px 7px}
+.gacha-select-scroll button[aria-pressed="true"]{border-color:#7d51a2;background:#dcc2f3;box-shadow:0 2px 9px #80579f35}
+.gacha-select-scroll button strong{font-size:13px;line-height:1.3}
+.gacha-type-icon{font-size:27px;line-height:1}
+.gacha-detail{background:#fffaff;border:1px solid #dec8ec;border-radius:18px;padding:14px;margin-top:8px;color:#573b6e}
+.gacha-detail h2{margin:0 0 8px;font-size:18px}
+.gacha-detail>p{font-size:12px;line-height:1.55}
+.gacha-detail .gacha-rate{color:#7a5e8d;font-size:11px}
+.gacha-odds{border:1px solid #dac3e9;border-radius:12px;margin:12px 0;background:#f7effc}
+.gacha-odds summary,.gacha-owned summary{cursor:pointer;padding:12px;font-size:13px;font-weight:700}
+.gacha-odds ul,.gacha-owned ul{list-style:none;margin:0;padding:4px 12px 12px}
+.gacha-odds li{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:6px 0;border-bottom:1px solid #e7dbee}
+.gacha-odds li:last-child{border:0}
+.gacha-odds li strong{white-space:nowrap}
+.gacha-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+.gacha-actions button{min-height:52px;border-radius:14px;border:0;background:#76539b;color:white;font:inherit;font-size:12px;font-weight:700;padding:8px}
+.gacha-actions button:disabled{background:#ded4e5;color:#887a92}
+.gacha-win{font-weight:800;font-size:15px!important;color:#6e369b}
+.gacha-prize-notice{font-size:12px}
+.gacha-owned{margin-top:14px;border:1px solid #dec8ec;border-radius:14px;background:#f8f0fc}
+.gacha-owned li{padding:5px 0;font-size:12px}
+@media(max-width:350px){.gacha-select-scroll button{flex-basis:130px}.reward-panel{padding:12px}.gacha-actions button{font-size:11px}}
