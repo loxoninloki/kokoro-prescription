@@ -6,7 +6,7 @@ import { gachaRarity,RARITY_PRESENTATION } from './gachaRarity';
 import GachaPrizeArt from './GachaPrizeArt';
 import GachaTryOn,{canTryOn} from './GachaTryOn';
 import { useGachaModal,useReducedMotion } from './useGachaModal';
-export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,error,onClose}:{itemId:string;form:{id:FormId;name:string;image:string};equipped:readonly string[];roomLayout:Readonly<RoomState['layout']>;busy:boolean;error:string;onClose:()=>void}) {
+export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,error,onClose,testMode=false}:{itemId:string;testMode?:boolean;form:{id:FormId;name:string;image:string};equipped:readonly string[];roomLayout:Readonly<RoomState['layout']>;busy:boolean;error:string;onClose:()=>void}) {
  const [trying,setTrying]=React.useState(false),[applied,setApplied]=React.useState(true);
  const root=useGachaModal(()=>{if(!busy)onClose();}),reduced=useReducedMotion();
  const rarity=gachaRarity(itemId),interior=isInteriorPrize(itemId),supported=canTryOn(itemId,form.id);
@@ -29,6 +29,6 @@ export default function GachaRewardModal({itemId,form,equipped,roomLayout,busy,e
    </>}
    <button type="button" className="gacha-reward-ok" disabled={busy} onClick={onClose}>{busy?'確認中…':'OK'}</button>
   </div>
-  <p className="gacha-reward-saved">獲得アイテムは所持品に保存されています。</p>
+  <p className="gacha-reward-saved">{testMode ? '🧪 テスト結果です。アイテムと残高は実際の所持品には反映されません。' : '獲得アイテムは所持品に保存されています。'}</p>
  </section></div>;
 }
