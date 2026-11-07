@@ -924,3 +924,35 @@ button.home-progress {
 @media(prefers-reduced-motion:reduce){
   .avatar-room-preview .roki-room-actor{transition:none}
 }
+
+/* Compact growth layout: keep the six form choices visible on iPhone screens. */
+.kokoro-app[data-page="growth"] .page-sticker{width:40px;height:40px;right:4px;top:4px}
+.growth-card-compact{padding:14px 12px 12px;border-radius:20px;background:#f8f1ff;color:#4c3364}
+.growth-overview{display:grid;grid-template-columns:minmax(108px,38%) minmax(0,1fr);gap:10px;align-items:center}
+.growth-portrait{display:grid;place-items:center;min-width:0;height:136px;overflow:hidden}
+.growth-portrait .roki-character{max-width:100%;height:100%;width:auto!important;aspect-ratio:1}
+.growth-overview-info{min-width:0;text-align:left}
+.growth-overview-info h2{display:flex;align-items:center;gap:5px;font-size:clamp(16px,4.4vw,21px);line-height:1.25;margin:0 0 6px}
+.growth-overview-info .kokoro-icon{width:20px;height:20px;flex:none}
+.growth-overview-info .growth-current-form{font-size:13px;font-weight:700;margin:0 0 10px}
+.growth-overview-info label{font-size:12px;font-weight:600}
+.growth-overview-info progress{display:block;width:100%;height:9px;margin:5px 0 0;accent-color:#a678cb}
+.growth-overview-info .growth-next{font-size:11px;margin:6px 0 0;line-height:1.4}
+.growth-card-compact .form-picker{margin-top:10px;text-align:left}
+.growth-card-compact .form-picker h3{font-size:17px;margin:0 0 3px}
+.growth-card-compact .growth-picker-help{font-size:11px;line-height:1.35;margin:0 0 8px}
+.growth-card-compact .form-picker>div{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.growth-card-compact .form-picker button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 3px;min-height:112px;border-radius:13px}
+.growth-card-compact .form-picker img{height:63px;max-width:100%;object-fit:contain}
+.growth-card-compact .form-picker span{font-size:11px;line-height:1.2;font-weight:650}
+.growth-card-compact .form-picker small{font-size:10px;line-height:1.2}
+.growth-disclosure{margin-top:10px;border-radius:13px;border:1px solid #d8c5e7;background:#fbf7ff;color:#5a4173;text-align:left}
+.growth-disclosure summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:9px 12px;cursor:pointer;font-size:12px;font-weight:700;list-style:none}
+.growth-disclosure summary::-webkit-details-marker{display:none}
+.growth-disclosure summary::after{content:'▾';font-size:15px}
+.growth-disclosure[open] summary::after{content:'▴'}
+.growth-disclosure .evolution-stages,.growth-disclosure ul{margin:0;padding:4px 12px 12px 28px}
+.growth-disclosure .evolution-stages{padding-left:12px}
+.growth-disclosure p{padding:0 12px 12px;font-size:12px;margin:0}
+.growth-history{margin:10px 0 0}
+@media(max-width:360px){.growth-overview{grid-template-columns:110px minmax(0,1fr);gap:7px}.growth-portrait{height:116px}.growth-overview-info h2{font-size:16px}.growth-card-compact .form-picker img{height:56px}.growth-card-compact .form-picker button{min-height:106px}.growth-card-compact .form-picker span{font-size:10px}}
