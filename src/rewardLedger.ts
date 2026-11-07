@@ -20,6 +20,8 @@ export interface RewardState {
   lastLoginDate: string | null;
   creditedXp: Record<string, number>;
   ownedItemIds: string[];
+  /** Total copies by ID; absent legacy counts imply 1 for already-owned IDs. */
+  itemCounts?: Record<string, number>;
   medicationPolicy?: MedicationRewardPolicy;
   pendingGachaResult?: PendingGachaResult;
 }
@@ -30,6 +32,16 @@ export const EMPTY_REWARDS: RewardState = {
 };
 
 export const macaronBalance = (state: RewardState) => state.earned - state.spent;
+
+export function itemQuantity(state: Pick<RewardState,'ownedItemIds'|'itemCounts'>, id:string):number {
+  return state.itemCounts?.[id] ?? (state.ownedItemIds.includes(id) ? 1 : 0);
+}
+export function addGachaCopy(state:RewardState,id:string):RewardState {
+  const count=itemQuantity(state,id);
+  if(count>=Number.MAX_SAFE_INTEGER)throw new Error('所持数の上限です。');
+  return {...state,ownedItemIds:count ? state.ownedItemIds : [...state.ownedItemIds,id],
+    itemCounts:{...state.itemCounts,[id]:count+1}};
+}
 
 const tokyoCalendar = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -95,6 +107,7 @@ export function parseRewards(raw: unknown): RewardState {
       !Array.isArray(value.ownedItemIds) || !value.ownedItemIds.every(id => typeof id === 'string')) {
     throw new Error('報酬の保存データを読み込めませんでした。');
   }
+  if(value.itemCounts!==undefined&&(!value.itemCounts||typeof value.itemCounts!=='object'||Array.isArray(value.itemCounts)||Object.entries(value.itemCounts).length>10000||!Object.entries(value.itemCounts).every(([id,count])=>value.ownedItemIds!.includes(id)&&isCount(count)&&count>0)))throw new Error('アイテム所持数が不正です。');
   if(value.presentTicketCredit!==undefined&&!isCount(value.presentTicketCredit))throw new Error('プレゼントのチケット情報が不正です。');
   if(value.presentClaims!==undefined&&(!Array.isArray(value.presentClaims)||value.presentClaims.length>10000||!value.presentClaims.every(id=>typeof id==='string'&&/^[a-z0-9_-]{1,80}$/.test(id))||new Set(value.presentClaims).size!==value.presentClaims.length))throw new Error('プレゼント受取情報が不正です。');
   if(value.presentClaimDates!==undefined&&(!value.presentClaimDates||typeof value.presentClaimDates!=='object'||Array.isArray(value.presentClaimDates)||!Object.entries(value.presentClaimDates).every(([id,date])=>value.presentClaims?.includes(id)&&typeof date==='string'&&Number.isFinite(Date.parse(date)))))throw new Error('プレゼント受取日時が不正です。');
