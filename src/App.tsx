@@ -172,9 +172,6 @@ export default function App() {
     setAppearanceMessage(saved ? '' : '表示する姿を保存できませんでした。');
   };
 
-  const backPage = (page === 'backup' || page === 'invite') ? 'menu' : 'home';
-  const backLabel = { growth: '育成', menu: 'メニュー', home: 'ホーム' }[backPage];
-
   const checkIn = () => {
     const current = localDay();
     setToday(current);
@@ -188,11 +185,10 @@ export default function App() {
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={days.length} onCheckIn={checkIn} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
-        equipped={mature ? appearance.equipped : undefined} onBack={() => navigate('home')} />}
-      {page !== 'home' && page !== 'room' && page !== 'dressup' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
-        <button type="button" onClick={() => navigate(backPage)} style={{ border: 0, borderRadius: 999, background: '#7653a6', color: '#fff', padding: '10px 18px', fontSize: 14, flexShrink: 0 }}>← {backLabel}に戻る</button>
-        {headerSticker && !headerStickerFailed && <img src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true" onError={() => setHeaderStickerFailed(true)} style={{ width: 84, height: 74, maxWidth: '35%', objectFit: 'contain', objectPosition: 'center', pointerEvents: 'none' }} />}
-      </nav>}
+        equipped={mature ? appearance.equipped : undefined} />}
+      {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
+        <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
+          onError={() => setHeaderStickerFailed(true)} />}
       {page === 'growth' && <>
         <section className="growth-card" aria-label="ろきちゃんの成長" style={{ padding: 20, borderRadius: 20, background: '#f8f1ff', textAlign: 'center' }}>
           <div style={{ display: "flex", justifyContent: "center" }}>{character(220)}</div>

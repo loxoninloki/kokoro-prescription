@@ -5,9 +5,8 @@ import type { evolutionFromXp } from './evolution';
 
 type RoomEvolution = Pick<ReturnType<typeof evolutionFromXp>, 'level' | 'form'>;
 
-export default function RokiRoom({ level, form, equipped, onBack }: RoomEvolution & {
+export default function RokiRoom({ level, form, equipped }: RoomEvolution & {
   equipped?: string[];
-  onBack: () => void;
 }) {
   const [position, setPosition] = useState({ x: 50, y: 77 });
   const [walking, setWalking] = useState(false);
@@ -30,7 +29,6 @@ export default function RokiRoom({ level, form, equipped, onBack }: RoomEvolutio
 
   return <section className="roki-room" aria-labelledby="room-title">
     <header className="roki-room-header">
-      <button className="room-switch" type="button" onClick={onBack}>← ホームに戻る</button>
       <h1 id="room-title"><Icon name="growth" /> ろきちゃんのルーム</h1>
       <p>Lv.{level} · {form.name}</p>
     </header>

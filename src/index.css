@@ -118,7 +118,6 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
   font-weight: 650;
 }
 .kokoro-checkin button:disabled { background: #d7c3e9; }
-.kokoro-back-nav button { background: #51356f !important; border: 1px solid #e5bff7 !important; }
 .kokoro-app:not([data-page="home"]) > section {
   margin-top: 10px !important;
   padding: 16px !important;
@@ -358,12 +357,8 @@ progress::-moz-progress-bar { background: #c49aee; border-radius: 99px; }
   text-align: center;
 }
 
-.roki-room-header .room-switch {
-  display: block;
-}
-
 .roki-room-header h1 {
-  margin: 20px 0 4px;
+  margin: 0 0 4px;
   font-size: clamp(20px, 5.8vw, 29px);
 }
 
@@ -649,3 +644,5 @@ button.home-progress {
 .navigation-dialog { padding: 20px; max-width: 360px; width: 100%; border-radius: 20px; background: #f5eaff; color: #302044; }
 .navigation-dialog h2 { font-size: 18px; }
 .navigation-dialog button { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #a786c4; border-radius: 12px; background: #e6d1f5; color: #302044; }
+
+.page-sticker { float: right; width: 54px; height: 44px; margin: 0 0 4px 8px; object-fit: contain; pointer-events: none; }
