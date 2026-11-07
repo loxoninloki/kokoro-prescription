@@ -1,8 +1,9 @@
 import React from 'react';
 import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState, TICKET_DRAW_COST, updateRewards, drawItem } from './rewardLedger';
 import { GACHA_TYPES, drawCandidates, equalWeightPool, gachaItemName, isInteriorPrize } from './gachaCatalog';
-import { ITEMS } from './appearance';
-import { INTERIOR_ITEMS } from './interior';
+import { ITEMS, FormId } from './appearance';
+import { INTERIOR_ITEMS, RoomState } from './interior';
+import GachaTryOn, { canTryOn } from './GachaTryOn';
 import InteriorIcon from './InteriorIcon';
 
 export function RewardIcon({ kind }: { kind: 'macaron' | 'ticket' }) {
@@ -67,17 +68,23 @@ function GachaBanner({ gacha, onOpen, onLineup }: {
   </article>;
 }
 
-export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, onWalletChange }: {
+export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, onWalletChange, previewForm, previewEquipment, roomLayout }: {
   wallet: RewardState;
   error: boolean;
   section: 'gacha' | 'shop';
   roomOwnedItemIds: readonly string[];
   onWalletChange: (next: RewardState) => void;
+  previewForm: { id: FormId; name: string; image: string };
+  previewEquipment: readonly string[];
+  roomLayout: Readonly<RoomState['layout']>;
 }) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [view, setView] = React.useState<'catalog' | 'draw' | 'lineup'>('catalog');
   const [pendingPayment, setPendingPayment] = React.useState<Payment | null>(null);
   const [previewId, setPreviewId] = React.useState<string | null>(null);
+  const [tryingOn, setTryingOn] = React.useState(false);
+  const [trialApplied, setTrialApplied] = React.useState(true);
+  const closePreview = () => { setPreviewId(null); setTryingOn(false); setTrialApplied(true); };
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [prize, setPrize] = React.useState<string | null>(null);
@@ -96,7 +103,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
     setSelectedId(id);
     setView(target);
     setPendingPayment(null);
-    setPreviewId(null);
+    closePreview();
     setMessage('');
     setPrize(null);
   };
@@ -205,7 +212,7 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
               const itemOwned = owned.includes(id);
               const chance = pool.find(item => item.id === id)?.weight ?? 0;
               return <button type="button" key={id} className="gacha-prize-card" data-owned={itemOwned}
-                onClick={() => setPreviewId(id)} aria-label={gachaItemName(id) + 'を拡大表示'}>
+                onClick={() => { setPreviewId(id); setTryingOn(false); setTrialApplied(true); }} aria-label={gachaItemName(id) + 'を拡大表示'}>
                 <div className="gacha-prize-art"><PrizeArt id={id}/></div>
                 <strong>{gachaItemName(id)}</strong>
                 <span>{itemOwned ? '所持済み' : '排出対象'}</span>
@@ -218,14 +225,34 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
             setView('draw'); setPreviewId(null); setMessage(''); setPrize(null);
           }}>このガチャを選ぶ ›</button>
         </section>
-        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
+        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={closePreview}>
           <div className="gacha-confirm gacha-item-preview" role="dialog" aria-modal="true"
-            aria-label={gachaItemName(previewId) + 'のプレビュー'} onClick={event => event.stopPropagation()}>
-            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={() => setPreviewId(null)}>×</button>
-            <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
-            <h2>{gachaItemName(previewId)}</h2>
-            <p>{owned.includes(previewId) ? '所持済み' : 'このガチャから排出されるアイテムです。'}</p>
-            <button type="button" className="gacha-preview-close" onClick={() => setPreviewId(null)}>ラインナップに戻る</button>
+            aria-label={gachaItemName(previewId) + (tryingOn ? 'のお試しプレビュー' : 'のプレビュー')}
+            onClick={event => event.stopPropagation()}>
+            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={closePreview}>×</button>
+            {!tryingOn ? <>
+              <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
+              <h2>{gachaItemName(previewId)}</h2>
+              <p>{owned.includes(previewId) ? '所持済み' : '未所持アイテムもお試しできます。'}</p>
+              {canTryOn(previewId, previewForm.id) ? <button type="button" className="gacha-tryon-start" onClick={() => {
+                setTryingOn(true); setTrialApplied(true);
+              }}>{isInteriorPrize(previewId) ? 'ルームに置いてみる' : 'ろきちゃんに試着する'}</button> :
+                <p className="gacha-tryon-unsupported">現在のろきちゃんの姿では試着できません。対応するフォルムに進化すると試せます。</p>}
+              <button type="button" className="gacha-preview-close" onClick={closePreview}>ラインナップに戻る</button>
+            </> : <>
+              <span className="gacha-tryon-badge">{trialApplied ? 'お試し中 · 保存されません' : '元の状態'}</span>
+              <h2>{gachaItemName(previewId)}</h2>
+              <GachaTryOn itemId={previewId} form={previewForm} equipped={previewEquipment}
+                roomLayout={roomLayout} applied={trialApplied}/>
+              <p className="gacha-tryon-notice">未所持でも試せます。コーデやルーム、通貨・所持品は変更されません。</p>
+              <div className="gacha-tryon-actions">
+                <button type="button" onClick={() => setTrialApplied(current => !current)}>
+                  {trialApplied ? '元に戻す' : 'もう一度お試し'}
+                </button>
+                <button type="button" onClick={() => { setTryingOn(false); setTrialApplied(true); }}>アイテム詳細に戻る</button>
+              </div>
+              <button type="button" className="gacha-preview-close" onClick={closePreview}>ラインナップに戻る</button>
+            </>}
           </div>
         </div>}
       </> : <>
