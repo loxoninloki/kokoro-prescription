@@ -1,4 +1,5 @@
 import { FORM_STAGES, HUMAN_FORM } from './evolution';
+import { CHIBI_GACHA_ITEMS, CHIBI_GACHA_ASSETS_READY } from './chibiGachaCatalog';
 export const APPEARANCE_KEY = 'kokoro-roki-appearance-v1';
 
 export const CATEGORIES = {
@@ -21,6 +22,8 @@ interface OutfitLayer {
   position?: { left: number; top: number; width: number; rotation?: number };
   portraitClip?: string;
   clipPath?: string;
+  /** Tile index of a 4x3 square, transparent sprite atlas. */
+  atlasIndex?: number;
 }
 
 export interface DressUpItem {
@@ -31,9 +34,12 @@ export interface DressUpItem {
   supportedForms: readonly FormId[];
   // Layers share a canvas. A hairstyle can contribute both back and front layers.
   layers: readonly OutfitLayer[];
+  /** Use the matching tile in the icon atlas for the gacha prize image. */
+  previewAtlasIndex?: number;
 }
 
 export const ITEMS: readonly DressUpItem[] = [
+  ...(CHIBI_GACHA_ASSETS_READY ? CHIBI_GACHA_ITEMS : []),
   {
     id: 'growth-gift-development', name: '芽吹きのひかり', category: 'effects', supportedForms: ['development'],
     layers: [{ image: 'dressup/form_gift_sprout_back.svg', order: 12 }, { image: 'dressup/form_gift_sprout_front.svg', order: 24 }],
