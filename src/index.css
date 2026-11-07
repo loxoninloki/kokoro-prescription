@@ -1057,3 +1057,16 @@ button.home-progress {
 .reward-panel--gacha .gacha-prize-grid .gacha-prize-card{width:100%;height:100%;min-width:0;scroll-snap-align:start;align-self:stretch}
 .reward-panel--gacha .gacha-prize-grid:focus-visible{outline:2px solid #8860ba;outline-offset:2px}
 @media(max-width:350px){.reward-panel--gacha .gacha-prize-grid{grid-auto-columns:110px;gap:7px}}
+
+/* A gacha banner has two independent actions: choose it, or preview its lineup. */
+.reward-panel--gacha .gacha-banner{display:flex;flex-direction:column;justify-content:space-between;gap:0;padding:0;min-height:0}
+.reward-panel--gacha .gacha-banner-main{display:flex;align-items:stretch;justify-content:space-between;flex:1;gap:4px;width:100%;min-height:135px;padding:13px 11px 6px 15px;background:transparent;color:inherit;border:0;text-align:left;font:inherit;cursor:pointer}
+.reward-panel--gacha .gacha-banner-main:focus-visible,.reward-panel--gacha .gacha-banner-more:focus-visible{outline:3px solid #8955b4;outline-offset:-3px}
+.reward-panel--gacha .gacha-banner-footer{position:relative;display:flex;padding:0 13px 12px;z-index:3}
+.reward-panel--gacha .gacha-banner-more{margin:0;min-height:44px;border:1px solid #d8c1eb;background:#fffaf0e8;color:#694292;cursor:pointer}
+.reward-panel--gacha .gacha-banner-select{font-size:11px;font-weight:700;color:#7b5798}
+.reward-panel--gacha .gacha-lineup-page .gacha-prize-grid{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(114px,33vw,148px);grid-template-columns:none;grid-template-rows:1fr;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scroll-padding-inline:4px}
+.reward-panel--gacha .gacha-lineup-to-draw{display:block;width:100%;min-height:52px;border:0;border-radius:15px;margin-top:15px;background:#8658aa;color:white;font:inherit;font-weight:750}
+.reward-panel--gacha .gacha-draw-choices{margin-top:12px}
+.reward-panel--gacha .gacha-lineup-page .gacha-detail-overview{padding-top:6px}
+@media(max-width:350px){.reward-panel--gacha .gacha-banner-main{min-height:130px;padding:10px 9px}.reward-panel--gacha .gacha-banner-footer{padding:0 9px 10px}}
