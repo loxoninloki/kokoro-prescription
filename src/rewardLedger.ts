@@ -34,6 +34,10 @@ export function creditXp(state: RewardState, events: Readonly<Record<string, num
   let earned = state.earned;
   let creditedXp: RewardState['creditedXp'] | undefined;
   for (const [id, xp] of Object.entries(events)) {
+    // A legacy per-dose credit for this day must not be paid again as a daily reward.
+    if (id.startsWith('medication-day:') && Object.keys(state.creditedXp).some(
+      oldId => oldId.startsWith('medication:' + id.slice('medication-day:'.length) + '|')
+    )) continue;
     const previous = state.creditedXp[id] ?? 0;
     if (xp > previous) {
       earned += xp - previous;
@@ -69,7 +73,7 @@ export function parseRewards(raw: unknown): RewardState {
       value.tickets > Math.floor(value.loginDays / LOGIN_DAYS_PER_TICKET) ||
       !(value.lastLoginDate === null || (typeof value.lastLoginDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.lastLoginDate))) ||
       !value.creditedXp || typeof value.creditedXp !== 'object' || Array.isArray(value.creditedXp) ||
-      !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|steps|meditation):/.test(id) && isCount(xp)) ||
+      !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|medication-day|steps|meditation):/.test(id) && isCount(xp)) ||
       !Array.isArray(value.ownedItemIds) || !value.ownedItemIds.every(id => typeof id === 'string')) {
     throw new Error('報酬の保存データを読み込めませんでした。');
   }
