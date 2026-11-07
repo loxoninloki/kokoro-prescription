@@ -34,7 +34,6 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
   const [scene, setScene] = useState<'avatar' | 'illustration'>('avatar');
   const mature = evolution.form.id === MATURE_FORM.id;
-  const ticketProgress = wallet.loginDays % LOGIN_DAYS_PER_TICKET;
   const remainingXp = evolution.requiredLevelXp - evolution.currentLevelXp;
 
   return <div className="avatar-home">
@@ -87,27 +86,12 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
         <button key={target} type="button" onClick={() => onNavigate(target)}><Icon name={target} /><span>{label}</span></button>)}
     </nav>
 
-    <div className="avatar-summary-grid">
-    <button type="button" className="avatar-growth" onClick={() => onNavigate('growth')} aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
-      <span className="avatar-mini"><RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={48} /></span>
-      <span className="avatar-growth-text">
-        <span className="avatar-growth-title"><strong>ろきちゃん Lv.{evolution.level}</strong><span>{evolution.form.name}</span></span>
-        <span className="avatar-growth-xp">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP · あと {remainingXp} EXP</span>
-        <progress aria-label="ろきちゃんの経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
-        <span className="avatar-growth-next">{evolution.nextLevel ? `次の進化は Lv.${evolution.nextLevel}` : '成熟フォルムに到達しました'}</span>
-      </span>
-    </button>
-
-    <section className="avatar-login" aria-label="処方箋チケットの進捗情報">
-      <div className="avatar-login-heading"><span>処方箋チケットまで {ticketProgress}/{LOGIN_DAYS_PER_TICKET}日</span>
-        <span>累積ログイン {wallet.loginDays}日</span></div>
-      <progress aria-label="処方箋チケットの進捗" value={ticketProgress} max={LOGIN_DAYS_PER_TICKET} />
-      {walletError && <p role="status">報酬の保存状態を確認できませんでした。</p>}
-    </section>
-    </div>
-    <section className="avatar-checkin avatar-checkin-compact" aria-label="チェックイン">
-      <span>チェックイン {checkinDays}日<span className="checkin-total-xp"> · {totalPoints.toLocaleString('ja-JP')} EXP</span></span>
-      <button type="button" onClick={onCheckIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
+    <section className="home-progress avatar-progress">
+      <div className="home-progress-grid avatar-summary-grid">
+        <GrowthSummaryCard {...{ evolution, displayForm, equipped, onNavigate }} />
+        <TicketProgressCard {...{ wallet, walletError }} />
+      </div>
+      <CheckInCompactCard {...{ checkinDays, totalPoints, checkedIn, onCheckIn }} />
     </section>
 
     <nav className="avatar-bottom" aria-label="ホームナビゲーション">
@@ -119,4 +103,39 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
         </button>)}
     </nav>
   </div>;
+}
+
+function GrowthSummaryCard({ evolution, displayForm, equipped, onNavigate }: Pick<Props, 'evolution' | 'displayForm' | 'equipped' | 'onNavigate'>) {
+ return (
+    <button type="button" className="avatar-growth" onClick={() => onNavigate('growth')} aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
+      <span className="avatar-mini"><RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={48} /></span>
+      <span className="avatar-growth-text">
+        <span className="avatar-growth-title"><strong>Lv.{evolution.level}</strong><span>{evolution.form.name}</span></span>
+        <span className="avatar-growth-xp">EXP {evolution.currentLevelXp} / {evolution.requiredLevelXp}</span>
+        <progress aria-label="ろきちゃんの経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
+        <span className="avatar-growth-next">{evolution.nextLevel ? `次の進化は Lv.${evolution.nextLevel}` : '成熟フォルムに到達しました'}</span>
+      </span>
+    </button>
+ );
+}
+
+function TicketProgressCard({ wallet, walletError }: Pick<Props, 'wallet' | 'walletError'>) {
+ const ticketProgress = wallet.loginDays % LOGIN_DAYS_PER_TICKET;
+ return (
+    <section className="avatar-login" aria-label="処方箋チケットの進捗情報">
+      <Icon name="backup" /><div className="avatar-login-heading"><span>処方箋チケットまで <strong>{ticketProgress}/{LOGIN_DAYS_PER_TICKET}日</strong></span>
+        <span>累積ログイン {wallet.loginDays}日</span></div>
+      <progress aria-label="処方箋チケットの進捗" value={ticketProgress} max={LOGIN_DAYS_PER_TICKET} />
+      {walletError && <p role="status">報酬の保存状態を確認できませんでした。</p>}
+    </section>
+ );
+}
+
+function CheckInCompactCard({ checkinDays, totalPoints, checkedIn, onCheckIn }: Pick<Props, 'checkinDays' | 'totalPoints' | 'checkedIn' | 'onCheckIn'>) {
+ return (
+<section className="avatar-checkin avatar-checkin-compact" aria-label="チェックイン">
+      <span>チェックイン {checkinDays}日<span className="checkin-total-xp"> · {totalPoints.toLocaleString('ja-JP')} EXP</span></span>
+      <button type="button" onClick={onCheckIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
+    </section>
+ );
 }
