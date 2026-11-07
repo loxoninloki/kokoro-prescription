@@ -4,28 +4,23 @@ import { ITEMS } from './appearance';
 import { INTERIOR_ITEMS } from './interior';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
 
-test('3種類のガチャは用途別のラインナップを持ち、あとから追加可能', () => {
-  expect(GACHA_TYPES.map(g => g.name)).toEqual(['通常ガチャ', 'ファッションセレクトガチャ', 'インテリアセレクトガチャ']);
-  expect(GACHA_TYPES[0].itemIds).toHaveLength(ITEMS.length - FIRST_GIFT_IDS.length + INTERIOR_ITEMS.length);
-  expect(GACHA_TYPES[1].itemIds).toEqual(ITEMS.filter(item => !FIRST_GIFT_IDS.includes(item.id)).map(item => item.id));
-  expect(GACHA_TYPES[2].itemIds).toEqual(INTERIOR_ITEMS.map(item => item.id));
-  expect(GACHA_TYPES[1].itemIds.every(id => !isInteriorPrize(id))).toBe(true);
-  expect(GACHA_TYPES[2].itemIds.every(isInteriorPrize)).toBe(true);
+test('最初のガチャはコーデとインテリアの2種類だけ', () => {
+  expect(GACHA_TYPES.map(g => g.name)).toEqual(['コーデセレクトガチャ','インテリアセレクトガチャ']);
+  expect(GACHA_TYPES[0].itemIds).toEqual(ITEMS.filter(item=>!FIRST_GIFT_IDS.includes(item.id)).map(item=>item.id));
+  expect(GACHA_TYPES[1].itemIds).toEqual(INTERIOR_ITEMS.map(item=>item.id));
+  expect(GACHA_TYPES[0].itemIds.every(id=>!isInteriorPrize(id))).toBe(true);
 });
-
-test('既に所持している家具や服は抽選対象から除外し、排出確率が合計100%', () => {
-  const gacha = GACHA_TYPES[2];
-  const owned = [gacha.itemIds[0], gacha.itemIds[1]];
-  const candidates = drawCandidates(gacha, owned);
-  expect(candidates).toHaveLength(gacha.itemIds.length - 2);
-  expect(candidates).not.toContain(owned[0]);
-  const pool = equalWeightPool(candidates);
-  expect(pool.reduce((total, item) => total + item.weight, 0)).toBe(10000);
-  expect(Math.max(...pool.map(p => p.weight)) - Math.min(...pool.map(p => p.weight))).toBeLessThanOrEqual(1);
+test('所持済みでも同じ確率で再抽選される', () => {
+  const gacha=GACHA_TYPES[1];
+  const owned=[gacha.itemIds[0],gacha.itemIds[1]];
+  const candidates=drawCandidates(gacha,owned);
+  expect(candidates).toEqual(gacha.itemIds);
+  const pool=equalWeightPool(candidates);
+  expect(pool.reduce((n,p)=>n+p.weight,0)).toBe(10000);
+  expect(Math.max(...pool.map(p=>p.weight))-Math.min(...pool.map(p=>p.weight))).toBeLessThanOrEqual(1);
 });
-
 test('セレクトガチャは既存の抽選処理とチケット・マカロン残高を使用する', () => {
-  const gacha = GACHA_TYPES[1];
+  const gacha = GACHA_TYPES[0];
   const first = gacha.itemIds[0];
   const state = { ...EMPTY_REWARDS, earned: 100, tickets: 1, loginDays: 7 };
   const config = {
