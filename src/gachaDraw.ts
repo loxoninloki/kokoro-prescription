@@ -9,7 +9,7 @@ export async function confirmGachaDraw(gacha:GachaType,payment:'ticket'|'macaron
   const id=typeof window.crypto?.randomUUID==='function'?window.crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`;
   saved={id,itemId:result.itemId,gachaId:gacha.id,payment,amount:payment==='ticket'?1:gacha.macaronCost,confirmedAt:new Date().toISOString()};
   // Currency, copy quantity, and the unacknowledged result are written atomically.
-  const awarded=result.state.itemCounts?.[result.itemId] ? result.state : {...result.state,itemCounts:{...result.state.itemCounts,[result.itemId]:1}};
+  const awarded=result.state.itemCounts?.[result.itemId] ? result.state : {...result.state,itemCounts:{...result.state.itemCounts,[result.itemId]:roomOwned.includes(result.itemId) && !current.ownedItemIds.includes(result.itemId) ? 2 : 1}};
   return {...awarded,pendingGachaResult:saved};
  });
  return {wallet,result:saved!};
