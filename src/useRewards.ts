@@ -19,6 +19,6 @@ export default function useRewards(readXp:()=>Record<string,number>,xpEvents:Rea
   sync();const timer=window.setInterval(sync,60000);document.addEventListener('visibilitychange',sync);window.addEventListener('focus',sync);window.addEventListener('storage',storage);
   return()=>{active=false;window.clearInterval(timer);document.removeEventListener('visibilitychange',sync);window.removeEventListener('focus',sync);window.removeEventListener('storage',storage);};
  },[readXp,xpEvents]);
- return {wallet,walletError,stampDay,receipt,clearStamp:()=>{pendingStamp.current=null;setStampDay(null);setReceipt(null);}};
+ return {wallet,walletError,setWallet,stampDay,receipt,clearStamp:()=>{pendingStamp.current=null;setStampDay(null);setReceipt(null);}};
 }
 
