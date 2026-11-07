@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Icon } from './Icon';
 import RokiCharacter from './RokiCharacter';
 import HomeIllustration from './HomeIllustration';
-import { MATURE_FORM, evolutionFromXp } from './evolution';
+import { evolutionFromXp } from './evolution';
 import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState } from './rewardLedger';
 import { RewardIcon } from './RewardPanel';
 
@@ -28,7 +28,6 @@ const careActions = [
 export default function HomePage({ evolution, displayForm, equipped, wallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
   const [scene, setScene] = useState<'avatar' | 'illustration'>('avatar');
-  const mature = evolution.form.id === MATURE_FORM.id;
   const remainingXp = evolution.requiredLevelXp - evolution.currentLevelXp;
 
   return <div className="avatar-home">
@@ -58,21 +57,11 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
           ? <RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={280} />
           : <HomeIllustration />}
       </div>
-      <nav className="avatar-side avatar-side-left" aria-label="ろきちゃんのメニュー">
-        <button type="button" onClick={() => onNavigate('room')}><Icon name="home" /><span>ルーム</span></button>
-        <button type="button" disabled={!mature} onClick={() => onNavigate('dressup')}
-          aria-label={mature ? '着せ替え' : '着せ替え Lv.50で解放'}>
-          <Icon name="dressup" /><span>{mature ? '着せ替え' : 'Lv.50〜'}</span>
-        </button>
-        <button type="button" onClick={() => onNavigate('gacha')}><Icon name="gacha" /><span>ガチャ</span></button>
-        <button type="button" onClick={() => onNavigate('rewards')}><Icon name="rewards" /><span>ショップ</span></button>
-      </nav>
-      <nav className="avatar-side avatar-side-right" aria-label="ホームの表示とメニュー">
+      <nav className="avatar-side avatar-side-right" aria-label="ホームの表示切替">
         <button type="button" onClick={() => setScene(previous => previous === 'avatar' ? 'illustration' : 'avatar')}
           aria-label={scene === 'avatar' ? 'イラスト表示へ切り替え' : 'アバター表示へ切り替え'}>
           <Icon name="scene" /><span>表示切替</span>
         </button>
-        <button type="button" onClick={() => onNavigate('menu')}><Icon name="menu" /><span>メニュー</span></button>
       </nav>
     </section>
 
