@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Appearance, CATEGORIES, Category, ITEMS, toggleItem, FormId } from './appearance';
 import RokiCharacter from './RokiCharacter';
 import WardrobeIcon from './WardrobeIcon';
+import GachaPrizeArt from './GachaPrizeArt';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
 
 const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
@@ -61,11 +62,10 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
               if (!owned(item) || unsupported) return;
               setDraft(previous => toggleItem(previous, item)); setMessage('');
             }}>
-            <span className="coordinate-thumbnail"><img src={`${process.env.PUBLIC_URL}/${item.layers[0].image}`} alt="" loading="lazy"
-              onError={event => { event.currentTarget.hidden = true; }} />
+            <span className="coordinate-thumbnail"><GachaPrizeArt id={item.id}/>
               {selected && <span className="coordinate-check" aria-hidden="true">✓</span>}</span>
             <span className="coordinate-item-name">{item.name}</span>
-            <small>{unsupported ? 'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? `累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
+            <small>{unsupported ? FIRST_GIFT_IDS.includes(item.id)?'別フォルムの記念エフェクト':'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? FIRST_GIFT_IDS.includes(item.id)?'初回フォルム選択で獲得':`累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
           </button>;
         })}</div>}
     </div>

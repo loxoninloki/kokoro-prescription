@@ -36,19 +36,19 @@ export interface DressUpItem {
 export const ITEMS: readonly DressUpItem[] = [
   {
     id: 'growth-gift-development', name: '芽吹きのひかり', category: 'effects', supportedForms: ['development'],
-    layers: [{ image: 'dressup/form_gift_sprout.svg', order: 12 }],
+    layers: [{ image: 'dressup/form_gift_sprout_back.svg', order: 12 }, { image: 'dressup/form_gift_sprout_front.svg', order: 24 }],
   },
   {
     id: 'growth-gift-birth', name: '誕生のきらめき', category: 'effects', supportedForms: ['birth'],
-    layers: [{ image: 'dressup/form_gift_birth.svg', order: 12 }],
+    layers: [{ image: 'dressup/form_gift_birth_back.svg', order: 12 }, { image: 'dressup/form_gift_birth_front.svg', order: 24 }],
   },
   {
     id: 'growth-gift-growth', name: '成長の星めぐり', category: 'effects', supportedForms: ['growth'],
-    layers: [{ image: 'dressup/form_gift_growth.svg', order: 12 }],
+    layers: [{ image: 'dressup/form_gift_growth_back.svg', order: 12 }, { image: 'dressup/form_gift_growth_front.svg', order: 24 }],
   },
   {
     id: 'growth-gift-mature', name: '成熟の月光', category: 'effects', supportedForms: ['mature'],
-    layers: [{ image: 'dressup/form_gift_mature.svg', order: 12 }],
+    layers: [{ image: 'dressup/form_gift_mature_back.svg', order: 12 }, { image: 'dressup/form_gift_mature_front.svg', order: 24 }],
   },
   {
     id: 'growth-gift-human', name: 'ヒューマンの祝福', category: 'effects', supportedForms: ['human'],
