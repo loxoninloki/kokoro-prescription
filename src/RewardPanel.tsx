@@ -140,10 +140,10 @@ export default function RewardPanel({ wallet, error, section, roomOwnedItemIds, 
         </div>
         <div className="gacha-detail-overview">
           <h2>このガチャのラインナップ</h2>
-          <p>タップするとアイテムを拡大表示できます。未所持のアイテムから抽選されます。</p>
+          <p>左右にスワイプしてラインナップを見られます。アイテムをタップすると拡大表示できます。未所持のアイテムから抽選されます。</p>
           <p>排出対象：<strong>{candidates.length}種類</strong> ／ 全{selected.itemIds.length}種類</p>
         </div>
-        <div className="gacha-prize-grid" aria-label="排出アイテムのプレビュー">
+        <div className="gacha-prize-grid" role="region" aria-label="排出アイテムのラインナップ（横スクロール）" tabIndex={0}>
           {selected.itemIds.map(id => {
             const itemOwned = owned.includes(id);
             const chance = pool.find(item => item.id === id)?.weight ?? 0;
