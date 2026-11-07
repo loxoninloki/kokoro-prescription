@@ -7,7 +7,7 @@
  * in public/dressup/chibi on this branch. Otherwise the gacha would award
  * blank images. User-uploaded files are required for the binary atlases.
  */
-export const CHIBI_GACHA_ASSETS_READY = false;
+export const CHIBI_GACHA_ASSETS_READY = true;
 export const CHIBI_GACHA_LAYER_ATLAS = 'dressup/chibi/chibi_layers_atlas.webp';
 export const CHIBI_GACHA_ICON_ATLAS = 'dressup/chibi/chibi_icons_atlas.webp';
 
