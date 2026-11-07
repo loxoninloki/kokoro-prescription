@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { Icon } from './Icon';
 import RokiCharacter from './RokiCharacter';
+import RoomStage from './RoomStage';
+import type { RoomState } from './interior';
 import HomeIllustration from './HomeIllustration';
 import { evolutionFromXp } from './evolution';
 import { LOGIN_DAYS_PER_TICKET, macaronBalance, RewardState } from './rewardLedger';
 import { RewardIcon } from './RewardPanel';
 
 type Evolution = ReturnType<typeof evolutionFromXp>;
+const scenes = ['avatar', 'illustration', 'room'] as const;
+type Scene = typeof scenes[number];
+const sceneLabels: Record<Scene, string> = { avatar: 'ろきちゃん', illustration: 'イラスト', room: 'ルーム' };
 type Destination = 'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'rewards' | 'gacha' | 'menu';
 interface Props {
   onLoginRewards: () => void;
   evolution: Evolution;
   displayForm: { name: string; image: string };
+  room: RoomState;
   equipped?: string[];
   wallet: RewardState;
   walletError: boolean;
@@ -26,9 +32,10 @@ const careActions = [
   ['diary', '気分・日記'], ['medication', 'お薬'], ['steps', '歩数'], ['meditation', '瞑想BGM'],
 ] as const;
 
-export default function HomePage({ onLoginRewards, evolution, displayForm, equipped, wallet, walletError,
+export default function HomePage({ onLoginRewards, evolution, displayForm, room, equipped, wallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
-  const [scene, setScene] = useState<'avatar' | 'illustration'>('avatar');
+  const [scene, setScene] = useState<Scene>('avatar');
+  const nextScene = scenes[(scenes.indexOf(scene) + 1) % scenes.length];
   const remainingXp = evolution.requiredLevelXp - evolution.currentLevelXp;
 
   return <div className="avatar-home">
@@ -56,11 +63,14 @@ export default function HomePage({ onLoginRewards, evolution, displayForm, equip
       <div className="avatar-center">
         {scene === 'avatar'
           ? <RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={280} />
-          : <HomeIllustration />}
+          : scene === 'illustration'
+            ? <HomeIllustration />
+            : <RoomStage layout={room.layout} form={displayForm} equipped={equipped} compact />}
       </div>
+      <span className="avatar-scene-label" role="status" aria-live="polite">{sceneLabels[scene]}</span>
       <nav className="avatar-side avatar-side-right" aria-label="ホームの表示切替">
-        <button type="button" onClick={() => setScene(previous => previous === 'avatar' ? 'illustration' : 'avatar')}
-          aria-label={scene === 'avatar' ? 'イラスト表示へ切り替え' : 'アバター表示へ切り替え'}>
+        <button type="button" onClick={() => setScene(nextScene)}
+          aria-label={`${sceneLabels[nextScene]}表示へ切り替え`} title={`次：${sceneLabels[nextScene]}`}>
           <Icon name="scene" /><span>表示切替</span>
         </button>
       </nav>
