@@ -87,6 +87,7 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
         <button key={target} type="button" onClick={() => onNavigate(target)}><Icon name={target} /><span>{label}</span></button>)}
     </nav>
 
+    <div className="avatar-summary-grid">
     <button type="button" className="avatar-growth" onClick={() => onNavigate('growth')} aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
       <span className="avatar-mini"><RokiCharacter key={displayForm.image} form={displayForm} equipped={equipped} size={48} /></span>
       <span className="avatar-growth-text">
@@ -97,15 +98,16 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
       </span>
     </button>
 
-    <section className="avatar-login" aria-label="ログインとチェックイン">
+    <section className="avatar-login" aria-label="処方箋チケットの進捗情報">
       <div className="avatar-login-heading"><span>処方箋チケットまで {ticketProgress}/{LOGIN_DAYS_PER_TICKET}日</span>
         <span>累積ログイン {wallet.loginDays}日</span></div>
       <progress aria-label="処方箋チケットの進捗" value={ticketProgress} max={LOGIN_DAYS_PER_TICKET} />
-      <div className="avatar-checkin">
-        <span>チェックイン {checkinDays}日 · {totalPoints.toLocaleString('ja-JP')} EXP</span>
-        <button type="button" onClick={onCheckIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
-      </div>
       {walletError && <p role="status">報酬の保存状態を確認できませんでした。</p>}
+    </section>
+    </div>
+    <section className="avatar-checkin avatar-checkin-compact" aria-label="チェックイン">
+      <span>チェックイン {checkinDays}日<span className="checkin-total-xp"> · {totalPoints.toLocaleString('ja-JP')} EXP</span></span>
+      <button type="button" onClick={onCheckIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
     </section>
 
     <nav className="avatar-bottom" aria-label="ホームナビゲーション">
