@@ -10,6 +10,7 @@ import BackupExport from './BackupExport';
 import AppInvite from './AppInvite';
 import { APPEARANCE_KEY, Appearance, parseAppearance, readAppearance, selectedForm, outfitView, saveFormEquipment, equipmentForForm, FORM_CHOICES, FormId } from './appearance';
 import DressUp from './DressUp';
+import GachaPrizeArt from './GachaPrizeArt';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
@@ -51,7 +52,7 @@ export default function App() {
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [appearance, setAppearance] = useState(readAppearance);
   const [appearanceMessage, setAppearanceMessage] = useState('');
-  const [firstFormGift, setFirstFormGift] = useState<{name:string;formName:string;image:string}|null>(null);
+  const [firstFormGift, setFirstFormGift] = useState<{name:string;formName:string;image:string;itemId:string}|null>(null);
   const formGiftBusy = useRef(false);
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
@@ -196,7 +197,7 @@ export default function App() {
         return {...current, ownedItemIds:[...current.ownedItemIds,gift.item.id]};
       });
       setWallet(next);
-      if (granted) setFirstFormGift({name:gift.item.name,formName:gift.form.name,image:gift.item.layers[0].image});
+      if (granted) setFirstFormGift({itemId:gift.item.id,name:gift.item.name,formName:gift.form.name,image:gift.item.layers[0].image});
     } catch {
       setAppearanceMessage('フォルムの記念アイテムを保存できませんでした。再度フォルムを選択すると受け取れます。');
     } finally {
@@ -302,7 +303,7 @@ export default function App() {
           <span className="form-gift-sparkle" aria-hidden="true">✦ ✧ ✦</span>
           <h2 id="form-gift-title">進化おめでとうございます！</h2>
           <p>{firstFormGift.formName}の初回ボーナス</p>
-          <div className="form-gift-art"><img src={`${process.env.PUBLIC_URL}/${firstFormGift.image}`} alt="" /></div>
+          <div className="form-gift-art"><GachaPrizeArt id={firstFormGift.itemId}/></div>
           <strong>{firstFormGift.name}</strong>
           <p>このフォルムで使える記念エフェクトをプレゼントしました。</p>
           <button type="button" onClick={() => setFirstFormGift(null)}>受け取る</button>
