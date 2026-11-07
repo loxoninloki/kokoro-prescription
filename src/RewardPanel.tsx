@@ -24,8 +24,8 @@ function RewardBalances({ wallet }: { wallet: RewardState }) {
   </span>;
 }
 
-export default function RewardPanel({ wallet, error }: { wallet: RewardState; error: boolean }) {
-  const [section, setSection] = React.useState<'gacha' | 'shop'>('shop');
+export default function RewardPanel({ wallet, error, initialSection = 'shop' }: { wallet: RewardState; error: boolean; initialSection?: 'gacha' | 'shop' }) {
+  const [section, setSection] = React.useState<'gacha' | 'shop'>(initialSection);
   const progress = wallet.loginDays % LOGIN_DAYS_PER_TICKET;
   return <section className="reward-panel" aria-labelledby="reward-title">
     <h1 id="reward-title">ショップ</h1>

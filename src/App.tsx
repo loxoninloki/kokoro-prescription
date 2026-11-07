@@ -11,7 +11,8 @@ import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
-import RewardPanel, { RewardIcon } from './RewardPanel';
+import HomePage from './HomePage';
+import RewardPanel from './RewardPanel';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
 import { Icon } from './Icon';
@@ -45,18 +46,6 @@ function readSavedXp() {
   return collectXpEvents(loadCheckins(), readDiary(), readMedication(), readSteps(), readMeditation());
 }
 
-function streakFor(days: string[]): number {
-  const dates = new Set(days);
-  const cursor = new Date();
-  if (!dates.has(localDay(cursor))) cursor.setDate(cursor.getDate() - 1);
-  let count = 0;
-  while (dates.has(localDay(cursor))) {
-    count += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  return count;
-}
-
 export default function App() {
   const [days, setDays] = useState<string[]>(loadCheckins);
   const [diary, setDiary] = useState<DiaryEntries>(readDiary);
@@ -69,7 +58,7 @@ export default function App() {
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
   const [headerStickerFailed, setHeaderStickerFailed] = useState(false);
-  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'invite' | 'menu' | 'rewards'>('home');
+  const [page, setPage] = useState<'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'backup' | 'invite' | 'menu' | 'rewards' | 'gacha'>('home');
   const navigate = (next: typeof page) => {
     if (next !== 'home' && next !== 'room') {
       setHeaderSticker(HEADER_STICKERS[Math.floor(Math.random() * HEADER_STICKERS.length)]);
@@ -121,7 +110,6 @@ export default function App() {
   const rewardDays = Math.max(recordDays, appearance.rewardDays ?? 0);
   const checkedIn = days.includes(today);
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
-  const streak = streakFor(days);
   const evolution = evolutionFromXp(totalPoints);
   const mature = evolution.form.id === MATURE_FORM.id;
   const human = mature && appearance.mode === 'human';
@@ -161,71 +149,10 @@ export default function App() {
 
   return (
     <main className="kokoro-app" data-page={page}>
-      {page === 'home' && <>
-        <header className="kokoro-header">
-          <Icon name="brand" />
-          <h1>こころの処方箋</h1>
-        </header>
-        <div className="kokoro-hero">
-          <svg className="kokoro-hero-art" viewBox="0 0 1214 1295" role="img" aria-label="月夜の部屋でぬいぐるみとくつろぐろきちゃん">
-            <defs>
-              <image id="home-art-source" href={`${process.env.PUBLIC_URL}/home-hero.webp`} width="1214" height="1295" />
-              <clipPath id="home-art-highlights">
-                {/* These areas are inside the illustration, including its white highlights. */}
-                <path d="M390 616 L515 494 L780 490 L908 600 L950 746 L1090 757 L1110 1095 L876 1172 L253 1185 L76 1082 L90 837 L227 732 Z" />
-                <circle cx="186" cy="229" r="46" />
-                <circle cx="286" cy="340" r="51" />
-              </clipPath>
-              <filter id="home-art-blend" colorInterpolationFilters="sRGB">
-                {/* Blend the white paper into the room while retaining the original illustration. */}
-                <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -4 -5 -3 1 11" />
-              </filter>
-            </defs>
-            <use href="#home-art-source" filter="url(#home-art-blend)" />
-            <use href="#home-art-source" clipPath="url(#home-art-highlights)" />
-          </svg>
-          <button className="room-switch" type="button" onClick={() => navigate('room')}>
-            <Icon name="growth" /> ろきちゃんのルーム
-          </button>
-          <button className="home-reward-icons" type="button" onClick={() => navigate('rewards')}
-            aria-label="マカロンと処方箋チケットの残高を見る">
-            <RewardIcon kind="macaron" />
-            <RewardIcon kind="ticket" />
-          </button>
-        </div>
-        <nav className="kokoro-menu" aria-label="機能メニュー">
-          {([
-            ['diary', '気分・日記'],
-            ['medication', 'お薬'],
-            ['steps', '歩数'],
-            ['meditation', '瞑想BGM'],
-            ['rewards', 'ショップ'],
-            ['menu', 'メニュー'],
-          ] as const).map(([target, title]) => (
-            <button key={target} type="button" onClick={() => navigate(target)}>
-              <Icon name={target} />
-              {title}
-            </button>
-          ))}
-        </nav>
-        <button className="home-progress" type="button" onClick={() => navigate('growth')}
-          aria-label={`ろきちゃん育成 Lv.${evolution.level}を開く`}>
-          <span className="home-form-avatar">{character(48)}</span>
-          <span className="home-progress-content">
-            <span className="progress-heading">
-              <strong><Icon name="growth" /> ろきちゃん Lv.{evolution.level}</strong>
-              <span>{displayForm.name} <span aria-hidden="true">›</span></span>
-            </span>
-            <span className="home-progress-caption">経験値 {evolution.currentLevelXp} / {evolution.requiredLevelXp} EXP</span>
-            <progress aria-label="経験値" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} />
-            <span className="home-progress-caption">{evolution.nextLevel ? `次の進化まで Lv.${evolution.nextLevel}` : '最終フォルムに到達！'}</span>
-          </span>
-        </button>
-        <section className="kokoro-checkin" aria-label="今日のチェックイン">
-          <div aria-label="記録の概要">累計 {days.length}日 · 連続 {streak}日 · {totalPoints} EXP</div>
-          <button type="button" onClick={checkIn} disabled={checkedIn}>{checkedIn ? 'チェックイン済み ✓' : 'チェックイン'}</button>
-        </section>
-      </>}
+      {page === 'home' && <HomePage evolution={evolution} displayForm={displayForm}
+        equipped={mature && !human ? appearance.equipped : undefined}
+        wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
+        checkinDays={days.length} onCheckIn={checkIn} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
         equipped={mature ? appearance.equipped : undefined} onBack={() => navigate('home')} />}
       {page !== 'home' && page !== 'room' && <nav className="kokoro-back-nav" aria-label="画面移動" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 74 }}>
@@ -263,7 +190,7 @@ export default function App() {
         </section>
       </>}
       {page === 'dressup' && mature && <DressUp saved={appearance} onSave={saveAppearance} rewardDays={rewardDays} />}
-      {page === 'rewards' && <RewardPanel wallet={wallet} error={walletError} />}
+      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}

@@ -488,3 +488,128 @@ button.home-progress {
   padding: 10px 12px;
   text-align: left;
 }
+
+/* Avatar home */
+.kokoro-app[data-page="home"]::before {
+  background: linear-gradient(180deg, #20173580, #20173538 45%, #201735e8),
+    url('./art/bedroom.webp') center / cover;
+}
+.avatar-home {
+  --home-panel: #493568c9;
+  --home-border: #d6c1eb73;
+  color: #fff;
+}
+.avatar-home button {
+  color: inherit;
+  border: 1px solid var(--home-border);
+  background: var(--home-panel);
+  box-shadow: none;
+}
+.avatar-home button:disabled { opacity: .55; }
+.avatar-header h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 1px 0 10px;
+  font-size: clamp(20px, 5.7vw, 29px);
+  letter-spacing: .04em;
+}
+.avatar-header h1 .kokoro-icon { width: 25px; height: 25px; color: #e7d7f5; }
+.avatar-status {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  gap: 5px;
+}
+.avatar-status button { min-width: 0; border-radius: 18px; }
+.avatar-level {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1px 5px;
+  padding: 5px 8px;
+  text-align: left;
+}
+.avatar-level strong { font-size: .9rem; }
+.avatar-level small { grid-column: 1 / -1; color: #e7d7f5; font-size: .65rem; text-align: center; }
+.avatar-home .avatar-level progress { margin: 0; height: 5px; }
+.avatar-currency {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  padding: 5px 7px;
+}
+.avatar-currency .reward-icon { width: 22px; height: 22px; flex: none; }
+.avatar-currency strong { font-size: clamp(11px, 3vw, 15px); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.avatar-plus {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  background: #e7d7f5;
+  color: #493568;
+  font-weight: 800;
+}
+.avatar-scene { position: relative; height: clamp(242px, 38svh, 330px); margin-top: 10px; }
+.avatar-center { position: absolute; inset: 0; display: grid; align-items: center; justify-items: center; }
+.avatar-center > .roki-character { width: min(280px, 70%) !important; filter: drop-shadow(0 9px 9px #1a112e50); }
+.avatar-center .kokoro-hero-art { width: 100%; height: 100%; bottom: 0; object-fit: contain; }
+.avatar-side { position: absolute; top: 2px; display: grid; gap: 6px; }
+.avatar-side-left { left: 0; }
+.avatar-side-right { right: 0; }
+.avatar-side button {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  width: 52px;
+  min-height: 49px;
+  padding: 5px 1px;
+  border-radius: 15px;
+  font-size: 10px;
+}
+.avatar-side .kokoro-icon { width: 21px; height: 21px; color: #e7d7f5; }
+.avatar-care { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.avatar-care button { display: grid; justify-items: center; align-content: center; gap: 5px; min-height: 65px; padding: 7px 2px; border-radius: 18px; font-size: clamp(10px, 3vw, 13px); font-weight: 650; }
+.avatar-care .kokoro-icon { width: 25px; height: 25px; color: #e7d7f5; }
+.avatar-growth {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 9px;
+  padding: 10px;
+  border-radius: 19px;
+  text-align: left;
+}
+.avatar-mini { display: grid; place-items: center; width: 48px; height: 48px; }
+.avatar-growth-text { min-width: 0; }
+.avatar-growth-title { display: flex; justify-content: space-between; gap: 4px; flex-wrap: wrap; }
+.avatar-growth-title strong { font-size: 15px; }
+.avatar-growth-title > span, .avatar-growth-xp, .avatar-growth-next { font-size: 11px; color: #e7d7f5; }
+.avatar-growth-xp, .avatar-growth-next { display: block; margin-top: 3px; }
+.avatar-home progress { accent-color: #b69bd8; }
+.avatar-home progress::-webkit-progress-value { background: #b69bd8; }
+.avatar-login { margin-top: 9px; padding: 9px 10px; border: 1px solid var(--home-border); border-radius: 18px; background: var(--home-panel); }
+.avatar-login-heading, .avatar-checkin { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; }
+.avatar-checkin { margin-top: 8px; }
+.avatar-checkin button { border-radius: 999px; padding: 7px 12px; background: #e7d7f5; color: #493568; font-size: 12px; font-weight: 700; }
+.avatar-bottom {
+  position: sticky;
+  bottom: max(7px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 10px;
+  padding: 5px 3px;
+  border: 1px solid var(--home-border);
+  border-radius: 20px;
+  background: #261b3ff5;
+  z-index: 3;
+}
+.avatar-bottom button { display: grid; justify-items: center; align-content: center; gap: 3px; min-height: 48px; padding: 4px 0; border: 0; border-radius: 14px; background: transparent; font-size: 10px; }
+.avatar-bottom .kokoro-icon { width: 21px; height: 21px; }
+.avatar-bottom button[aria-current="page"] { background: #70548f; }
