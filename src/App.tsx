@@ -11,6 +11,8 @@ import DressUp from './DressUp';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
+import LoginRewards from './LoginRewards';
+import { readRoom, EMPTY_ROOM, updateRoom, grantInterior, ROOM_KEY } from './interior';
 import HomePage from './HomePage';
 import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
@@ -48,6 +50,9 @@ function readSavedXp() {
 }
 
 export default function App() {
+  const [roomError, setRoomError] = useState('');
+  const [room, setRoom] = useState(() => { try { return readRoom(); } catch { return EMPTY_ROOM; } });
+  const [loginRewardsOpen, setLoginRewardsOpen] = useState(false);
   const [days, setDays] = useState<string[]>(loadCheckins);
   const [diary, setDiary] = useState<DiaryEntries>(readDiary);
   const [medication, setMedication] = useState<MedicationData>(readMedication);
@@ -140,6 +145,14 @@ export default function App() {
   const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
     [days, diary, medication, steps, meditation]);
   const { wallet, walletError } = useRewards(readSavedXp, xpEvents);
+  useEffect(() => {
+    if (walletError) return;
+    void updateRoom(s => grantInterior(s, wallet.loginDays)).then(setRoom).catch(() => setRoomError('ルームの保存情報を読み込めませんでした。既存データは保持しています。'));
+  }, [wallet.loginDays, walletError]);
+  useEffect(() => {
+    const sync = (e: StorageEvent) => { if(e.key === ROOM_KEY) {try {setRoom(readRoom());} catch {setRoomError('ルーム情報を読み込めません。');}} };
+    window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync);
+  }, []);
   const recordDays = countRecordDays(today, days, diary, medication, steps, meditation);
   const rewardDays = Math.max(recordDays, appearance.rewardDays ?? 0);
   const checkedIn = days.includes(today);
@@ -180,12 +193,12 @@ export default function App() {
 
   return (
     <main className="kokoro-app" data-page={page}>
-      {page === 'home' && <HomePage evolution={evolution} displayForm={displayForm}
+      {page === 'home' && <HomePage onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm}
         equipped={mature && !human ? appearance.equipped : undefined}
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={days.length} onCheckIn={checkIn} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={evolution.form}
-        equipped={mature ? appearance.equipped : undefined} />}
+        equipped={mature ? appearance.equipped : undefined} room={room} onChange={setRoom} onRewards={() => setLoginRewardsOpen(true)} />}
       {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
@@ -236,6 +249,8 @@ export default function App() {
       {page === 'invite' && <AppInvite />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
       {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
+      {roomError && <p role="alert">{roomError}</p>}
+      {loginRewardsOpen && <LoginRewards days={wallet.loginDays} room={room} onClose={() => setLoginRewardsOpen(false)} />}
       <BottomNavigation page={page} onNavigate={navigate} />
       {pendingPage && <div className="navigation-dialog-backdrop">
         <section role="dialog" aria-modal="true" aria-labelledby="unsaved-title" className="navigation-dialog">

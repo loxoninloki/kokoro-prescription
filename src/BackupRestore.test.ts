@@ -68,3 +68,10 @@ describe('バックアップ復元', () => {
     }
   });
 });
+
+test('ルーム・報酬台帳をバックアップから復元できる', () => {
+ const base={version:1,exportedAt:new Date().toISOString(),checkins:[],diary:{},medication:{medicines:[],taken:{}},steps:{},meditation:{},room:{version:1,layout:{wallpaper:'wall-basic'},ownedItemIds:['wall-basic'],claimedRewardIds:['interior-day-1'],selectedFormId:'tablet',updatedAt:''},rewards:{version:1,earned:35,spent:0,tickets:1,loginDays:7,lastLoginDate:'2026-11-07',creditedXp:{},ownedItemIds:[]}};
+ const parsed=parseBackup(JSON.stringify(base));restoreBackup(parsed);
+ expect(JSON.parse(localStorage.getItem('kokoro-room-v1')!).layout.wallpaper).toBe('wall-basic');
+ expect(JSON.parse(localStorage.getItem('kokoro-rewards-v1')!).loginDays).toBe(7);
+});

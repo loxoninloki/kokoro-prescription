@@ -1,3 +1,5 @@
+import { ROOM_KEY, parseRoom } from './interior';
+import { REWARD_KEY, parseRewards } from './rewardLedger';
 import { APPEARANCE_KEY, parseAppearance, readAppearance } from './appearance';
 import type { BackupData } from './BackupExport';
 
@@ -45,6 +47,8 @@ export function parseBackup(text: string): BackupData {
       /^\d{4}-\d{2}-\d{2}\|[^|]+$/.test(key) && value === true)) {
     throw new Error('服薬チェックの情報が不正です。');
   }
+  if (raw.room !== undefined) raw.room = parseRoom(raw.room);
+  if (raw.rewards !== undefined) raw.rewards = parseRewards(raw.rewards);
   const backup = raw as unknown as BackupData;
   return raw.appearance === undefined ? backup : { ...backup, appearance: parseAppearance(raw.appearance) };
 }
@@ -57,6 +61,8 @@ export function restoreBackup(backup: BackupData): void {
     const rewardDays = Math.max(backup.appearance.rewardDays ?? 0, readAppearance().rewardDays ?? 0);
     values.push(rewardDays ? { ...backup.appearance, rewardDays } : backup.appearance);
   }
+  if (backup.room !== undefined) { keys.push(ROOM_KEY); values.push(parseRoom(backup.room)); }
+  if (backup.rewards !== undefined) { keys.push(REWARD_KEY); values.push(parseRewards(backup.rewards)); }
   let previous: Array<string | null>;
   try {
     previous = keys.map(key => localStorage.getItem(key));

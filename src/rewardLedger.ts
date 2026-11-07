@@ -58,7 +58,11 @@ const isCount = (value: unknown): value is number =>
 export function readRewards(): RewardState {
   const raw = localStorage.getItem(REWARD_KEY);
   if (raw === null) return EMPTY_REWARDS;
-  const value: Partial<RewardState> | null = JSON.parse(raw);
+  return parseRewards(JSON.parse(raw));
+}
+
+export function parseRewards(raw: unknown): RewardState {
+  const value = raw as Partial<RewardState> | null;
   if (!value || value.version !== 1 || !isCount(value.earned) || !isCount(value.spent) ||
       value.spent > value.earned || !isCount(value.tickets) || !isCount(value.loginDays) ||
       value.tickets > Math.floor(value.loginDays / LOGIN_DAYS_PER_TICKET) ||

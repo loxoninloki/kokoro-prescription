@@ -1,3 +1,5 @@
+import { RoomState, readRoom } from './interior';
+import { RewardState, readRewards } from './rewardLedger';
 import { Icon } from './Icon';
 import React, { useState } from 'react';
 import type { Appearance } from './appearance';
@@ -15,6 +17,8 @@ export interface BackupData {
   medication: MedicationData;
   steps: StepEntries;
   meditation: MeditationEntries;
+  room?: RoomState;
+  rewards?: RewardState;
   appearance?: Appearance;
 }
 
@@ -37,6 +41,8 @@ export function makeBackup(data: Props): BackupData {
     steps: data.steps,
     meditation: data.meditation,
     appearance: data.appearance,
+    room: readRoom(),
+    rewards: readRewards(),
   };
 }
 
@@ -81,7 +87,7 @@ export default function BackupExport(data: Props) {
   };
   return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f7f3ff' }}>
     <h2><Icon name="backup" /> 記録のバックアップ</h2>
-    <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録とコーデをJSONファイルに書き出します。</p>
+    <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録、コーデ、ルーム、累積ログイン報酬をJSONファイルに書き出します。</p>
     <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
     <label style={{ display: 'block', marginTop: 18 }}>
       バックアップから復元

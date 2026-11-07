@@ -9,6 +9,7 @@ import { RewardIcon } from './RewardPanel';
 type Evolution = ReturnType<typeof evolutionFromXp>;
 type Destination = 'home' | 'room' | 'diary' | 'medication' | 'steps' | 'meditation' | 'growth' | 'dressup' | 'rewards' | 'gacha' | 'menu';
 interface Props {
+  onLoginRewards: () => void;
   evolution: Evolution;
   displayForm: { name: string; image: string };
   equipped?: string[];
@@ -25,7 +26,7 @@ const careActions = [
   ['diary', '気分・日記'], ['medication', 'お薬'], ['steps', '歩数'], ['meditation', '瞑想BGM'],
 ] as const;
 
-export default function HomePage({ evolution, displayForm, equipped, wallet, walletError,
+export default function HomePage({ onLoginRewards, evolution, displayForm, equipped, wallet, walletError,
   totalPoints, checkedIn, checkinDays, onCheckIn, onNavigate }: Props) {
   const [scene, setScene] = useState<'avatar' | 'illustration'>('avatar');
   const remainingXp = evolution.requiredLevelXp - evolution.currentLevelXp;
@@ -75,7 +76,7 @@ export default function HomePage({ evolution, displayForm, equipped, wallet, wal
         <GrowthSummaryCard {...{ evolution, displayForm, equipped, onNavigate }} />
         <TicketProgressCard {...{ wallet, walletError }} />
       </div>
-      <CheckInCompactCard {...{ checkinDays, totalPoints, checkedIn, onCheckIn }} />
+      <CheckInCompactCard {...{ checkinDays, totalPoints, checkedIn, onCheckIn }} /><button className="login-reward-link" type="button" onClick={onLoginRewards}>累積ログイン報酬を見る</button>
     </section>
 
 
