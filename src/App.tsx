@@ -14,7 +14,7 @@ import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
 import LoginRewards from './LoginRewards';
-import { readRoom, EMPTY_ROOM, ROOM_KEY } from './interior';
+import { readRoom, EMPTY_ROOM, ROOM_KEY, updateRoom, INTERIOR_ITEMS } from './interior';
 import HomePage from './HomePage';
 import BottomNavigation from './BottomNavigation';
 import RewardPanel from './RewardPanel';
@@ -60,10 +60,20 @@ export default function App() {
   const [pendingPage, setPendingPage] = useState<Page | null>(null);
   const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
     [days, diary, medication, steps, meditation]);
-  const { wallet, walletError, stampDay, receipt, clearStamp } = useRewards(readSavedXp, xpEvents, (nextDays, nextRoom) => {
+  const { wallet, walletError, setWallet, stampDay, receipt, clearStamp } = useRewards(readSavedXp, xpEvents, (nextDays, nextRoom) => {
     setDays(previous => JSON.stringify(previous) === JSON.stringify(nextDays) ? previous : nextDays);
     setRoom(nextRoom);
   });
+  // Gacha furniture is recorded in the reward ledger and mirrored into room ownership.
+  // Reconciliation also repairs an interrupted previous write without duplicating a draw.
+  useEffect(() => {
+    const acquired = wallet.ownedItemIds.filter(id => INTERIOR_ITEMS.some(item => item.id === id));
+    if (!acquired.length || acquired.every(id => room.ownedItemIds.includes(id))) return;
+    void updateRoom(current => ({
+      ...current,
+      ownedItemIds: Array.from(new Set([...current.ownedItemIds, ...acquired])),
+    })).then(setRoom).catch(() => setRoomError('獲得した家具をルームに同期できませんでした。再読み込みしてください。'));
+  }, [wallet.ownedItemIds, room.ownedItemIds]);
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication, wallet.medicationPolicy ?? makeMedicationPolicy(medication,wallet.creditedXp,today), wallet.creditedXp) + stepsExperience(steps) + meditationExperience(meditation);
   const evolution = evolutionFromXp(totalPoints);
   const displayForm = selectedForm(appearance,evolution.level,room.selectedFormId);
@@ -223,7 +233,7 @@ export default function App() {
         </details>
       </>}
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
-      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
+      {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} section={page === 'gacha' ? 'gacha' : 'shop'} roomOwnedItemIds={room.ownedItemIds} onWalletChange={setWallet} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
       {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
