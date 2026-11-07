@@ -11,13 +11,9 @@ import InteriorIcon from './InteriorIcon';
  */
 function GarmentArt({ item }: { item: DressUpItem }) {
   const [failed, setFailed] = React.useState<string[]>([]);
-  const effects = item.category === 'effects';
   const visible = item.layers.filter(layer => !failed.includes(layer.image));
   return <span className={`gacha-item-art gacha-item-art--${item.category}`}
     role="img" aria-label={item.name}>
-    {effects && <span className="gacha-item-art-symbol" aria-hidden="true">
-      {item.id === 'lavender-bloom' ? '✿' : item.id === 'moon-sparkles' ? '☾' : '✦'}
-    </span>}
     {visible.map((layer, index) =>
       <img key={layer.image} className="gacha-item-art-layer"
         src={`${process.env.PUBLIC_URL}/${layer.image}`} alt=""
@@ -26,7 +22,7 @@ function GarmentArt({ item }: { item: DressUpItem }) {
         onError={() => setFailed(old => [...old, layer.image])}/>
     )}
     {!visible.length && <span className="gacha-art-fallback" aria-hidden="true">
-      {effects ? '✦' : '◇'}
+      画像を読み込めませんでした
     </span>}
   </span>;
 }

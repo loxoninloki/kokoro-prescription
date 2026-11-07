@@ -63,7 +63,8 @@ function GachaBanner({ gacha, onOpen, onLineup }: {
   </article>;
 }
 
-export default function RewardPanel({ wallet, error, testMode = false, section, roomOwnedItemIds, onWalletChange, previewForm, previewEquipment, roomLayout }: {
+export default function RewardPanel({ wallet, error, testMode = false, section, roomOwnedItemIds, onWalletChange, previewForm, previewEquipment, roomLayout, onEquip }: {
+  onEquip?: (itemId:string,formId:FormId)=>Promise<void>;
   wallet: RewardState;
   error: boolean;
   testMode?: boolean;
@@ -80,7 +81,10 @@ export default function RewardPanel({ wallet, error, testMode = false, section, 
   const [previewId, setPreviewId] = React.useState<string | null>(null);
   const [tryingOn, setTryingOn] = React.useState(false);
   const [trialApplied, setTrialApplied] = React.useState(true);
-  const closePreview = () => { setPreviewId(null); setTryingOn(false); setTrialApplied(true); };
+  const [wearing,setWearing]=React.useState(false),[wearMessage,setWearMessage]=React.useState('');
+  const wearLock=React.useRef(false);
+  const wearPreview=async()=>{if(wearLock.current||testMode||!previewId||!onEquip)return;wearLock.current=true;setWearing(true);setWearMessage('');try{await onEquip(previewId,previewForm.id);setWearMessage('着用しました！');}catch(reason){setWearMessage(reason instanceof Error?reason.message:'コーデを保存できませんでした。');}finally{wearLock.current=false;setWearing(false);}};
+  const closePreview = () => { setPreviewId(null); setTryingOn(false); setTrialApplied(true); setWearMessage(''); };
   const [busy, setBusy] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const restored=section==='gacha'?wallet.pendingGachaResult:undefined;
@@ -167,7 +171,7 @@ export default function RewardPanel({ wallet, error, testMode = false, section, 
     {error ? <p role="alert">報酬データを読み込めないため、抽選は利用できません。</p> : <>
       {testMode && <p className="gacha-test-notice" role="status">🧪 テストモード：通貨・獲得アイテムは仮のものです。実際の所持品には反映されません。</p>}
       <RewardBalances wallet={wallet} />
-      {section==='gacha'&&<div className="gacha-sound-setting"><button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={toggleSound}>効果音 {soundOn?'ON':'OFF'}</button><small>小さな音で再生します。初期設定はOFF。</small>{soundMessage&&<span role="status">{soundMessage}</span>}</div>}
+      {section==='gacha'&&<div className="gacha-sound-setting"><button className="gacha-sound-toggle" type="button" aria-pressed={soundOn} onClick={toggleSound}>BGM・効果音 {soundOn?'ON':'OFF'}</button><small>小さな音で再生します。初期設定はOFF。</small>{soundMessage&&<span role="status">{soundMessage}</span>}</div>}
       {section === 'gacha' ? !selected || view === 'catalog' ? <>
         <p className="gacha-help">今日はどれにしよう？ 気になるガチャを選んでください。ラインナップは引く前に確認できます。</p>
         <div className="gacha-catalog-scroll" role="region" aria-label="ガチャ一覧（縦スクロール）" tabIndex={0}>
@@ -241,11 +245,11 @@ export default function RewardPanel({ wallet, error, testMode = false, section, 
             setView('draw'); setPreviewId(null); setMessage('');
           }}>このガチャを選ぶ ›</button>
         </section>
-        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={closePreview}>
+        {previewId && <div className="gacha-confirm-backdrop" role="presentation" onClick={()=>{if(!wearing)closePreview();}}>
           <div className="gacha-confirm gacha-item-preview" role="dialog" aria-modal="true"
             aria-label={gachaItemName(previewId) + (tryingOn ? 'のお試しプレビュー' : 'のプレビュー')}
             onClick={event => event.stopPropagation()}>
-            <button type="button" className="gacha-confirm-close" aria-label="閉じる" onClick={closePreview}>×</button>
+            <button type="button" className="gacha-confirm-close" aria-label="閉じる" disabled={wearing} onClick={closePreview}>×</button>
             {!tryingOn ? <>
               <div className="gacha-prize-art"><PrizeArt id={previewId}/></div>
               <h2>{gachaItemName(previewId)}</h2>
@@ -256,18 +260,21 @@ export default function RewardPanel({ wallet, error, testMode = false, section, 
                 <p className="gacha-tryon-unsupported">現在のろきちゃんの姿では試着できません。対応するフォルムに進化すると試せます。</p>}
               <button type="button" className="gacha-preview-close" onClick={closePreview}>ラインナップに戻る</button>
             </> : <>
-              <span className="gacha-tryon-badge">{trialApplied ? 'お試し中 · 保存されません' : '元の状態'}</span>
+              <span className="gacha-tryon-badge">{wearMessage==='着用しました！'?'保存したコーデ':trialApplied ? 'お試し中 · 保存されません' : '元の状態'}</span>
               <h2>{gachaItemName(previewId)}</h2>
               <GachaTryOn itemId={previewId} form={previewForm} equipped={previewEquipment}
                 roomLayout={roomLayout} applied={trialApplied}/>
-              <p className="gacha-tryon-notice">未所持でも試せます。コーデやルーム、通貨・所持品は変更されません。</p>
+              <p className="gacha-tryon-notice">{wearMessage==='着用しました！'?'現在のフォルムのコーデに保存しました。':'未所持でも試せます。着用を保存するまでコーデやルームは変更されません。'}</p>
               <div className="gacha-tryon-actions">
-                <button type="button" onClick={() => setTrialApplied(current => !current)}>
+                <button type="button" disabled={wearing} onClick={() => setTrialApplied(current => !current)}>
                   {trialApplied ? '元に戻す' : 'もう一度お試し'}
                 </button>
-                <button type="button" onClick={() => { setTryingOn(false); setTrialApplied(true); }}>アイテム詳細に戻る</button>
+                <button type="button" disabled={wearing} onClick={() => { setTryingOn(false); setTrialApplied(true); }}>アイテム詳細に戻る</button>
+                {!testMode&&owned.includes(previewId)&&!isInteriorPrize(previewId)&&canTryOn(previewId,previewForm.id)&&onEquip&&<button type="button" className="gacha-wear" disabled={wearing||!trialApplied||wearMessage==='着用しました！'} onClick={()=>void wearPreview()}>{wearing?'保存中…':wearMessage==='着用しました！'?'着用済み':'このまま着用する'}</button>}
               </div>
-              <button type="button" className="gacha-preview-close" onClick={closePreview}>ラインナップに戻る</button>
+              {testMode&&<p className="gacha-tryon-notice">仮着用です。テスト中は保存できません。</p>}
+              {wearMessage&&<p role="status">{wearMessage}</p>}
+              <button type="button" disabled={wearing} className="gacha-preview-close" onClick={closePreview}>ラインナップに戻る</button>
             </>}
           </div>
         </div>}
@@ -280,7 +287,7 @@ export default function RewardPanel({ wallet, error, testMode = false, section, 
       </>}
     </>}
     {drawResult&&gachaReveal==='playing'&&<GachaDrawSequence key={drawResult.id} drawId={drawResult.id} rarity={gachaRarity(drawResult.itemId)} audio={getAudio()} soundOn={soundOn} onSoundChange={toggleSound} onComplete={()=>setGachaReveal('revealed')}/>}
-    {drawResult&&gachaReveal==='revealed'&&<GachaRewardModal itemId={drawResult.itemId} testMode={testMode} form={previewForm} equipped={previewEquipment} roomLayout={roomLayout} busy={busy} error={resultError} onClose={()=>void closeResult()}/>}
+    {drawResult&&gachaReveal==='revealed'&&<GachaRewardModal itemId={drawResult.itemId} ownedItemIds={wallet.ownedItemIds} onEquip={onEquip} testMode={testMode} form={previewForm} equipped={previewEquipment} roomLayout={roomLayout} busy={busy} error={resultError} onClose={()=>void closeResult()}/>}
     {(section === 'shop' || view === 'catalog') && <details className="gacha-owned">
       <summary>所持アイテム（{owned.length}種類）</summary>
       {owned.length ? <ul>{owned.map(id => <li key={id}>{gachaItemName(id)}</li>)}</ul> : <p>獲得したアイテムはここに表示されます。</p>}
