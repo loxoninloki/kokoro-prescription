@@ -5,6 +5,7 @@ import WardrobeIcon from './WardrobeIcon';
 import GachaPrizeArt from './GachaPrizeArt';
 import { FIRST_GIFT_IDS } from './formFirstGifts';
 import { isChibiGachaItem } from './chibiGachaCatalog';
+import { itemQuantity } from './rewardLedger';
 
 const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
   { name: 'ファッション', icon: 'tops', categories: ['tops', 'bottoms', 'shoes'] },
@@ -14,13 +15,14 @@ const GROUPS: { name: string; icon: Category; categories: Category[] }[] = [
   { name: 'エフェクト', icon: 'effects', categories: ['effects'] },
 ];
 
-export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ownedItemIds, form }: {
+export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ownedItemIds, itemCounts, form }: {
   form: {id:FormId;name:string;image:string};
   saved: Appearance;
   draft: Appearance;
   setDraft: React.Dispatch<React.SetStateAction<Appearance>>;
   rewardDays: number;
   ownedItemIds: string[];
+  itemCounts?: Record<string,number>;
   onSave: (appearance: Appearance) => boolean;
 }) {
   const [group, setGroup] = useState(4);
@@ -65,8 +67,8 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
             }}>
             <span className="coordinate-thumbnail"><GachaPrizeArt id={item.id}/>
               {selected && <span className="coordinate-check" aria-hidden="true">✓</span>}</span>
-            <span className="coordinate-item-name">{item.name}</span>
-            <small>{unsupported ? FIRST_GIFT_IDS.includes(item.id)?'別フォルムの記念エフェクト':'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? FIRST_GIFT_IDS.includes(item.id)?'初回フォルム選択で獲得':isChibiGachaItem(item.id)?'ファッションガチャで獲得':`累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
+            <span className="coordinate-item-name">{item.name}{owned(item) && ` ×${itemQuantity({ownedItemIds,itemCounts},item.id) || 1}`}</span>
+            <small>{unsupported ? FIRST_GIFT_IDS.includes(item.id)?'別フォルムの記念エフェクト':'このフォルムは非対応（位置合わせ素材待ち）' : !owned(item) ? FIRST_GIFT_IDS.includes(item.id)?'レベル到達のプレゼントで獲得':isChibiGachaItem(item.id)?'コーデガチャで獲得':`累計${rewardDays}/${item.requiredRecordDays}日` : selected ? '選択中 ✓' : '所持済み'}{equipped && <b>保存中の装備</b>}</small>
           </button>;
         })}</div>}
     </div>
