@@ -1492,3 +1492,82 @@ button.home-progress {
 .form-gift-art{display:grid;place-items:center;margin:10px auto;width:150px;max-width:65%;aspect-ratio:1;border:2px solid #dfbceb;border-radius:24px;background:radial-gradient(circle,#fffaff,#eed7fa)}
 .form-gift-art img{width:94%;height:94%;object-fit:contain}
 .form-gift-dialog button{width:100%;min-height:48px;margin-top:10px;border:0;border-radius:15px;background:#8657ab;color:#fff;font:inherit;font-weight:750}
+
+/* Compact self-care: daily actions first, secondary information on demand. */
+.selfcare-page.care-compact .care-heading {padding:10px 14px;margin-bottom:8px;border-radius:17px;backdrop-filter:none}
+.selfcare-page.care-compact .care-heading h1 {font-size:21px;line-height:1.3;margin:0}
+.selfcare-page.care-compact .care-heading .kokoro-icon {width:23px;height:23px}
+.selfcare-page.care-compact .care-heading :is(.care-eyebrow,p) {display:none}
+.selfcare-page.care-compact .care-card {padding:12px;margin:8px 0;border-radius:18px;backdrop-filter:none}
+.selfcare-page.care-compact .care-section-title {margin-bottom:8px;gap:6px;min-height:24px}
+.kokoro-app .selfcare-page.care-compact .care-section-title h2 {font-size:15px}
+.selfcare-page.care-compact .care-section-title:before {height:16px;width:4px}
+.selfcare-page.care-compact .care-segment {margin:6px 0;padding:3px;border-radius:14px}
+.selfcare-page.care-compact .care-segment button {padding:6px 4px;font-size:14px}
+.selfcare-page.care-compact .care-date-label {margin:0;font-size:12px;gap:7px}
+.selfcare-page.care-compact .care-date-label input {padding:8px;max-width:157px}
+.care-diary-date {display:flex;align-items:center;justify-content:space-between;gap:6px}
+.care-saved-mood {font-size:12px;color:#7754a8;white-space:nowrap}
+.selfcare-page.care-compact .care-moods {margin:6px 0 8px;gap:4px}
+.selfcare-page.care-compact .care-moods button {min-height:62px;padding:4px 1px;border-radius:12px;font-size:11px}
+.selfcare-page.care-compact .care-moods .mood-icon {width:24px;height:24px}
+.selfcare-page.care-compact .care-field {font-size:13px;margin:6px 0 5px}
+.selfcare-page.care-compact textarea {min-height:96px;height:100px;padding:9px 11px;line-height:1.55;border-radius:13px}
+.selfcare-page.care-compact .care-input-meta {margin:4px 0 7px;font-size:11px;line-height:1.4}
+.selfcare-page.care-compact .care-primary {min-height:44px;padding:8px 13px;border-radius:13px}
+.selfcare-page.care-compact .care-saved {font-size:13px;line-height:1.5;margin:7px 0 0;color:#684987}
+.selfcare-page.care-compact .care-disclosure {margin:7px 0;border:1px solid #e3d3ef;border-radius:15px;background:#f6f0fbe8;color:#65477f;overflow:visible}
+.selfcare-page.care-compact .care-disclosure>summary {min-height:44px;padding:10px 12px;font-size:13px;line-height:1.7;font-weight:600}
+.selfcare-page.care-compact .care-disclosure>.care-card {margin:0;border:0;box-shadow:none;background:transparent;padding-top:5px}
+.selfcare-page.care-compact .care-inline-disclosure>summary {min-height:44px;padding:9px 2px;font-size:12px;line-height:1.8}
+.selfcare-page.care-compact .care-prompt-chips {margin:0 0 5px}
+.selfcare-page.care-compact .care-disclosure-body {padding:0 12px 10px;font-size:13px;line-height:1.7}
+.selfcare-page.care-compact .care-step-hero {gap:8px 12px;align-items:center}
+.selfcare-page.care-compact .care-step-hero .care-ring {width:96px;margin:0}
+.selfcare-page.care-compact .care-ring>div {gap:2px}
+.selfcare-page.care-compact .care-ring>div>.kokoro-icon {width:18px;height:18px}
+.selfcare-page.care-compact .care-ring>div>span {font-size:11px}
+.selfcare-page.care-compact .care-ring>div>small {font-size:10px}
+.selfcare-page.care-compact .care-step-number {font-size:26px;line-height:1.2}
+.selfcare-page.care-compact .care-step-number[data-long=true] {font-size:20px}
+.selfcare-page.care-compact .care-step-number small {font-size:11px}
+.selfcare-page.care-compact .care-step-message {min-width:100px;font-size:13px;line-height:1.6}
+.selfcare-page.care-compact .care-step-message .care-badge {display:none}
+.selfcare-page.care-compact .care-step-message p {margin:3px 0}
+.selfcare-page.care-compact .care-step-message .care-help {font-size:12px;line-height:1.5}
+.care-shortcut-button {display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;border:1px solid #c5b3d3;border-radius:12px;background:#faf7ff;color:#684987;text-decoration:none;font-size:14px;padding:8px}
+.care-chart-toolbar {display:flex;align-items:center;gap:4px;margin:4px 0}
+.care-chart-toolbar>button {min-width:44px;min-height:44px;flex-shrink:0;border:0;background:#fff9;color:#7754a8;font-size:24px;border-radius:12px;padding:3px}
+.care-chart-toolbar>strong {min-width:0;flex:1;text-align:center;font-size:12px;line-height:1.4}
+.selfcare-page .care-chart-toolbar>select {min-width:0;width:83px;padding:5px;font-size:13px!important;min-height:44px;flex-shrink:0}
+.selfcare-page.care-compact .care-week-chart {padding:4px 0;gap:3px}
+.selfcare-page.care-compact .care-week-chart button {gap:3px;padding:3px 0;border-radius:10px}
+.selfcare-page.care-compact .care-week-bar-track {height:54px}
+.selfcare-page.care-compact .care-week-chart strong {font-size:11px}
+.selfcare-page.care-compact .care-week-chart small {font-size:10px}
+.care-chart-key {font-size:11px;line-height:1.5;color:#79658b;margin:4px 0 0}
+.care-next-compact .care-next-medicine {gap:8px;flex-wrap:nowrap}
+.care-next-compact .care-capsule {width:32px;height:32px;flex-shrink:0}
+.care-next-compact .care-capsule .kokoro-icon {width:21px;height:21px}
+.care-next-compact .care-next-medicine>div {display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 8px;min-width:0;align-items:center}
+.care-next-compact .care-next-medicine>div>span {grid-column:1/-1;font-size:11px}
+.care-next-compact .care-next-medicine strong {font-size:22px;line-height:1.3}
+.care-next-compact .care-next-medicine p {margin:0;font-size:13px;line-height:1.4}
+.care-next-compact .care-countdown {padding:6px;max-width:78px;flex-shrink:0;font-size:11px;text-align:center}
+.selfcare-page.care-compact .care-next-compact .care-empty {padding:3px;margin:0;font-size:13px}
+.selfcare-page.care-compact .care-medicine-timeline {margin:7px 0 0}
+.selfcare-page.care-compact .care-medicine-timeline .medication-dose {margin:6px 0;padding:7px 8px;gap:8px;border-radius:13px;align-items:center}
+.selfcare-page.care-compact .care-medicine-timeline time {min-width:46px;padding:0;font-size:16px}
+.selfcare-page.care-compact .care-medicine-timeline li>div {display:flex;gap:5px;align-items:center}
+.selfcare-page.care-compact .care-medicine-timeline label {flex:1;gap:7px}
+.selfcare-page.care-compact .care-medicine-timeline label strong {font-size:13px;line-height:1.4}
+.selfcare-page.care-compact .care-medicine-timeline label small {font-size:11px;margin-top:1px}
+.care-dose-menu {position:relative;flex-shrink:0}
+.selfcare-page .care-dose-menu>summary {display:flex;justify-content:center;align-items:center;width:44px;min-height:44px;padding:0;list-style:none;border:1px solid #e0d1eb;border-radius:10px;font-size:22px;color:#7754a8}
+.care-dose-menu>summary::-webkit-details-marker {display:none}
+.care-dose-menu>div {position:absolute;right:0;top:48px;width:160px;z-index:4;padding:5px;border:1px solid #ccb5df;background:#faf7ff;border-radius:12px;box-shadow:0 5px 15px #46345725}
+.selfcare-page .care-dose-menu>div>button {display:block;width:100%;text-align:left;min-height:44px;padding:8px;text-decoration:none;font-size:13px}
+.care-bonus-compact {margin:6px 0;font-size:12px;color:#e9ddf5;line-height:1.5}
+.selfcare-page.care-compact+p {display:none}
+@media(max-width:365px) {.care-diary-date .care-saved-mood{display:none}.selfcare-page .care-chart-toolbar>select{width:76px;font-size:12px!important}.care-chart-toolbar>strong{font-size:11px}.selfcare-page.care-compact .care-moods button{font-size:10px}}
+@media(max-height:650px) {.selfcare-page.care-compact textarea{height:88px;min-height:88px}.selfcare-page.care-compact .care-moods button{min-height:58px}.selfcare-page.care-compact .care-week-bar-track{height:46px}}

@@ -1,7 +1,7 @@
 import { MEDICATION_DAILY_XP, medicationTotalXp, MedicationRewardPolicy } from './medicationPolicy';
 import { Icon } from './Icon';
-import {CareHeading,CareSection,CareRing} from './SelfcareUI';
-import {displayDay,nextMedicine} from './selfcareView';
+import {CareHeading,CareSection} from './SelfcareUI';
+import {nextMedicine} from './selfcareView';
 import React, { useEffect, useRef, useState } from 'react';
 
 export interface Medicine { id: string; name: string; time: string; archived?: boolean }
@@ -92,29 +92,27 @@ export default function MedicationTracker({ data, setData, today, bonusEarned=fa
     setData(previous => ({ ...previous, medicines: previous.medicines.map(m => m.id === id ? { ...m, archived: true } : m) }));
   };
 
-  return <section className="selfcare-page medication-care" aria-label="お薬">
+  return <section className="selfcare-page medication-care care-compact" aria-label="お薬">
     <CareHeading icon="medication" title="お薬" note="記録できたことを、ひとつずつ。"/>
-    <CareSection title="次のお薬の予定">
+    <div className="care-card care-next-compact" aria-label="次のお薬の予定">
       {upcoming?<div className="care-next-medicine"><span className="care-capsule"><Icon name="medication"/></span><div><span>{upcoming.tomorrow?'明日の登録時刻':'本日の登録時刻'}</span><strong>{upcoming.medicine.time}</strong><p>{upcoming.medicine.name}</p></div><span className="care-countdown">{remaining}</span></div>:<p className="care-empty">予定はまだありません。登録したお薬の時刻がここに表示されます。</p>}
-      <p className="care-help">処方されたお薬と時刻を登録できます。服薬量や時刻は医師・薬剤師の指示に従ってください。</p>
-    </CareSection>
-    <CareSection title={selectedDate===today?'今日のお薬タイムライン':'選択日のお薬タイムライン'}>
+    </div>
+    <CareSection title={selectedDate===today?'今日のお薬':'選択日のお薬'} action={<span className="care-badge">{recorded}/{active.length}件 記録済み</span>}>
       <label className="care-date-label">記録する日付<input type="date" value={selectedDate} max={today} min="2000-01-01" onChange={e=>{if(e.target.value)setSelectedDate(e.target.value);}}/></label>
-      <p className="care-help">{displayDay(selectedDate,true)} · チェックはアプリへの記録状態です。</p>
+
       {!active.length?<p className="care-empty">お薬はまだ登録されていません。</p>:<ul className="care-medicine-timeline">{active.map(m=>{
         const checked=!!data.taken[doseKey(selectedDate,m.id)];
-        return <li key={m.id} className="medication-dose" data-taken={checked}><time>{m.time}</time><div><label><input type="checkbox" checked={checked} disabled={selectedDate>today} onChange={()=>toggleTaken(m.id)} aria-label={`${m.time} ${m.name}の服薬記録`}/><span><strong>{m.name}</strong><small>{checked?'記録済み ✓':'未記録'}</small></span></label><div className="care-dose-actions"><button type="button" onClick={()=>{setEditingId(m.id);setName(m.name);setTime(m.time);nameInput.current?.focus();nameInput.current?.scrollIntoView?.({block:'center'});}}>編集</button><button type="button" onClick={()=>removeMedicine(m.id)}>一覧から非表示</button></div></div></li>;
+        return <li key={m.id} className="medication-dose" data-taken={checked}><time>{m.time}</time><div><label><input type="checkbox" checked={checked} disabled={selectedDate>today} onChange={()=>toggleTaken(m.id)} aria-label={`${m.time} ${m.name}の服薬記録`}/><span><strong>{m.name}</strong><small>{checked?'記録済み ✓':'未記録'}</small></span></label><div className="care-dose-actions"><details className="care-dose-menu"><summary aria-label={`${m.name}の管理`}>⋯</summary><div><button type="button" onClick={()=>{setEditingId(m.id);setName(m.name);setTime(m.time);window.requestAnimationFrame(()=>{nameInput.current?.focus();nameInput.current?.scrollIntoView?.({block:'center'});});}}>編集</button><button type="button" onClick={()=>removeMedicine(m.id)}>一覧から非表示</button></div></details></div></div></li>;
       })}</ul>}
     </CareSection>
-    <CareSection title={selectedDate===today?'今日の服薬記録':'選択日の服薬記録'}>
-      <div className="care-medication-progress"><CareRing value={recorded} max={active.length||1} label={`服薬記録 ${recorded}件／登録済み予定 ${active.length}件`}><Icon name="medication"/><strong>{active.length?Math.round(100*recorded/active.length):0}<small>%</small></strong></CareRing><div><span>記録済み / 登録済み予定</span><strong>{recorded}<small> / {active.length}件</small></strong><p>未チェックは「未記録」です。服用していないとは限りません。</p></div></div>
-      <p className="medication-reward-explanation">服薬を記録すると、1日最大10 EXP＋10マカロンを獲得できます。お薬の種類や回数によって報酬は増えません。</p>
-      {bonusEarned&&<p role="status" className="medication-bonus-earned">今日の服薬記録ボーナスは獲得済みです ✓</p>}
-    </CareSection>
+    {bonusEarned&&<p className="care-bonus-compact" role="status">今日の服薬記録ボーナスは獲得済み ✓</p>}
+    <details className="care-disclosure care-medicine-editor" open={editingId!==null||undefined}><summary>お薬の登録・編集</summary>
     <CareSection title={editingId?'お薬の登録内容を編集':'お薬を登録'}>
       <form className="care-form" onSubmit={addMedicine}><label>お薬の名前<input ref={nameInput} required maxLength={80} value={name} onChange={e=>setName(e.target.value)} placeholder="登録するお薬の名前"/></label><label>服薬予定時刻<input required type="time" value={time} onChange={e=>setTime(e.target.value)}/></label><button className="care-primary" type="submit">{editingId?'登録内容を保存':'お薬を登録'}</button>{editingId&&<button className="care-secondary" type="button" onClick={()=>{setEditingId(null);setName('');}}>編集をやめる</button>}</form>
       <p className="care-help">チェックは服薬した事実の記録です。通知機能ではありません。経験値のために余分に服用しないでください。</p>
     </CareSection>
+    </details>
+    <details className="care-disclosure"><summary>記録・報酬について</summary><div className="care-disclosure-body"><p>未チェックは「未記録」です。服用していないとは限りません。</p><p className="medication-reward-explanation">服薬を記録すると、1日最大10 EXP＋10マカロンを獲得できます。お薬の種類や回数によって報酬は増えません。</p><p>服薬量や時刻は医師・薬剤師の指示に従ってください。</p></div></details>
     {storageError&&<p role="alert">端末に保存できませんでした。空き容量やブラウザの設定をご確認ください。</p>}
   </section>;
 }

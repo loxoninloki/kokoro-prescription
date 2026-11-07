@@ -107,30 +107,26 @@ export default function DiaryCalendar({ entries, setEntries, checkins, today, st
     setSaved(true);
   };
 
-  return <section className="selfcare-page diary-care" data-view={view} aria-label={view==='diary'?'日記':'カレンダー'}>
+  return <section className={'selfcare-page diary-care'+(view==='diary'?' care-compact':'')} data-view={view} aria-label={view==='diary'?'日記':'カレンダー'}>
     <CareHeading icon="diary" title={view==='diary'?'日記':'カレンダー'} note="小さな気持ちも、あなたの大切な記録。"/>
     <div className="care-segment diary-switch" role="group" aria-label="記録画面">
       <button type="button" aria-pressed={view==='diary'} onClick={()=>setView('diary')}>日記</button>
       <button type="button" aria-pressed={view==='calendar'} onClick={()=>setView('calendar')}>カレンダー</button>
     </div>
     {view==='diary'?<>
-      <CareSection title={selected===today?'今日のこころ':'この日のこころ'}>
-        <div className="care-mood-summary"><time dateTime={selected}>{displayDay(selected,true)}</time><span className="care-mood-face">{savedMood?<MoodIcon index={savedMood-1}/>:<Icon name="growth"/>}</span><div><strong>{savedMood?MOOD_LABELS[savedMood-1]:'気分はまだ未記録'}</strong><p>書けない日があっても大丈夫。自分のペースで。</p></div></div>
-        <label className="care-date-label">記録する日<input type="date" value={selected} max={today} onChange={e=>{if(e.target.value){setSelected(e.target.value);setSaved(false);}}}/></label>
-      </CareSection>
-      <CareSection title="気持ちを、ことばに">
-        <p className="care-help">この日の気分はいかがでしたか？</p>
+      <section className="care-card care-diary-editor" aria-label="気分と日記の入力">
+        <div className="care-diary-date"><label className="care-date-label">記録日<input type="date" value={selected} max={today} onChange={e=>{if(e.target.value){setSelected(e.target.value);setSaved(false);}}}/></label><span className="care-saved-mood">{savedMood?MOOD_LABELS[savedMood-1]:'気分を選択'}</span></div>
         <div className="mood-options care-moods" role="group" aria-label="5段階の気分">{MOOD_LABELS.map((label,index)=><button key={label} type="button" aria-pressed={mood===index+1} onClick={()=>{setMood(index+1);setSaved(false);}}><MoodIcon index={index}/><span>{label}</span></button>)}</div>
         <label className="care-field" htmlFor="diary-text">日記（任意）</label>
-        <textarea id="diary-text" value={draft} maxLength={2000} rows={6} onChange={e=>{setDraft(e.target.value);setSaved(false);}} placeholder="嬉しかったこと、疲れたこと。なんでも大丈夫です。"/>
-        <div className="care-input-meta"><span>保存するまで、記録は変わりません</span><span>{draft.length} / 2000</span></div>
-        <div className="care-prompt-chips" role="group" aria-label="日記の入力補助">{['ほっとした','疲れた','がんばった','不安だった','楽しかった'].map(chip=><button key={chip} type="button" disabled={draft.length+chip.length+(draft?1:0)>2000} onClick={()=>{setDraft(value=>value+(value?'\n':'')+chip);setSaved(false);}}>{chip}</button>)}</div>
+        <textarea id="diary-text" value={draft} maxLength={2000} rows={4} onChange={e=>{setDraft(e.target.value);setSaved(false);}} placeholder="今日の気持ちを、ひとことから。"/>
+        <div className="care-input-meta"><span>自分のペースで、大丈夫。</span><span>{draft.length} / 2000</span></div>
         <button className="care-primary" type="button" onClick={save} disabled={selected>today}><Icon name="diary"/>記録を保存</button>
-        <div role="status">{saved&&(reply?<div className="diary-mood-reply"><img src={`${process.env.PUBLIC_URL}/stickers/${reply.image}`} alt="" width="64" height="64"/><div><span>保存しました</span><strong>{reply.title}</strong><p>{reply.message}</p></div></div>:<p className="care-saved">保存しました。今日もお疲れさまです。</p>)}</div>
-      </CareSection>
-      <CareSection title="最近の日記" action={<button type="button" className="care-text-button" onClick={()=>{setMonth(today.slice(0,7));setView('calendar');setCalendarView('calendar');}}>もっと見る ›</button>}>
+        <div role="status">{saved&&<p className="care-saved">保存しました。{reply?reply.message:'今日もお疲れさまです。'}</p>}</div>
+        <details className="care-inline-disclosure"><summary>書き出しのヒント</summary><div className="care-prompt-chips" role="group" aria-label="日記の入力補助">{['ほっとした','疲れた','がんばった','不安だった','楽しかった'].map(chip=><button key={chip} type="button" disabled={draft.length+chip.length+(draft?1:0)>2000} onClick={()=>{setDraft(value=>value+(value?'\n':'')+chip);setSaved(false);}}>{chip}</button>)}</div></details>
+      </section>
+      <details className="care-disclosure"><summary>最近の日記・履歴</summary><CareSection title="最近の日記" action={<button type="button" className="care-text-button" onClick={()=>{setMonth(today.slice(0,7));setView('calendar');setCalendarView('calendar');}}>もっと見る ›</button>}>
         {recent.length?<ul className="care-recent">{recent.map(day=><li key={day}><button type="button" onClick={()=>openDiary(day)}><Icon name="diary"/><span><time dateTime={day}>{displayDay(day)}</time><span>{entries[day].text.trim()||(entries[day].mood?MOOD_LABELS[entries[day].mood!-1]:'記録なし')}</span></span><b aria-hidden="true">›</b></button></li>)}</ul>:<p className="care-empty">日記はまだありません。ひとことからでも大丈夫。</p>}
-      </CareSection>
+      </CareSection></details>
     </>:<>
       <div className="care-segment diary-switch" role="group" aria-label="カレンダー内の表示"><button type="button" aria-pressed={calendarView==='calendar'} onClick={()=>setCalendarView('calendar')}>記録カレンダー</button><button type="button" aria-pressed={calendarView==='steps'} onClick={()=>setCalendarView('steps')}>歩数グラフ</button></div>
       <p className="diary-swipe-hint">{calendarView==='calendar'?'左にスワイプで歩数グラフ →':'← 右にスワイプで記録カレンダー'}</p>
