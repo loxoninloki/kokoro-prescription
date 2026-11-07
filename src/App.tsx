@@ -10,7 +10,6 @@ import BackupExport from './BackupExport';
 import AppInvite from './AppInvite';
 import { APPEARANCE_KEY, Appearance, parseAppearance, readAppearance, selectedForm, outfitView, saveFormEquipment, equipmentForForm, FORM_CHOICES, FormId } from './appearance';
 import DressUp from './DressUp';
-import GachaPrizeArt from './GachaPrizeArt';
 import { countRecordDays } from './recordDays';
 import RokiCharacter from './RokiCharacter';
 import RokiRoom from './RokiRoom';
@@ -23,8 +22,7 @@ import RewardPanel from './RewardPanel';
 import { equipGachaPrize } from './gachaEquip';
 import { collectXpEvents } from './xpEvents';
 import useRewards from './useRewards';
-import { tokyoDay, RewardState, updateRewards } from './rewardLedger';
-import { giftForForm } from './formFirstGifts';
+import { tokyoDay, RewardState } from './rewardLedger';
 import { freshDevGachaWallet, isDevGachaHost } from './devGachaSandbox';
 import { readCheckins } from './loginStamp';
 import { Icon } from './Icon';
@@ -52,7 +50,6 @@ export default function App() {
   const [meditation, setMeditation] = useState<MeditationEntries>(readMeditation);
   const [appearance, setAppearance] = useState(readAppearance);
   const [appearanceMessage, setAppearanceMessage] = useState('');
-  const [firstFormGift, setFirstFormGift] = useState<{name:string;formName:string;image:string;itemId:string}|null>(null);
   const formGiftBusy = useRef(false);
   const [today, setToday] = useState(localDay);
   const [headerSticker, setHeaderSticker] = useState<string | null>(null);
@@ -86,9 +83,9 @@ export default function App() {
       ownedItemIds: Array.from(new Set([...current.ownedItemIds, ...acquired])),
     })).then(setRoom).catch(() => setRoomError('獲得した家具をルームに同期できませんでした。再読み込みしてください。'));
   }, [wallet.ownedItemIds, room.ownedItemIds]);
-  useEffect(()=>{try{syncPresentReceipts(wallet,room);}catch{/* The present card reports storage errors without blocking existing rewards. */}},[wallet,room]);
   const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication, wallet.medicationPolicy ?? makeMedicationPolicy(medication,wallet.creditedXp,today), wallet.creditedXp) + stepsExperience(steps) + meditationExperience(meditation);
   const evolution = evolutionFromXp(totalPoints);
+  useEffect(()=>{try{syncPresentReceipts(wallet,room,evolution.level);}catch{/* The present card reports storage errors without blocking existing rewards. */}},[wallet,room,evolution.level]);
   const displayForm = selectedForm(appearance,evolution.level,room.selectedFormId);
   const dirty = page === 'dressup' && JSON.stringify(draft.equipped) !== JSON.stringify(equipmentForForm(appearance,displayForm.id));
   const commitNavigation = (next: Page, push = true) => {
@@ -181,25 +178,12 @@ export default function App() {
   }, [appearance, recordDays, saveAppearance]);
 
   const saveOutfit = (next:Appearance) => saveAppearance(saveFormEquipment(appearance,displayForm.id,next.equipped));
-  const switchForm = async (id:FormId) => {
+  const switchForm = (id:FormId) => {
     if (formGiftBusy.current || !FORM_CHOICES.some(f => f.id === id && f.level <= evolution.level)) return;
     formGiftBusy.current = true;
     try {
       const saved = saveAppearance({...appearance,selectedFormId:id,mode:id==='human'?'human':'chibi'});
-      if (!saved) { setAppearanceMessage('表示する姿を保存できませんでした。'); return; }
-      setAppearanceMessage('フォルムを変更しました。');
-      const gift = giftForForm(id, evolution.level);
-      if (!gift) return;
-      let granted = false;
-      const next = await updateRewards(current => {
-        if (current.ownedItemIds.includes(gift.item.id)) return current;
-        granted = true;
-        return {...current, ownedItemIds:[...current.ownedItemIds,gift.item.id]};
-      });
-      setWallet(next);
-      if (granted) setFirstFormGift({itemId:gift.item.id,name:gift.item.name,formName:gift.form.name,image:gift.item.layers[0].image});
-    } catch {
-      setAppearanceMessage('フォルムの記念アイテムを保存できませんでした。再度フォルムを選択すると受け取れます。');
+      setAppearanceMessage(saved ? 'フォルムを変更しました。' : '表示する姿を保存できませんでした。');
     } finally {
       formGiftBusy.current = false;
     }
@@ -221,7 +205,7 @@ export default function App() {
         </div>
       </aside>}
 
-      {page === 'home' && <HomePage onWalletChange={setWallet} onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
+      {page === 'home' && <HomePage level={evolution.level} onWalletChange={setWallet} onLoginRewards={() => setLoginRewardsOpen(true)} evolution={evolution} displayForm={displayForm} room={room}
         equipped={visibleEquipment}
         wallet={displayedWallet} realWallet={wallet} walletError={walletError && !devGachaWallet} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
@@ -298,17 +282,6 @@ export default function App() {
       {roomError && <p role="alert">{roomError}</p>}
       {(loginRewardsOpen || stampDay !== null) && <LoginRewards days={wallet.loginDays} room={room} stampDay={stampDay} receipt={receipt} onClose={closeRewards} />}
       <BottomNavigation page={page} onNavigate={navigate} />
-      {firstFormGift && <div className="form-gift-backdrop">
-        <section className="form-gift-dialog" role="dialog" aria-modal="true" aria-labelledby="form-gift-title">
-          <span className="form-gift-sparkle" aria-hidden="true">✦ ✧ ✦</span>
-          <h2 id="form-gift-title">進化おめでとうございます！</h2>
-          <p>{firstFormGift.formName}の初回ボーナス</p>
-          <div className="form-gift-art"><GachaPrizeArt id={firstFormGift.itemId}/></div>
-          <strong>{firstFormGift.name}</strong>
-          <p>このフォルムで使える記念エフェクトをプレゼントしました。</p>
-          <button type="button" onClick={() => setFirstFormGift(null)}>受け取る</button>
-        </section>
-      </div>}
       {pendingPage && <div className="navigation-dialog-backdrop">
         <section role="dialog" aria-modal="true" aria-labelledby="unsaved-title" className="navigation-dialog">
           <h2 id="unsaved-title">未保存のコーデがあります</h2>
