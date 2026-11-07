@@ -1201,3 +1201,46 @@ button.home-progress {
 @keyframes gacha-soft-particle {from{opacity:0;transform:translateY(10px)}to{opacity:.85;transform:translateY(-8px)}}
 @media(max-height:650px) {.gacha-confirm.gacha-reward-modal{padding:12px}.gacha-reward-modal .gacha-reveal-prize{height:140px;margin:8px auto}.gacha-reward-modal .gacha-reveal-prize img{max-height:125px}.gacha-reward-modal .gacha-furniture-icon{height:100px;width:100px}.gacha-reward-modal .gacha-reveal-name{font-size:17px;margin:6px 0}}
 @media(prefers-reduced-motion:reduce) {.gacha-sequence *,.gacha-reward-modal *{animation:none!important;transition:none!important}.gacha-rarity-particles{display:none}}
+
+
+/* Disposable DEV-only gacha simulation controls (no production wallet writes). */
+.dev-gacha-banner {
+  position:relative;
+  z-index:5;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px 10px;
+  padding:7px 10px;
+  margin:0 0 9px;
+  border:1px solid #d7b8fb;
+  border-radius:13px;
+  background:#f3e5ff;
+  color:#513474;
+  box-shadow:0 3px 12px rgba(42,19,75,.15);
+  font-size:12px;
+  font-weight:700;
+}
+.dev-gacha-banner>div{display:flex;gap:6px;flex-shrink:0}
+.dev-gacha-banner button {
+  min-height:32px;
+  padding:5px 9px;
+  border:1px solid #ae7dd4;
+  border-radius:9px;
+  background:#fff9ff;
+  color:#573582;
+  font-size:12px;
+  font-weight:750;
+}
+.dev-gacha-banner button:disabled{opacity:.55}
+.gacha-test-notice{
+  margin:8px 0;
+  padding:9px;
+  border:1px solid #a77bcc;
+  border-radius:12px;
+  background:#f3e6ff;
+  color:#513474!important;
+  font-size:12px;
+  line-height:1.6;
+}
