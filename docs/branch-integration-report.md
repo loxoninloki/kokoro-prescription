@@ -73,6 +73,16 @@ LUX Development Division 本部長宛 / LUX Works / 2026年11月7日
 
 10スイート58テスト、TypeScript、production buildが成功。詳細は`integration-validation.md`。Chromiumでは服薬3件の上限、再読み込み、ルーム配置解除保存、コーデ解除保存、フォルムのロック、報酬カレンダーを確認した。
 
+## 公開結果と完了条件
+
+統合専用プレビューのデプロイは成功した。実際に返されたURLは https://kokoro-unified-preview.loxonin-loki.chatgpt.site 。アプリのソースはGitHub commit `a2d83272881fccaffb4ce8250bbfdd8d2125a8ce`、配信用ソースは`fae9ab9334861329724dbfddf62a7d05a9688ab3`。詳細は`unified-deployment.json`。
+
+新規プレビューは本人用の認証付き環境であり、ブラウザではChatGPTサインイン画面まで確認した。デプロイ成功と、ログイン後の配信画面の動作確認は区別する。認証開始は行っていない。既存プレビューも認証後画面は未確認のため、「既存プレビューの正常稼働確認」の完了条件は保留。
+
+- 完了: 全9ブランチ比較、固有機能と素材の確認、統合ブランチ、服薬公平化と台帳保護、ビルド、上記範囲の回帰、独立URL発行、整理案、報告書。
+- 保留: 既存・新規プレビューの認証後画面確認、iPhone Safari/PWA実機受け入れ、iOSネイティブのXcode確認。
+- 未実施: mainマージ、旧ブランチ削除、保存済みプロトタイプ変更、既存プレビューの上書き、利用者データ操作、課金契約。
+
 ## ブランチ整理案
 
 現時点では元の9ブランチを全保持する。今後の開発基準は`integration/kokoro-unified-v3`を推奨する。mainとarchiveとfixは保護を継続する。

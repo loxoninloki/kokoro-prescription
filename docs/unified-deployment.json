@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-07",
+  "githubRepository": "loxoninloki/kokoro-prescription",
+  "branch": "integration/kokoro-unified-v3",
+  "appSourceCommit": "a2d83272881fccaffb4ce8250bbfdd8d2125a8ce",
+  "siteSourceCommit": "fae9ab9334861329724dbfddf62a7d05a9688ab3",
+  "projectId": "appgprj_6aeef8f5b5248191bf8f2aec6056315a",
+  "deploymentId": "appgdep_6aeefb7518fc81918a41733a0b2f06cf",
+  "versionId": "appgprj_6aeef8f5b5248191bf8f2aec6056315a~appgver_99ffb225395c8191aca9e96057114bba",
+  "status": "succeeded",
+  "url": "https://kokoro-unified-preview.loxonin-loki.chatgpt.site",
+  "oldPreviewUnchanged": true,
+  "tests": {
+    "suites": 10,
+    "passed": 58,
+    "typecheck": "passed",
+    "productionBuild": "passed"
+  },
+  "browserGate": "ChatGPT sign-in required; no authenticated hosted-screen verification",
+  "acceptance": "iPhone Safari/PWA and native Xcode verification pending"
+}
