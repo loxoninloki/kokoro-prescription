@@ -5,7 +5,7 @@ const wallet={...EMPTY_REWARDS,loginDays:7,lastLoginDate:'2026-11-08',tickets:1,
 beforeEach(()=>localStorage.clear());
 test('付与済みのログイン・進化報酬を二重登録せず、受取確認でも通貨を増やさない',()=>{
  localStorage.setItem(REWARD_KEY,JSON.stringify(wallet));const before=localStorage.getItem(REWARD_KEY);
- const first=syncPresentReceipts(wallet,EMPTY_ROOM);expect(first.entries).toHaveLength(2);expect(first.entries[0].description).toContain('チケット 1枚');
+ const first=syncPresentReceipts(wallet,EMPTY_ROOM);expect(first.entries).toHaveLength(2);expect(first.entries[0].description).toContain('チケット 1枚');expect(first.entries[0].description).not.toContain('マカロン');
  expect(syncPresentReceipts(wallet,EMPTY_ROOM).entries).toHaveLength(2);
  expect(receivePresent(first.entries[0].id).entries[0].receivedAt).toBeDefined();expect(localStorage.getItem(REWARD_KEY)).toBe(before);
 });

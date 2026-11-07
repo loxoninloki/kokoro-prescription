@@ -9,6 +9,9 @@ export interface PendingGachaResult {
  id:string; itemId:string; gachaId:string; payment:'ticket'|'macaron'; amount:number; confirmedAt:string;
 }
 export interface RewardState {
+  presentClaims?: string[];
+  presentClaimDates?:Record<string,string>;
+  presentTicketCredit?: number;
   version: 1;
   earned: number;
   spent: number;
@@ -85,13 +88,16 @@ export function parseRewards(raw: unknown): RewardState {
   const value = raw as Partial<RewardState> | null;
   if (!value || value.version !== 1 || !isCount(value.earned) || !isCount(value.spent) ||
       value.spent > value.earned || !isCount(value.tickets) || !isCount(value.loginDays) ||
-      value.tickets > Math.floor(value.loginDays / LOGIN_DAYS_PER_TICKET) ||
+      value.tickets > Math.floor(value.loginDays / LOGIN_DAYS_PER_TICKET) + (value.presentTicketCredit ?? 0) ||
       !(value.lastLoginDate === null || (typeof value.lastLoginDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.lastLoginDate))) ||
       !value.creditedXp || typeof value.creditedXp !== 'object' || Array.isArray(value.creditedXp) ||
       !Object.entries(value.creditedXp).every(([id, xp]) => /^(checkin|mood|diary|medication|medication-day|steps|meditation):/.test(id) && isCount(xp)) ||
       !Array.isArray(value.ownedItemIds) || !value.ownedItemIds.every(id => typeof id === 'string')) {
     throw new Error('報酬の保存データを読み込めませんでした。');
   }
+  if(value.presentTicketCredit!==undefined&&!isCount(value.presentTicketCredit))throw new Error('プレゼントのチケット情報が不正です。');
+  if(value.presentClaims!==undefined&&(!Array.isArray(value.presentClaims)||value.presentClaims.length>10000||!value.presentClaims.every(id=>typeof id==='string'&&/^[a-z0-9_-]{1,80}$/.test(id))||new Set(value.presentClaims).size!==value.presentClaims.length))throw new Error('プレゼント受取情報が不正です。');
+  if(value.presentClaimDates!==undefined&&(!value.presentClaimDates||typeof value.presentClaimDates!=='object'||Array.isArray(value.presentClaimDates)||!Object.entries(value.presentClaimDates).every(([id,date])=>value.presentClaims?.includes(id)&&typeof date==='string'&&Number.isFinite(Date.parse(date)))))throw new Error('プレゼント受取日時が不正です。');
   if(value.pendingGachaResult!==undefined){
     const p=value.pendingGachaResult;
     if(!p||typeof p.id!=='string'||!p.id||p.id.length>150||typeof p.itemId!=='string'||!value.ownedItemIds.includes(p.itemId)||

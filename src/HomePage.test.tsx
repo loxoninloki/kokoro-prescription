@@ -15,7 +15,7 @@ test('home scene cycles through character, illustration and saved room without c
     layout: { wallpaper: 'wall-night', floor: 'floor-basic', desk: 'desk-basic' },
   };
   const props = {
-    onLoginRewards: jest.fn(),
+    onLoginRewards: jest.fn(), onWalletChange:jest.fn(),
     evolution: evolutionFromXp(0),
     displayForm: { name: '錠剤', image: 'tablet.webp' },
     room,
