@@ -187,15 +187,21 @@ export default function App() {
           <progress id="xp-progress" value={evolution.currentLevelXp} max={evolution.requiredLevelXp} style={{ display: 'block', width: '100%', marginTop: 8, accentColor: '#7653a6' }} />
           <p>{evolution.nextLevel ? `Lv.${evolution.nextLevel}で次のフォルムに進化！` : '成熟フォルムに到達しました！'}</p>
           <section className="form-picker" aria-label="フォルム変更"><h3>フォルム変更</h3><p>選んだ姿をホーム・ルーム・コーデで表示します。</p>
-          <div>{FORM_CHOICES.map(f=><button type="button" key={f.id} disabled={f.level>evolution.level} aria-pressed={displayForm.id===f.id} onClick={()=>switchForm(f.id)}>
-            <img src={`${process.env.PUBLIC_URL}/forms/${f.image}`} alt=""/><span>{f.name}</span><small>{f.level>evolution.level?`Lv.${f.level}で解放`:displayForm.id===f.id?'選択中 ✓':'解放済み'}</small>
-          </button>)}</div>{appearanceMessage&&<p role="status">{appearanceMessage}</p>}</section>
+          <div>{FORM_CHOICES.map(f => {
+            const locked = f.level > evolution.level;
+            return <button type="button" key={f.id} disabled={locked} data-locked={locked} aria-label={locked ? `？？？、Lv.${f.level}で解放` : f.name} aria-pressed={!locked && displayForm.id===f.id} onClick={()=>switchForm(f.id)}>
+              <img className={locked ? 'form-locked-silhouette' : undefined} src={`${process.env.PUBLIC_URL}/forms/${f.image}`} alt="" aria-hidden="true" />
+              <span>{locked ? '？？？' : f.name}</span>
+              <small>{locked ? `Lv.${f.level}で解放` : displayForm.id===f.id ? '選択中 ✓' : '解放済み'}</small>
+            </button>;
+          })}</div>{appearanceMessage&&<p role="status">{appearanceMessage}</p>}</section>
           <ol className="evolution-stages" aria-label="進化の5段階">
-            {FORM_STAGES.map(form => (
-              <li key={form.id} aria-current={form.id === evolution.form.id ? 'step' : undefined}>
-                <span>Lv.{form.level}〜</span> {form.name}
-              </li>
-            ))}
+            {FORM_STAGES.map(form => {
+              const locked = form.level > evolution.level;
+              return <li key={form.id} aria-current={!locked && form.id === evolution.form.id ? 'step' : undefined}>
+                <span>Lv.{form.level}〜</span> {locked ? '？？？' : form.name}{locked ? `（Lv.${form.level}で解放）` : ''}
+              </li>;
+            })}
           </ol>
         </section>
         <section style={{ marginTop: 24 }}>
