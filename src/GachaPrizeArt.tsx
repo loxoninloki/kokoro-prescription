@@ -2,6 +2,8 @@ import React from 'react';
 import { ITEMS, DressUpItem } from './appearance';
 import { INTERIOR_ITEMS } from './interior';
 import InteriorIcon from './InteriorIcon';
+import ChibiAtlasTile from './ChibiAtlasTile';
+import { CHIBI_GACHA_ICON_ATLAS } from './chibiGachaCatalog';
 
 /**
  * Prize artwork is intentionally independent of the current evolution form.
@@ -11,6 +13,9 @@ import InteriorIcon from './InteriorIcon';
  */
 function GarmentArt({ item }: { item: DressUpItem }) {
   const [failed, setFailed] = React.useState<string[]>([]);
+  if (item.previewAtlasIndex !== undefined) return <span className="gacha-item-art" role="img" aria-label={item.name}>
+    <ChibiAtlasTile image={CHIBI_GACHA_ICON_ATLAS} index={item.previewAtlasIndex} className="gacha-chibi-icon-tile" />
+  </span>;
   const visible = item.layers.filter(layer => !failed.includes(layer.image));
   return <span className={`gacha-item-art gacha-item-art--${item.category}`}
     role="img" aria-label={item.name}>
