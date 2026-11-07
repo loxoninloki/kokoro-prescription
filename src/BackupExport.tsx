@@ -1,4 +1,7 @@
 import { RoomState, readRoom } from './interior';
+import { Capacitor } from '@capacitor/core';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { RewardState, readRewards } from './rewardLedger';
 import { Icon } from './Icon';
 import React, { useState } from 'react';
@@ -49,6 +52,7 @@ export function makeBackup(data: Props): BackupData {
 export default function BackupExport(data: Props) {
   const [message, setMessage] = useState('');
   const [restoring, setRestoring] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const importBackup = async (file?: File) => {
     if (!file) return;
     setMessage('');
@@ -69,29 +73,46 @@ export default function BackupExport(data: Props) {
       setRestoring(false);
     }
   };
-  const exportBackup = () => {
+  const exportBackup = async () => {
+    setExporting(true);
+    let temporaryPath: string | null = null;
     try {
-      const blob = new Blob([JSON.stringify(makeBackup(data), null, 2)], { type: 'application/json' });
+      const backup=makeBackup(data);
+      const filename='kokoro-backup-'+backup.exportedAt.slice(0,10)+'.json';
+      const json=JSON.stringify(backup,null,2);
+      if(Capacitor.isNativePlatform()){
+        const file=await Filesystem.writeFile({path:filename,directory:Directory.Cache,data:json,encoding:Encoding.UTF8});
+        temporaryPath=filename;
+        await Share.share({files:[file.uri]});
+        setMessage('「ファイルに保存」を選んだ場合は、選択したフォルダに保存されています。');
+        return;
+      }
+      const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'kokoro-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage('バックアップファイルの保存を開始しました。iPhoneの「ファイル」アプリ等で保存先をご確認ください。');
-    } catch {
-      setMessage('書き出しに失敗しました。ブラウザの空き容量や設定をご確認ください。');
+    } catch (error) {
+      if(!(error instanceof Error && (error.name==='AbortError'||error.message==='Share canceled')))
+        setMessage('書き出しに失敗しました。端末の空き容量や設定をご確認ください。');
+    } finally {
+      if(temporaryPath)await Filesystem.deleteFile({path:temporaryPath,directory:Directory.Cache}).catch(()=>undefined);
+      setExporting(false);
     }
   };
   return <section style={{ marginTop: 26, padding: 18, borderRadius: 24, background: '#f7f3ff' }}>
     <h2><Icon name="backup" /> 記録のバックアップ</h2>
     <p style={{ fontSize: 13 }}>チェックイン、日記、気分、お薬、歩数、瞑想の記録、コーデ、ルーム、累積ログイン報酬をJSONファイルに書き出します。</p>
-    <button type="button" onClick={exportBackup} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
+    {Capacitor.isNativePlatform() && <p>共有メニューから「ファイルに保存」を選んでください。</p>}
+    <button type="button" onClick={exportBackup} disabled={exporting || restoring} style={{ padding: '12px 20px', borderRadius: 22, border: 0, color: '#fff', background: '#7653a6' }}>バックアップを書き出す</button>
     <label style={{ display: 'block', marginTop: 18 }}>
       バックアップから復元
-      <input type="file" accept=".json,application/json" disabled={restoring}
+      <input type="file" accept=".json,application/json" disabled={restoring || exporting}
         onChange={event => { void importBackup(event.target.files?.[0]); event.target.value = ''; }}
         style={{ display: 'block', marginTop: 8, maxWidth: '100%' }} />
     </label>

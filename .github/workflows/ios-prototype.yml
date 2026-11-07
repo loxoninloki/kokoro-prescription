@@ -1,0 +1,44 @@
+name: Build iOS prototype
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - prototype/kokoro-ios
+
+permissions:
+  contents: read
+
+jobs:
+  simulator:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check web code and tests
+        run: |
+          npx tsc --noEmit
+          npm test -- --watch=false --runInBand
+        env:
+          CI: 'true'
+      - name: Bundle the app for iOS
+        run: npm run ios:sync
+        env:
+          CI: 'true'
+      - name: Build for iPhone Simulator
+        run: |
+          xcodebuild -version
+          xcodebuild -project ios/App/App.xcodeproj -scheme App \
+            -configuration Debug -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath ios-build CODE_SIGNING_ALLOWED=NO build
+      - name: Save simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: kokoro-ios-simulator
+          path: ios-build/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+          retention-days: 7

@@ -46,7 +46,7 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
       {details.map(key => <button type="button" key={key} aria-pressed={category === key} onClick={() => setCategory(key)}>
         <WardrobeIcon category={key} />{CATEGORIES[key].name}</button>)}
     </div>
-    <div className="coordinate-inventory" aria-label={`${current.name}のアイテム`}>
+    <div className="coordinate-inventory" role="region" tabIndex={0} aria-label={`${current.name}のアイテム`}>
       {items.length === 0 ? <div className="coordinate-empty"><WardrobeIcon category={current.icon} />
         <strong>{current.name}のパーツは準備中です</strong><p>初期の姿を表示しています。分離素材が揃うと、この一覧から着せ替えできます。</p></div> :
         <div className="coordinate-grid">{items.map(item => {
@@ -81,3 +81,4 @@ export default function DressUp({ saved, onSave, rewardDays, draft, setDraft, ow
     </footer>
   </section>;
 }
+

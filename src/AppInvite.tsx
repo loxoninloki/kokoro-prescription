@@ -1,4 +1,6 @@
 import React, { useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import { Icon } from './Icon';
 
 const PUBLIC_APP_URL = 'https://kokoro-prescription-preview.pages.dev/';
@@ -21,13 +23,15 @@ export default function AppInvite() {
   const shareApp = async () => {
     setShareMessage('');
     try {
-      await navigator.share({
+      const invite={
         title: 'こころの処方箋',
         text: '気分や日記を記録できる「こころの処方箋」です。リンクを開いて使ってみてください。',
         url: shareUrl,
-      });
+      };
+      if(Capacitor.isNativePlatform())await Share.share(invite);
+      else await navigator.share(invite);
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      if (!(error instanceof Error && (error.name === 'AbortError'||error.message === 'Share canceled'))) {
         setShareMessage('共有メニューを開けませんでした。「リンクをコピー」をお使いください。');
       }
     }
@@ -39,7 +43,7 @@ export default function AppInvite() {
       <input ref={shareInput} aria-label="紹介リンク" value={shareUrl} readOnly
         onFocus={event => event.currentTarget.select()} style={{ width: '100%' }} />
       <div className="wardrobe-options">
-        {typeof navigator.share === 'function' && <button type="button" onClick={shareApp}>アプリを紹介する</button>}
+        {(Capacitor.isNativePlatform()||typeof navigator.share === 'function') && <button type="button" onClick={shareApp}>アプリを紹介する</button>}
         <button type="button" onClick={copyLink}>リンクをコピー</button>
       </div>
       <details style={{ marginTop: 12 }}>

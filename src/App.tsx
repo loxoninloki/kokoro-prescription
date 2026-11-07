@@ -1,3 +1,4 @@
+import { makeMedicationPolicy, hasMedicationCredit } from './medicationPolicy';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CHECKIN_XP, evolutionFromXp, FORM_STAGES } from './evolution';
 import DiaryCalendar, { diaryExperience, DiaryEntries, readDiary } from './DiaryCalendar';
@@ -56,7 +57,13 @@ export default function App() {
   const [page, setPage] = useState<Page>(route);
   const [draft, setDraft] = useState(readAppearance);
   const [pendingPage, setPendingPage] = useState<Page | null>(null);
-  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication) + stepsExperience(steps) + meditationExperience(meditation);
+  const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
+    [days, diary, medication, steps, meditation]);
+  const { wallet, walletError, stampDay, receipt, clearStamp } = useRewards(readSavedXp, xpEvents, (nextDays, nextRoom) => {
+    setDays(previous => JSON.stringify(previous) === JSON.stringify(nextDays) ? previous : nextDays);
+    setRoom(nextRoom);
+  });
+  const totalPoints = days.length * POINTS_PER_DAY + diaryExperience(diary) + medicationExperience(medication, wallet.medicationPolicy ?? makeMedicationPolicy(medication,wallet.creditedXp,today), wallet.creditedXp) + stepsExperience(steps) + meditationExperience(meditation);
   const evolution = evolutionFromXp(totalPoints);
   const displayForm = selectedForm(appearance,evolution.level,room.selectedFormId);
   const dirty = page === 'dressup' && JSON.stringify(draft.equipped) !== JSON.stringify(equipmentForForm(appearance,displayForm.id));
@@ -121,12 +128,6 @@ export default function App() {
     };
   }, []);
 
-  const xpEvents = useMemo(() => collectXpEvents(days, diary, medication, steps, meditation),
-    [days, diary, medication, steps, meditation]);
-  const { wallet, walletError, stampDay, receipt, clearStamp } = useRewards(readSavedXp, xpEvents, (nextDays, nextRoom) => {
-    setDays(previous => JSON.stringify(previous) === JSON.stringify(nextDays) ? previous : nextDays);
-    setRoom(nextRoom);
-  });
   const closeRewards = () => {setLoginRewardsOpen(false);clearStamp();};
   useEffect(() => {
     const sync=(e:StorageEvent)=>{if(e.key===APPEARANCE_KEY){setAppearance(readAppearance());}if(e.key===ROOM_KEY){try{setRoom(readRoom());}catch{setRoomError('ルーム情報を読み込めません。');}}};
@@ -173,7 +174,7 @@ export default function App() {
         wallet={wallet} walletError={walletError} totalPoints={totalPoints} checkedIn={checkedIn}
         checkinDays={wallet.loginDays} onCheckIn={() => setLoginRewardsOpen(true)} onNavigate={navigate} />}
       {page === 'room' && <RokiRoom level={evolution.level} form={displayForm}
-        equipped={visibleEquipment} room={room} onChange={setRoom} onRewards={() => setLoginRewardsOpen(true)} />}
+        equipped={visibleEquipment} room={room} onChange={setRoom} />}
       {page !== 'home' && page !== 'room' && page !== 'dressup' && headerSticker && !headerStickerFailed &&
         <img className="page-sticker" src={`${process.env.PUBLIC_URL}/stickers/${headerSticker}`} alt="" aria-hidden="true"
           onError={() => setHeaderStickerFailed(true)} />}
@@ -206,7 +207,7 @@ export default function App() {
       {page === 'dressup' && <DressUp key={displayForm.id} form={displayForm} saved={outfitView(appearance,displayForm.id)} draft={draft} setDraft={setDraft} onSave={saveOutfit} rewardDays={rewardDays} ownedItemIds={wallet.ownedItemIds} />}
       {(page === 'rewards' || page === 'gacha') && <RewardPanel key={page} wallet={wallet} error={walletError} initialSection={page === 'gacha' ? 'gacha' : 'shop'} />}
       {page === 'diary' && <DiaryCalendar entries={diary} setEntries={setDiary} checkins={days} today={today} steps={steps} medicationTaken={medication.taken} />}
-      {page === 'medication' && <MedicationTracker data={medication} setData={setMedication} today={today} />}
+      {page === 'medication' && <MedicationTracker bonusEarned={hasMedicationCredit(wallet.creditedXp,today)} data={medication} setData={setMedication} today={today} />}
       {page === 'steps' && <StepTracker entries={steps} setEntries={setSteps} today={today} incoming={stepImport} clearIncoming={() => setStepImport(null)} />}
       {page === 'meditation' && <Meditation entries={meditation} setEntries={setMeditation} today={today} />}
       {page === 'menu' && <section className="menu-panel" aria-labelledby="menu-title">
@@ -219,7 +220,7 @@ export default function App() {
       </section>}
       {page === 'invite' && <AppInvite />}
       {page === 'backup' && <BackupExport checkins={days} diary={diary} medication={medication} steps={steps} meditation={meditation} appearance={appearance} />}
-      {page !== 'home' && page !== 'room' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
+      {page !== 'home' && page !== 'room' && page !== 'dressup' && <p style={{ fontSize: 12, color: '#766b82', marginTop: 24 }}>記録はこの端末のブラウザに保存されます。ブラウザのデータを削除すると記録も消える場合があります。</p>}
       {roomError && <p role="alert">{roomError}</p>}
       {(loginRewardsOpen || stampDay !== null) && <LoginRewards days={wallet.loginDays} room={room} stampDay={stampDay} receipt={receipt} onClose={closeRewards} />}
       <BottomNavigation page={page} onNavigate={navigate} />
@@ -235,3 +236,4 @@ export default function App() {
     </main>
   );
 }
+

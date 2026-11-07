@@ -791,3 +791,63 @@ button.home-progress {
  .roki-room[data-editing=true] .interior-tabs svg{width:20px;height:20px}
  .roki-room[data-editing=true] .roki-room-actor{width:min(82px,30%)}
 }
+
+
+.medication-reward-explanation{padding:12px;border-radius:14px;background:#eee4f7;color:#634778;font-size:13px;line-height:1.7}
+.medication-bonus-earned{padding:10px 12px;border-radius:12px;background:#e8ddef;color:#72538a;font-size:12px;line-height:1.5}
+
+/* Preview-first editing: only the inventory owns vertical scrolling. */
+.kokoro-app[data-page="dressup"],
+.kokoro-app[data-page="room"]:has(>.roki-room[data-editing=true]) {
+ height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+ padding-top:max(10px,env(safe-area-inset-top));
+ padding-bottom:calc(82px + env(safe-area-inset-bottom,0px));
+}
+.kokoro-app[data-page="dressup"]>.coordinate-page,
+.kokoro-app[data-page="room"]>.roki-room[data-editing=true] {
+ flex:1;min-height:0;height:auto;margin-top:0!important;padding:0!important;
+ display:grid;gap:0;overflow:hidden;
+}
+.kokoro-app[data-page="dressup"]>.coordinate-page {
+ grid-template-rows:auto minmax(0,1.65fr) auto auto minmax(0,1fr) auto;
+}
+.coordinate-heading {padding:9px 12px}
+.coordinate-preview {padding:8px 10px;overflow:hidden}
+.coordinate-preview .roki-character {height:calc(100% - 26px);max-height:none;max-width:100%;width:auto!important;aspect-ratio:1;flex-shrink:0}
+.coordinate-preview p {flex-shrink:0;font-size:11px;line-height:18px;margin:4px 0 0}
+.coordinate-tabs,.coordinate-details {min-height:48px;padding:4px 6px;gap:5px;overflow-y:hidden}
+.coordinate-tabs button,.coordinate-details button {min-width:60px;min-height:44px;font-size:11px;padding:3px 8px}
+.coordinate-tabs svg,.coordinate-details svg {width:21px;height:21px}
+.coordinate-inventory {height:auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+.coordinate-controls {padding:6px 8px 8px}
+.coordinate-controls p {font-size:10px;line-height:14px;min-height:14px;margin:0 0 5px}
+.coordinate-controls button {min-height:44px;font-size:11px}
+.kokoro-app[data-page="room"]>.roki-room[data-editing=true] {
+ grid-template-rows:auto minmax(0,1.65fr) auto auto auto minmax(0,1fr) auto auto;
+ border-radius:22px;
+}
+.roki-room[data-editing=true] .roki-room-header {padding:9px 12px 6px;text-align:center}
+.roki-room[data-editing=true] .roki-room-header h1 {font-size:18px;line-height:24px;margin:0}
+.roki-room[data-editing=true] .roki-room-header p {font-size:12px;line-height:18px;margin:3px 0 0}
+.roki-room[data-editing=true] .interior-stage {height:auto;min-height:0;max-height:none;aspect-ratio:auto;flex:none;container-type:size;margin:0 10px}
+.roki-room[data-editing=true] .roki-room-actor {width:min(42cqw,76cqh,180px)}
+.roki-room[data-editing=true] .interior-note {font-size:10px;line-height:16px;margin:0;padding:5px 12px}
+.roki-room[data-editing=true] .interior-editor {display:contents}
+.roki-room[data-editing=true] .interior-tabs {min-height:48px;max-height:none;padding:4px 7px;overflow-y:hidden}
+.roki-room[data-editing=true] .interior-tabs button {min-height:44px;min-width:60px;padding:3px 8px;font-size:11px}
+.roki-room[data-editing=true] .interior-tabs svg {width:21px;height:21px}
+.roki-room[data-editing=true] .interior-grid {height:auto;min-height:0;max-height:none;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;padding:8px;align-content:start}
+.roki-room[data-editing=true] .room-actions {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:8px;border-top:1px solid #d6c1e6}
+.roki-room[data-editing=true] .room-actions button {min-height:44px;font-size:11px;line-height:1.3;min-width:0;padding:4px 2px;overflow-wrap:anywhere}
+.roki-room[data-editing=true]>[role="status"] {margin:0;padding:3px 10px;font-size:10px;line-height:14px}
+@media(max-height:650px) {
+ .coordinate-heading{padding:6px 10px}
+ .coordinate-controls p{font-size:9px;line-height:12px;min-height:12px}
+ .coordinate-tabs,.coordinate-details,.roki-room[data-editing=true] .interior-tabs{min-height:44px;padding-top:2px;padding-bottom:2px}
+ .coordinate-tabs svg,.coordinate-details svg,.roki-room[data-editing=true] .interior-tabs svg{width:19px;height:19px}
+ .coordinate-tabs button,.coordinate-details button,.roki-room[data-editing=true] .interior-tabs button{font-size:10px;min-height:40px}
+ .roki-room[data-editing=true] .roki-room-header{padding:6px 10px 4px}
+ .roki-room[data-editing=true] .roki-room-header h1{font-size:16px;line-height:20px}
+ .roki-room[data-editing=true] .roki-room-header p{font-size:11px;line-height:15px;margin-top:2px}
+ .roki-room[data-editing=true] .interior-note{font-size:9px;line-height:13px;padding:3px 10px}
+}

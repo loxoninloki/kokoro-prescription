@@ -1,0 +1,43 @@
+{
+  "asset_paths": 38,
+  "missing": [],
+  "changed_assets": [],
+  "branches": [
+    {
+      "name": "archive/kokoro-v2-prototype-20261106",
+      "ancestor": true
+    },
+    {
+      "name": "feature/avatar-home-ui",
+      "ancestor": true
+    },
+    {
+      "name": "feature/macaron-ticket-gacha",
+      "ancestor": true
+    },
+    {
+      "name": "feature/persistent-navigation",
+      "ancestor": true
+    },
+    {
+      "name": "feature/roki-evolution-dressup",
+      "ancestor": true
+    },
+    {
+      "name": "fix/medication-daily-reward-cap-20261107",
+      "ancestor": true
+    },
+    {
+      "name": "main",
+      "ancestor": true
+    },
+    {
+      "name": "prototype/kokoro-ios",
+      "ancestor": true
+    },
+    {
+      "name": "rebuild/kokoro-v2",
+      "ancestor": true
+    }
+  ]
+}
